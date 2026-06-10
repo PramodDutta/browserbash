@@ -1,0 +1,47 @@
+{
+    "name": "browserbash-cli",
+    "version": "0.1.0",
+    "description": "Vendor-independent natural-language browser automation CLI. Run plain-English objectives against local Chrome, LambdaTest/TestMu, BrowserStack, any CDP endpoint, or Playwright MCP.",
+    "type": "module",
+    "bin": {
+        "browserbash": "dist/index.js"
+    },
+    "main": "dist/index.js",
+    "files": [
+        "dist",
+        "docs",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "dev": "tsx src/index.ts",
+        "typecheck": "tsc --noEmit",
+        "check": "npm run typecheck",
+        "prepublishOnly": "npm run build"
+    },
+    "keywords": [
+        "browser-automation",
+        "playwright",
+        "ai-agent",
+        "testing",
+        "cli",
+        "lambdatest",
+        "browserstack",
+        "cdp",
+        "mcp"
+    ],
+    "license": "Apache-2.0",
+    "engines": {
+        "node": ">=18"
+    },
+    "dependencies": {
+        "@anthropic-ai/sdk": "^0.104.1",
+        "commander": "^12.1.0",
+        "playwright-core": "^1.49.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.0",
+        "tsx": "^4.19.0",
+        "typescript": "^5.7.0"
+    }
+}
