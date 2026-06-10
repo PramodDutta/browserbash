@@ -21,7 +21,7 @@ export interface BrowserBashConfig {
 const DEFAULTS: BrowserBashConfig = {
     defaultProvider: 'local',
     engine: 'stagehand',
-    model: 'claude-opus-4-8',
+    model: 'auto',
     headless: false,
     maxSteps: 30,
     timeoutSec: 300,

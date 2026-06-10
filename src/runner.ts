@@ -1,6 +1,7 @@
 import { loadConfig } from './config.js';
 import { runAgent } from './engine/agent.js';
 import { runStagehandAgent, stagehandSupports } from './engine/stagehand.js';
+import { resolveModel } from './llm.js';
 import { Reporter } from './output.js';
 import { getProvider } from './providers/index.js';
 import type { RunOptions, RunResult } from './types.js';
@@ -22,9 +23,19 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
         engine = 'builtin';
     }
 
+    const model = await resolveModel(options.model ?? config.model, (msg) => reporter.info(msg));
+    if (engine === 'builtin' && model.startsWith('ollama/')) {
+        throw new Error(
+            `The builtin engine (provider '${options.provider}') speaks the Anthropic API and cannot use '${model}' directly. ` +
+            'Options: use a stagehand-capable provider (local/cdp/browserbase), set ANTHROPIC_API_KEY, ' +
+            'or point ANTHROPIC_BASE_URL at an Anthropic-compatible gateway (e.g. LiteLLM) and pass a claude model id.',
+        );
+    }
+    const resolved = { ...options, model };
+
     const result = engine === 'stagehand'
-        ? await runWithStagehand(options, reporter, config.model)
-        : await runWithBuiltin(options, reporter, config.model);
+        ? await runWithStagehand(resolved, reporter, model)
+        : await runWithBuiltin(resolved, reporter, model);
 
     reporter.runEnd({
         type: 'run_end',
