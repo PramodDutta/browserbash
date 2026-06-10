@@ -23,8 +23,24 @@ export function stagehandSupports(provider: string): boolean {
     return (STAGEHAND_PROVIDERS as readonly string[]).includes(provider);
 }
 
-/** Map bare Anthropic/OpenAI model ids to Stagehand's provider/model format. */
-function toStagehandModel(model: string): string {
+type StagehandModelConfig = string | { modelName: string; apiKey?: string; baseURL?: string };
+
+/**
+ * Map model ids to Stagehand's model configuration.
+ *
+ * Open-source / local path: `ollama/<model>` routes through Ollama's
+ * OpenAI-compatible endpoint (default http://localhost:11434/v1, override
+ * with OLLAMA_BASE_URL). Works the same for any OpenAI-compatible server
+ * (vLLM, LM Studio, llama.cpp) — point OLLAMA_BASE_URL at it.
+ */
+function toStagehandModel(model: string): StagehandModelConfig {
+    if (model.startsWith('ollama/')) {
+        return {
+            modelName: `openai/${model.slice('ollama/'.length)}`,
+            baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/v1',
+            apiKey: process.env.OLLAMA_API_KEY ?? 'ollama',
+        };
+    }
     if (model.includes('/')) return model;
     if (model.startsWith('claude')) return `anthropic/${model}`;
     if (model.startsWith('gpt') || model.startsWith('o')) return `openai/${model}`;

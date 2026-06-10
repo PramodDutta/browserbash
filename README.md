@@ -21,7 +21,26 @@ Give it a plain-English objective. An AI agent drives a **real browser** and ret
 | `lambdatest` | LambdaTest / TestMu AI cloud grid | builtin (auto) | `LT_USERNAME` / `LT_ACCESS_KEY` |
 | `browserstack` | BrowserStack Automate cloud grid | builtin (auto) | `BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY` |
 
-Both engines need an LLM key — `ANTHROPIC_API_KEY` by default (model `claude-opus-4-8`; Stagehand also accepts `openai/...`, `google/...` via `--model`).
+## LLM backends (who does the thinking)
+
+Both engines need an LLM, but neither is locked to a paid one:
+
+| Backend | Model flag | Needs |
+| --- | --- | --- |
+| Anthropic (default) | `claude-opus-4-8` | `ANTHROPIC_API_KEY` |
+| OpenAI / Google | `openai/gpt-4.1`, `google/gemini-2.5-flash` | provider key (Stagehand engine) |
+| **Ollama — local, free, OSS** | `ollama/<model>` e.g. `ollama/qwen3` | Ollama running locally; `OLLAMA_BASE_URL` to override `http://localhost:11434/v1`. Same flag works for any OpenAI-compatible server (vLLM, LM Studio, llama.cpp). |
+| Anthropic-compatible gateway | `claude-*` + `ANTHROPIC_BASE_URL` | builtin engine routes through any Anthropic-compatible endpoint (e.g. a LiteLLM proxy fronting local models) |
+
+### Fully free / open-source stack
+
+```bash
+ollama pull qwen3                 # or any tool-capable local model
+browserbash config set model ollama/qwen3
+browserbash run "Open https://example.com and store the heading as 'h1'"
+```
+
+Stagehand engine (MIT) + local Chromium + Ollama (MIT) — zero cloud cost, no API keys.
 
 ## Install
 
