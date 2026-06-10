@@ -18,6 +18,7 @@ program
 
 interface CommonFlags {
     provider?: string;
+    engine?: 'stagehand' | 'builtin';
     agent?: boolean;
     headless?: boolean;
     maxSteps?: string;
@@ -32,7 +33,8 @@ interface CommonFlags {
 
 function addRunFlags(cmd: Command): Command {
     return cmd
-        .option('-p, --provider <id>', 'browser provider: local | cdp | lambdatest | browserstack')
+        .option('-p, --provider <id>', 'browser provider: local | cdp | browserbase | lambdatest | browserstack')
+        .option('-e, --engine <id>', 'automation engine: stagehand (default, OSS) | builtin')
         .option('--agent', 'emit NDJSON events on stdout (for AI agents / CI)', false)
         .option('--headless', 'run without a visible browser window', false)
         .option('--max-steps <n>', 'cap agent steps', '30')
@@ -69,6 +71,7 @@ addRunFlags(
         const result = await executeRun({
             objective,
             provider: flags.cdpEndpoint ? 'cdp' : flags.provider ?? config.defaultProvider,
+            engine: flags.engine,
             agent: flags.agent ?? false,
             headless: flags.headless ?? config.headless,
             maxSteps: Number(flags.maxSteps ?? config.maxSteps),
@@ -95,6 +98,7 @@ addRunFlags(
     try {
         const result = await runTestMd(file, {
             provider: flags.cdpEndpoint ? 'cdp' : flags.provider ?? config.defaultProvider,
+            engine: flags.engine,
             agent: flags.agent ?? false,
             headless: flags.headless ?? config.headless,
             maxSteps: Number(flags.maxSteps ?? config.maxSteps),
@@ -175,11 +179,18 @@ configCmd
     });
 configCmd
     .command('set <key> <value>')
-    .description('Set defaultProvider | model | headless | maxSteps | timeoutSec')
+    .description('Set defaultProvider | engine | model | headless | maxSteps | timeoutSec')
     .action((key: string, value: string) => {
         const config = loadConfig();
         switch (key) {
             case 'defaultProvider': config.defaultProvider = value; break;
+            case 'engine':
+                if (value !== 'stagehand' && value !== 'builtin') {
+                    process.stderr.write('engine must be stagehand or builtin\n');
+                    process.exit(2);
+                }
+                config.engine = value;
+                break;
             case 'model': config.model = value; break;
             case 'headless': config.headless = value === 'true'; break;
             case 'maxSteps': config.maxSteps = Number(value); break;

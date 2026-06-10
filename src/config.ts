@@ -10,6 +10,7 @@ export interface ProviderCredentials {
 
 export interface BrowserBashConfig {
     defaultProvider: string;
+    engine: 'stagehand' | 'builtin';
     model: string;
     headless: boolean;
     maxSteps: number;
@@ -19,6 +20,7 @@ export interface BrowserBashConfig {
 
 const DEFAULTS: BrowserBashConfig = {
     defaultProvider: 'local',
+    engine: 'stagehand',
     model: 'claude-opus-4-8',
     headless: false,
     maxSteps: 30,

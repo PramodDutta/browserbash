@@ -1,16 +1,64 @@
 import { loadConfig } from './config.js';
 import { runAgent } from './engine/agent.js';
+import { runStagehandAgent, stagehandSupports } from './engine/stagehand.js';
 import { Reporter } from './output.js';
 import { getProvider } from './providers/index.js';
 import type { RunOptions, RunResult } from './types.js';
 
-/** Connect provider → run agent loop → report status back to vendor → close. */
+/**
+ * Engine selection:
+ *  - stagehand (default) — open-source Stagehand agent (stagehand.dev, MIT).
+ *    Drives local Chromium, CDP endpoints, and Browserbase natively.
+ *  - builtin — in-repo Anthropic tool-use loop. Required for lambdatest /
+ *    browserstack grids (Playwright-protocol WS, which Stagehand cannot attach to).
+ */
 export async function executeRun(options: RunOptions): Promise<RunResult> {
     const config = loadConfig();
     const reporter = new Reporter(options.agent, options.variables);
-    const provider = getProvider(options.provider);
 
+    let engine = options.engine ?? config.engine;
+    if (engine === 'stagehand' && !stagehandSupports(options.provider)) {
+        reporter.info(`Provider '${options.provider}' needs the builtin engine — switching automatically.`);
+        engine = 'builtin';
+    }
+
+    const result = engine === 'stagehand'
+        ? await runWithStagehand(options, reporter, config.model)
+        : await runWithBuiltin(options, reporter, config.model);
+
+    reporter.runEnd({
+        type: 'run_end',
+        status: result.status,
+        summary: result.summary,
+        final_state: result.finalState,
+        duration_ms: result.durationMs,
+        steps_executed: result.stepsExecuted,
+        provider: options.provider,
+        test_url: result.testUrl,
+    });
+    return result;
+}
+
+async function runWithStagehand(options: RunOptions, reporter: Reporter, defaultModel: string): Promise<RunResult> {
+    return await runStagehandAgent({
+        objective: options.objective,
+        provider: options.provider,
+        headless: options.headless,
+        reporter,
+        maxSteps: options.maxSteps,
+        timeoutSec: options.timeoutSec,
+        variables: options.variables,
+        model: options.model ?? defaultModel,
+        cdpEndpoint: options.cdpEndpoint,
+        startUrl: options.startUrl,
+    });
+}
+
+async function runWithBuiltin(options: RunOptions, reporter: Reporter, defaultModel: string): Promise<RunResult> {
+    const config = loadConfig();
+    const provider = getProvider(options.provider);
     reporter.info(`Provider: ${provider.id} — ${provider.description}`);
+
     const session = await provider.connect({
         headless: options.headless,
         name: options.name ?? options.objective.slice(0, 80),
@@ -30,24 +78,13 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
             maxSteps: options.maxSteps,
             timeoutSec: options.timeoutSec,
             variables: options.variables,
-            model: options.model ?? config.model,
+            model: options.model ?? defaultModel,
         });
         result.testUrl = session.testUrl;
 
         if (session.reportStatus) {
             await session.reportStatus(result.status === 'passed' ? 'passed' : 'failed', result.summary);
         }
-
-        reporter.runEnd({
-            type: 'run_end',
-            status: result.status,
-            summary: result.summary,
-            final_state: result.finalState,
-            duration_ms: result.durationMs,
-            steps_executed: result.stepsExecuted,
-            provider: provider.id,
-            test_url: result.testUrl,
-        });
         return result;
     } finally {
         await session.close().catch(() => undefined);

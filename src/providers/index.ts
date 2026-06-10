@@ -1,3 +1,4 @@
+import { browserbaseProvider } from './browserbase.js';
 import { browserstackProvider } from './browserstack.js';
 import { cdpProvider } from './cdp.js';
 import { lambdatestProvider } from './lambdatest.js';
@@ -7,6 +8,7 @@ import type { BrowserProvider } from './types.js';
 const REGISTRY: Record<string, BrowserProvider> = {
     [localProvider.id]: localProvider,
     [cdpProvider.id]: cdpProvider,
+    [browserbaseProvider.id]: browserbaseProvider,
     [lambdatestProvider.id]: lambdatestProvider,
     [browserstackProvider.id]: browserstackProvider,
 };

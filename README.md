@@ -1,17 +1,27 @@
 # browserbash-cli
 
-Vendor-independent, natural-language browser automation CLI — inspired by [kane-cli](https://github.com/LambdaTest/kane-cli), but not tied to any one vendor.
+Vendor-independent, natural-language browser automation CLI.
 
-Give it a plain-English objective. It drives a **real browser** with an AI agent loop and returns structured results. The browser can live anywhere:
+Give it a plain-English objective. An AI agent drives a **real browser** and returns structured results. Both layers are swappable:
 
-| Provider | Where the browser runs | Auth |
+## Engines (who interprets the English)
+
+| Engine | What it is | License |
 |---|---|---|
-| `local` (default) | System Google Chrome on your machine | none |
-| `cdp` | Any Chrome DevTools Protocol endpoint (your grid, docker, Playwright MCP-managed browser) | none |
-| `lambdatest` | LambdaTest / TestMu AI cloud grid | `LT_USERNAME` / `LT_ACCESS_KEY` |
-| `browserstack` | BrowserStack Automate cloud grid | `BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY` |
+| `stagehand` (default) | [Stagehand](https://www.stagehand.dev) — open-source AI browser automation framework by Browserbase. act/extract/observe/agent primitives, self-healing, supports Anthropic/OpenAI/Google models. | MIT |
+| `builtin` | In-repo Anthropic tool-use loop driving Playwright. Used automatically for grids Stagehand can't attach to (LambdaTest, BrowserStack). | Apache-2.0 |
 
-The AI planning engine uses the Anthropic API (`ANTHROPIC_API_KEY` required, default model `claude-opus-4-8`).
+## Providers (where the browser runs)
+
+| Provider | Where the browser runs | Engine | Auth |
+|---|---|---|---|
+| `local` (default) | Chromium/Chrome on this machine | stagehand or builtin | none |
+| `cdp` | Any Chrome DevTools Protocol endpoint (your grid, docker, Playwright MCP-managed browser) | stagehand or builtin | none |
+| `browserbase` | Browserbase cloud browsers | stagehand only | `BROWSERBASE_API_KEY` / `BROWSERBASE_PROJECT_ID` |
+| `lambdatest` | LambdaTest / TestMu AI cloud grid | builtin (auto) | `LT_USERNAME` / `LT_ACCESS_KEY` |
+| `browserstack` | BrowserStack Automate cloud grid | builtin (auto) | `BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY` |
+
+Both engines need an LLM key — `ANTHROPIC_API_KEY` by default (model `claude-opus-4-8`; Stagehand also accepts `openai/...`, `google/...` via `--model`).
 
 ## Install
 
@@ -28,15 +38,22 @@ Requires Node ≥ 18 and Google Chrome stable (for the `local` provider).
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 
-# One-shot objective, local Chrome
+# One-shot objective, local browser, Stagehand engine (default)
 browserbash run "Open https://news.ycombinator.com and store the top story title as 'top_story'"
 
-# Same objective on a cloud grid
+# Browserbase cloud (Stagehand native)
+export BROWSERBASE_API_KEY=... BROWSERBASE_PROJECT_ID=...
+browserbash run "..." --provider browserbase
+
+# Cloud grid (auto-switches to builtin engine)
 export LT_USERNAME=... LT_ACCESS_KEY=...
 browserbash run "..." --provider lambdatest --headless
 
 # Attach to an existing browser (CDP / Playwright MCP)
 browserbash run "..." --cdp-endpoint ws://localhost:9222/devtools/browser/<id>
+
+# Force the builtin engine
+browserbash run "..." --engine builtin
 ```
 
 ## Agent mode (for AI coding tools & CI)
@@ -115,13 +132,14 @@ The process exit code is the test verdict — no output parsing needed.
 
 ## Architecture
 
-```
+```text
 src/
 ├── index.ts            # CLI (commander): run, testmd, login, config, providers, init
-├── runner.ts           # orchestrates provider session + agent loop + vendor status reporting
+├── runner.ts           # engine routing + provider session + vendor status reporting
 ├── engine/
-│   ├── agent.ts        # Anthropic tool-use loop (manual loop → NDJSON step events)
-│   └── tools.ts        # browser tools: navigate, snapshot, click, type_text, wait_for, extract, done
+│   ├── stagehand.ts    # default engine: Stagehand agent (stagehand.dev, MIT) — LOCAL / cdpUrl / Browserbase
+│   ├── agent.ts        # builtin engine: Anthropic tool-use loop (manual loop → NDJSON step events)
+│   └── tools.ts        # builtin browser tools: navigate, snapshot, click, type_text, wait_for, extract, done
 ├── providers/          # vendor abstraction — add a new vendor by implementing BrowserProvider
 │   ├── types.ts        # BrowserProvider / ProviderSession interfaces
 │   ├── local.ts        # system Chrome

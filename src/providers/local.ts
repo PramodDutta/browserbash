@@ -3,7 +3,7 @@ import type { BrowserProvider, ProviderConnectOptions, ProviderSession } from '.
 
 /**
  * Local provider — launches the system-installed Chrome stable channel
- * (no bundled browser download needed, same requirement as kane-cli).
+ * (no bundled browser download needed).
  */
 export const localProvider: BrowserProvider = {
     id: 'local',

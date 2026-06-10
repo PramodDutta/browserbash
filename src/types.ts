@@ -7,9 +7,12 @@ export const EXIT_CODES: Record<RunStatus, number> = {
     timeout: 3,
 };
 
+export type EngineId = 'stagehand' | 'builtin';
+
 export interface RunOptions {
     objective: string;
     provider: string;
+    engine?: EngineId;
     agent: boolean;
     headless: boolean;
     maxSteps: number;
