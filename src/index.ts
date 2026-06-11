@@ -9,6 +9,15 @@ import { runTestMd } from './testmd/runner.js';
 import { EXIT_CODES, type RunStatus } from './types.js';
 import { loadVariables } from './variables.js';
 
+// Downstream consumers (grep -q, head, jq) may close the pipe early.
+// That must end the process quietly, not crash with an EPIPE stack.
+for (const stream of [process.stdout, process.stderr]) {
+    stream.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EPIPE') process.exit(0);
+        throw err;
+    });
+}
+
 const program = new Command();
 
 program
