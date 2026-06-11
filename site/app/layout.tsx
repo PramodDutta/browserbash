@@ -41,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en" className={`${body.variable} ${pixel.variable} ${mono.variable}`}>
             <body>
+                <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

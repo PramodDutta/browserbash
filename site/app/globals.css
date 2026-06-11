@@ -121,14 +121,15 @@ code, pre, kbd {
     color: var(--ink);
 }
 
-/* scroll reveal */
-.reveal {
+/* scroll reveal — content is visible by default; hiding only applies
+   once JS has marked <html class="js">, so no-JS and crawlers see all. */
+.js .reveal {
     opacity: 0;
     transform: translateY(18px);
     transition: opacity 600ms ease, transform 600ms ease;
 }
 
-.reveal.in {
+.js .reveal.in {
     opacity: 1;
     transform: none;
 }
