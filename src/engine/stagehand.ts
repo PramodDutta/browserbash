@@ -32,13 +32,30 @@ type StagehandModelConfig = string | { modelName: string; apiKey?: string; baseU
  * OpenAI-compatible endpoint (default http://localhost:11434/v1, override
  * with OLLAMA_BASE_URL). Works the same for any OpenAI-compatible server
  * (vLLM, LM Studio, llama.cpp) — point OLLAMA_BASE_URL at it.
+ *
+ * Hosted multi-model path: `openrouter/<vendor>/<model>` routes through
+ * OpenRouter's OpenAI-compatible endpoint. Needs OPENROUTER_API_KEY.
  */
-function toStagehandModel(model: string): StagehandModelConfig {
+export function toStagehandModel(model: string): StagehandModelConfig {
     if (model.startsWith('ollama/')) {
         return {
             modelName: `openai/${model.slice('ollama/'.length)}`,
             baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/v1',
             apiKey: process.env.OLLAMA_API_KEY ?? 'ollama',
+        };
+    }
+    if (model.startsWith('openrouter/')) {
+        const apiKey = process.env.OPENROUTER_API_KEY;
+        if (!apiKey) {
+            throw new Error(
+                `Model '${model}' needs OPENROUTER_API_KEY. Get one at https://openrouter.ai/keys, ` +
+                'then: export OPENROUTER_API_KEY=sk-or-...',
+            );
+        }
+        return {
+            modelName: `openai/${model.slice('openrouter/'.length)}`,
+            baseURL: process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1',
+            apiKey,
         };
     }
     if (model.includes('/')) return model;

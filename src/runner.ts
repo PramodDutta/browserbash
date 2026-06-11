@@ -24,7 +24,7 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
     }
 
     const model = await resolveModel(options.model ?? config.model, (msg) => reporter.info(msg));
-    if (engine === 'builtin' && model.startsWith('ollama/')) {
+    if (engine === 'builtin' && (model.startsWith('ollama/') || model.startsWith('openrouter/'))) {
         throw new Error(
             `The builtin engine (provider '${options.provider}') speaks the Anthropic API and cannot use '${model}' directly. ` +
             'Options: use a stagehand-capable provider (local/cdp/browserbase), set ANTHROPIC_API_KEY, ' +
