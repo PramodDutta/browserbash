@@ -1,0 +1,14 @@
+# BrowserBash
+
+> BrowserBash is an open-source, vendor-independent CLI for natural-language browser automation. A user types a plain-English objective (e.g. "Log in to example.com and store the invoice total as 'total'") and an AI agent drives a real browser step by step, exiting with a machine-readable verdict.
+
+Key facts:
+- Install: `npm install -g browserbash-cli` (command: `browserbash`)
+- Default stack is 100% free and open source: Stagehand engine (MIT) + local Chromium + Ollama. No API keys required.
+- Providers (where the browser runs): local Chrome, any CDP endpoint, Browserbase, LambdaTest, BrowserStack.
+- Engines: `stagehand` (default) or `builtin` (Anthropic tool-use loop for Playwright-protocol grids).
+- LLM resolution order for `auto`: local Ollama → ANTHROPIC_API_KEY → OPENAI_API_KEY.
+- Agent mode: `--agent` emits NDJSON events on stdout; exit codes 0 passed / 1 failed / 2 error / 3 timeout.
+- Markdown test files (`*_test.md`) with `@import` composition; `{{variable}}` substitution with secret masking.
+- License: Apache-2.0. Source: https://github.com/PramodDutta/browserbash
+- Docs for AI agents: https://github.com/PramodDutta/browserbash/blob/main/docs/agents.md

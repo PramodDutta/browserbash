@@ -1,0 +1,102 @@
+.bo {
+    image-rendering: pixelated;
+    overflow: visible;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* --- body bob --- */
+.bo__body {
+    animation: bo-bob 1.2s steps(2) infinite;
+}
+
+@keyframes bo-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-0.5px); }
+}
+
+/* --- blink: lids hidden, flash on every 4s --- */
+.bo__lids {
+    opacity: 0;
+    animation: bo-blink 4s steps(1) infinite;
+}
+
+@keyframes bo-blink {
+    0%, 96% { opacity: 0; }
+    97%, 100% { opacity: 1; }
+}
+
+/* --- legs: idle shows A; walk alternates A/B --- */
+.bo__legs--b { visibility: hidden; }
+
+.bo--walk .bo__legs--a { animation: bo-step-a 0.5s steps(1) infinite; }
+.bo--walk .bo__legs--b { animation: bo-step-b 0.5s steps(1) infinite; }
+
+@keyframes bo-step-a {
+    0%, 49% { visibility: visible; }
+    50%, 100% { visibility: hidden; }
+}
+
+@keyframes bo-step-b {
+    0%, 49% { visibility: hidden; }
+    50%, 100% { visibility: visible; }
+}
+
+/* --- hammer: rests by Bo's right hand; bash = 3-step swing --- */
+.bo__hammer {
+    transform: translate(15px, 3px) rotate(18deg);
+    transform-origin: 18px 11px; /* grip */
+}
+
+.bo--bashing .bo__hammer {
+    animation: bo-swing 0.6s steps(3);
+}
+
+@keyframes bo-swing {
+    0% { transform: translate(15px, 3px) rotate(18deg); }
+    35% { transform: translate(14px, 1px) rotate(-70deg); }
+    65% { transform: translate(15px, 4px) rotate(55deg); }
+    100% { transform: translate(15px, 3px) rotate(18deg); }
+}
+
+/* whole-body lunge on bash */
+.bo--bashing {
+    animation: bo-lunge 0.6s steps(2);
+}
+
+@keyframes bo-lunge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(3px); }
+}
+
+/* --- browser window target --- */
+.bwin {
+    image-rendering: pixelated;
+    overflow: visible;
+}
+
+.bwin__crack {
+    opacity: 0;
+}
+
+.bwin--cracked .bwin__crack {
+    opacity: 1;
+}
+
+.bwin--cracked {
+    animation: bwin-shake 0.4s steps(4);
+}
+
+@keyframes bwin-shake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(-1px, 1px) rotate(-2deg); }
+    50% { transform: translate(1px, -1px) rotate(2deg); }
+    75% { transform: translate(-1px, 0) rotate(-1deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bo__body, .bo__lids, .bo__legs--a, .bo__legs--b, .bo__hammer, .bo, .bwin {
+        animation: none !important;
+    }
+}
