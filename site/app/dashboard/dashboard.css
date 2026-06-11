@@ -1,0 +1,85 @@
+.dash {
+    padding-top: 48px;
+    padding-bottom: 80px;
+}
+
+.dash__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.dash__cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.dash__stat {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dash__num {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--accent-deep);
+}
+
+.dash__lbl {
+    font-family: var(--font-pixel), monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+}
+
+.dash__chart {
+    padding: 16px;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    min-height: 110px;
+}
+
+.dash__bar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 90px;
+    font-size: 10px;
+    color: var(--ink-soft);
+}
+
+.dash__bar-fill {
+    width: 100%;
+    background: var(--accent);
+    border: 1px solid var(--ink);
+    min-height: 3px;
+}
+
+.dash__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.dash__table th, .dash__table td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.dash__table th {
+    font-family: var(--font-pixel), monospace;
+    font-size: 11px;
+    background: var(--bg-soft);
+}
+
+@media (max-width: 880px) {
+    .dash__cards { grid-template-columns: 1fr; }
+}

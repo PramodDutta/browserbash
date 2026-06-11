@@ -44,8 +44,8 @@
 
 /* --- hammer: rests by Bo's right hand; bash = 3-step swing --- */
 .bo__hammer {
-    transform: translate(15px, 3px) rotate(18deg);
-    transform-origin: 18px 11px; /* grip */
+    transform: translate(13.6px, 2.2px) rotate(24deg);
+    transform-origin: 16.6px 10px; /* grip */
 }
 
 .bo--bashing .bo__hammer {
@@ -53,10 +53,10 @@
 }
 
 @keyframes bo-swing {
-    0% { transform: translate(15px, 3px) rotate(18deg); }
-    35% { transform: translate(14px, 1px) rotate(-70deg); }
-    65% { transform: translate(15px, 4px) rotate(55deg); }
-    100% { transform: translate(15px, 3px) rotate(18deg); }
+    0% { transform: translate(13.6px, 2.2px) rotate(24deg); }
+    35% { transform: translate(12.5px, 0.5px) rotate(-70deg); }
+    65% { transform: translate(13.8px, 3px) rotate(60deg); }
+    100% { transform: translate(13.6px, 2.2px) rotate(24deg); }
 }
 
 /* whole-body lunge on bash */

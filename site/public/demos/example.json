@@ -1,0 +1,12 @@
+{
+  "objective": "Open https://example.com and store the main heading text as 'h1'",
+  "command": "browserbash run \"Open https://example.com and store the main heading text as 'h1'\" --agent --headless",
+  "recordedAt": null,
+  "simulated": true,
+  "events": [
+    { "t": 350, "line": "{\"type\":\"step\",\"step\":1,\"status\":\"running\",\"action\":\"navigate\",\"remark\":\"Opening https://example.com\"}" },
+    { "t": 1300, "line": "{\"type\":\"step\",\"step\":1,\"status\":\"passed\",\"action\":\"navigate\",\"remark\":\"Page loaded: Example Domain\"}" },
+    { "t": 2300, "line": "{\"type\":\"step\",\"step\":2,\"status\":\"passed\",\"action\":\"extract\",\"remark\":\"Heading text stored as 'h1'\"}" },
+    { "t": 2900, "line": "{\"type\":\"run_end\",\"status\":\"passed\",\"summary\":\"Extracted the main heading.\",\"final_state\":{\"h1\":\"Example Domain\"},\"duration_ms\":2850,\"steps_executed\":2,\"provider\":\"local\"}" }
+  ]
+}

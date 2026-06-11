@@ -1,0 +1,13 @@
+{
+  "objective": "Open https://news.ycombinator.com and store the top story title as 'top_story'",
+  "command": "browserbash run \"Open https://news.ycombinator.com and store the top story title as 'top_story'\" --agent --headless",
+  "recordedAt": null,
+  "simulated": true,
+  "events": [
+    { "t": 400, "line": "{\"type\":\"step\",\"step\":1,\"status\":\"running\",\"action\":\"navigate\",\"remark\":\"Opening https://news.ycombinator.com\"}" },
+    { "t": 1900, "line": "{\"type\":\"step\",\"step\":1,\"status\":\"passed\",\"action\":\"navigate\",\"remark\":\"Page loaded: Hacker News\"}" },
+    { "t": 2600, "line": "{\"type\":\"step\",\"step\":2,\"status\":\"passed\",\"action\":\"snapshot\",\"remark\":\"Captured 87 interactive elements\"}" },
+    { "t": 4100, "line": "{\"type\":\"step\",\"step\":3,\"status\":\"passed\",\"action\":\"extract\",\"remark\":\"Top story title extracted and stored as 'top_story'\"}" },
+    { "t": 4700, "line": "{\"type\":\"run_end\",\"status\":\"passed\",\"summary\":\"Stored the top Hacker News story title.\",\"final_state\":{\"top_story\":\"Show HN: I built a CLI that bashes browsers with plain English\"},\"duration_ms\":4650,\"steps_executed\":3,\"provider\":\"local\"}" }
+  ]
+}

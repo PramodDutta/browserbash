@@ -1,0 +1,14 @@
+{
+  "objective": "Log in to {{base_url}} as {{username}} with {{password}} and verify the dashboard is visible",
+  "command": "browserbash run \"Log in to {{base_url}} as {{username}} with {{password}} and verify the dashboard is visible\" --agent --headless --variables-file ./creds.json",
+  "recordedAt": null,
+  "simulated": true,
+  "events": [
+    { "t": 400, "line": "{\"type\":\"step\",\"step\":1,\"status\":\"passed\",\"action\":\"navigate\",\"remark\":\"Opened https://demo.app/login\"}" },
+    { "t": 1500, "line": "{\"type\":\"step\",\"step\":2,\"status\":\"passed\",\"action\":\"type_text\",\"remark\":\"Typed qa@demo.app into the email field\"}" },
+    { "t": 2500, "line": "{\"type\":\"step\",\"step\":3,\"status\":\"passed\",\"action\":\"type_text\",\"remark\":\"Typed ***** into the password field\"}" },
+    { "t": 3400, "line": "{\"type\":\"step\",\"step\":4,\"status\":\"passed\",\"action\":\"click\",\"remark\":\"Clicked Sign in\"}" },
+    { "t": 4600, "line": "{\"type\":\"step\",\"step\":5,\"status\":\"passed\",\"action\":\"wait_for\",\"remark\":\"Dashboard heading is visible\"}" },
+    { "t": 5200, "line": "{\"type\":\"run_end\",\"status\":\"passed\",\"summary\":\"Logged in and verified the dashboard. Password was masked in every log line.\",\"final_state\":{},\"duration_ms\":5150,\"steps_executed\":5,\"provider\":\"local\"}" }
+  ]
+}
