@@ -43,13 +43,15 @@ describe('browserbash CLI', () => {
         expect(existsSync(join(dir, '.browserbash/tests/smoke_test.md'))).toBe(true);
     });
 
-    it('login + config show masks accessKey', async () => {
+    it('login/connect + config show mask secrets', async () => {
         const home = mkdtempSync(join(tmpdir(), 'bbh-'));
         const env = { ...cleanEnv, BROWSERBASH_HOME: home };
         await run('node', [CLI, 'login', '--provider', 'lambdatest', '--username', 'demo', '--access-key', 'secret123'], { env });
+        await run('node', [CLI, 'connect', '--key', `bb_${'a'.repeat(40)}`], { env });
         const { stdout } = await run('node', [CLI, 'config', 'show'], { env });
         expect(stdout).toContain('*****');
         expect(stdout).not.toContain('secret123');
+        expect(stdout).not.toContain(`bb_${'a'.repeat(40)}`);
     });
 
     it('missing creds in --agent mode → NDJSON run_end error, exit 2', async () => {
@@ -77,5 +79,29 @@ describe('browserbash CLI', () => {
         const r = (await run('node', [CLI, 'config', 'set', 'bogus', '1'], { env: { ...cleanEnv, BROWSERBASH_HOME: home } })
             .catch((e: ExecError) => e)) as ExecError;
         expect(r.code).toBe(2);
+    });
+
+    it('invalid numeric run flags fail before backend detection', async () => {
+        const home = mkdtempSync(join(tmpdir(), 'bbh-'));
+        const r = (await run('node', [CLI, 'run', 'x', '--agent', '--max-steps', 'nope'], { env: { ...cleanEnv, BROWSERBASH_HOME: home } })
+            .catch((e: ExecError) => e)) as ExecError;
+        expect(r.code).toBe(2);
+        const end = JSON.parse(r.stdout.trim());
+        expect(end.status).toBe('error');
+        expect(end.summary).toMatch(/max-steps must be a positive integer/);
+    });
+
+    it('config set validates provider and numeric values', async () => {
+        const home = mkdtempSync(join(tmpdir(), 'bbh-'));
+        const env = { ...cleanEnv, BROWSERBASH_HOME: home };
+        const badProvider = (await run('node', [CLI, 'config', 'set', 'defaultProvider', 'nope'], { env })
+            .catch((e: ExecError) => e)) as ExecError;
+        expect(badProvider.code).toBe(2);
+        expect(badProvider.stderr).toContain('Unknown provider');
+
+        const badSteps = (await run('node', [CLI, 'config', 'set', 'maxSteps', 'nan'], { env })
+            .catch((e: ExecError) => e)) as ExecError;
+        expect(badSteps.code).toBe(2);
+        expect(badSteps.stderr).toContain('maxSteps must be a positive integer');
     });
 });

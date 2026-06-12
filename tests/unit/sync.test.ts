@@ -9,7 +9,7 @@ const baseConfig: BrowserBashConfig = {
 };
 
 const result: RunResult = {
-    status: 'passed', summary: 'ok', finalState: { h1: 'Example' },
+    status: 'passed', summary: 'ok', finalState: { h1: 'Example', password: 'hunter2' },
     stepsExecuted: 3, durationMs: 1500,
 };
 
@@ -41,6 +41,7 @@ describe('syncRun', () => {
         const body = JSON.parse(init.body as string);
         expect(body.objective).not.toContain('hunter2');
         expect(body.objective).toContain('*****');
+        expect(body.final_state.password).toBe('*****');
         expect(body.status).toBe('passed');
         expect(body.cli_version).toBe(CLI_VERSION);
         expect(logs.some((l) => l.includes('synced'))).toBe(true);

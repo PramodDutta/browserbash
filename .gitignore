@@ -4,3 +4,8 @@ dist/
 .DS_Store
 .browserbash/
 Result.md
+
+# Env files (secrets — never commit)
+.env
+.env.*
+!.env.local.example

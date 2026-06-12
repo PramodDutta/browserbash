@@ -1,5 +1,5 @@
 import type { RunEndEvent, StepEvent, VariableValue } from './types.js';
-import { maskSecrets } from './variables.js';
+import { maskSecretRecord, maskSecrets } from './variables.js';
 
 /**
  * Output sink. With --agent every event is one NDJSON line on stdout
@@ -22,7 +22,11 @@ export class Reporter {
     }
 
     runEnd(event: RunEndEvent): void {
-        const safe = { ...event, summary: maskSecrets(event.summary, this.vars) };
+        const safe = {
+            ...event,
+            summary: maskSecrets(event.summary, this.vars),
+            final_state: maskSecretRecord(event.final_state, this.vars),
+        };
         if (this.agentMode) {
             process.stdout.write(JSON.stringify(safe) + '\n');
         } else {

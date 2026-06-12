@@ -116,13 +116,16 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
 
         const agent = stagehand.agent();
         const timeoutMs = options.timeoutSec * 1000;
+        let timeout: ReturnType<typeof setTimeout> | undefined;
 
         const result = await Promise.race([
             agent.execute({ instruction, maxSteps: options.maxSteps }),
-            new Promise<never>((_, reject) =>
-                setTimeout(() => reject(new Error('__timeout__')), timeoutMs),
-            ),
-        ]);
+            new Promise<never>((_, reject) => {
+                timeout = setTimeout(() => reject(new Error('__timeout__')), timeoutMs);
+            }),
+        ]).finally(() => {
+            if (timeout) clearTimeout(timeout);
+        });
 
         let step = 0;
         for (const action of result.actions) {
@@ -139,7 +142,7 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
         return {
             status: result.success ? 'passed' : 'failed',
             summary: result.message,
-            finalState: extractFinalState(result.message),
+            finalState: extractFinalState(result.message, objective),
             stepsExecuted: result.actions.length,
             durationMs: Date.now() - start,
         };
@@ -160,17 +163,49 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
 }
 
 /** Pull the trailing JSON object (store-as values) out of the agent's final message. */
-function extractFinalState(message: string): Record<string, string> {
+export function extractFinalState(message: string, objective = ''): Record<string, string> {
     const match = message.match(/\{[\s\S]*\}(?=[^{}]*$)/);
-    if (!match) return {};
-    try {
+    if (match) {
+        try {
         const parsed = JSON.parse(match[0]) as Record<string, unknown>;
-        return Object.fromEntries(
+        const state = Object.fromEntries(
             Object.entries(parsed)
                 .filter(([, v]) => typeof v !== 'object')
-                .map(([k, v]) => [k, String(v)]),
+                .map(([k, v]) => [k, String(v)])
+                .filter(([, v]) => !isPlaceholder(v)),
         );
-    } catch {
-        return {};
+        if (Object.keys(state).length > 0) return state;
+        } catch {
+            // Fall through to summary-based extraction below.
+        }
     }
+    return extractStoredValuesFromSummary(message, objective);
+}
+
+function extractStoredValuesFromSummary(message: string, objective: string): Record<string, string> {
+    const keys = Array.from(objective.matchAll(/\bas\s+['"]([^'"]+)['"]/gi), (m) => m[1]);
+    const state: Record<string, string> = {};
+
+    for (const key of keys) {
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const beforeStored = new RegExp(`\\(([^()]{1,160})\\)[^.]{0,240}\\bstored\\b[^.]{0,120}\\bas\\s+['"]${escapedKey}['"]`, 'i');
+        const afterStored = new RegExp(`\\bstored\\b[^.]{0,120}\\bas\\s+['"]${escapedKey}['"][^.]{0,240}\\(([^()]{1,160})\\)`, 'i');
+        const beforeKeyMention = new RegExp(`\\(([^()]{1,160})\\)[\\s\\S]{0,320}['"]${escapedKey}['"]`, 'i');
+        const explicitAssignment = new RegExp(`['"]?${escapedKey}['"]?\\s*[:=]\\s*['"]([^'"]{1,240})['"]`, 'i');
+
+        const value = message.match(beforeStored)?.[1]
+            ?? message.match(afterStored)?.[1]
+            ?? message.match(beforeKeyMention)?.[1]
+            ?? message.match(explicitAssignment)?.[1];
+        if (value && !isPlaceholder(value)) {
+            state[key] = value.trim();
+        }
+    }
+
+    return state;
+}
+
+function isPlaceholder(value: string): boolean {
+    const normalized = value.trim().toLowerCase();
+    return normalized === '...' || normalized === 'the title text' || normalized === 'value';
 }

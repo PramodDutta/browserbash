@@ -21,7 +21,7 @@ describe('Reporter agent mode', () => {
         r.step({ type: 'step', step: 1, status: 'passed', action: 'type_text', remark: 'typed s3cret' });
         r.runEnd({
             type: 'run_end', status: 'passed', summary: 'done s3cret',
-            final_state: {}, duration_ms: 5, steps_executed: 1, provider: 'local',
+            final_state: { password: 's3cret' }, duration_ms: 5, steps_executed: 1, provider: 'local',
         });
         out.restore();
 
@@ -32,6 +32,7 @@ describe('Reporter agent mode', () => {
         expect(step.remark).toContain('*****');
         expect(end).toMatchObject({ type: 'run_end', status: 'passed', steps_executed: 1 });
         expect(end.summary).not.toContain('s3cret');
+        expect(end.final_state.password).toBe('*****');
     });
 
     it('info() writes nothing to stdout in agent mode', () => {

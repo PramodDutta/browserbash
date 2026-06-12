@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { substitute, maskSecrets } from '../../dist/variables.js';
+import { substitute, maskSecretRecord, maskSecrets } from '../../dist/variables.js';
 import type { VariableValue } from '../../dist/types.js';
 
 const vars: Record<string, VariableValue> = {
@@ -31,5 +31,12 @@ describe('maskSecrets', () => {
 
     it('leaves text without secrets untouched', () => {
         expect(maskSecrets('nothing here', vars)).toBe('nothing here');
+    });
+
+    it('masks secrets inside record values', () => {
+        expect(maskSecretRecord({ token: 'hunter2', user: 'pramod' }, vars)).toEqual({
+            token: '*****',
+            user: 'pramod',
+        });
     });
 });

@@ -3,11 +3,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Command } from 'commander';
 import { configDir, configPath, loadConfig, projectDir, saveConfig } from './config.js';
-import { listProviders } from './providers/index.js';
+import { getProvider, listProviders } from './providers/index.js';
 import { executeRun } from './runner.js';
 import { runTestMd } from './testmd/runner.js';
-import { EXIT_CODES, type RunStatus } from './types.js';
-import { loadVariables } from './variables.js';
+import { EXIT_CODES, type EngineId, type RunStatus, type VariableValue } from './types.js';
+import { loadVariables, maskSecrets } from './variables.js';
 
 // Downstream consumers (grep -q, head, jq) may close the pipe early.
 // That must end the process quietly, not crash with an EPIPE stack.
@@ -23,7 +23,7 @@ const program = new Command();
 program
     .name('browserbash')
     .description('Vendor-independent natural-language browser automation CLI')
-    .version('1.1.0');
+    .version('1.1.1');
 
 interface CommonFlags {
     provider?: string;
@@ -44,10 +44,10 @@ function addRunFlags(cmd: Command): Command {
     return cmd
         .option('-p, --provider <id>', 'browser provider: local | cdp | browserbase | lambdatest | browserstack')
         .option('-e, --engine <id>', 'automation engine: stagehand (default, OSS) | builtin')
-        .option('--agent', 'emit NDJSON events on stdout (for AI agents / CI)', false)
-        .option('--headless', 'run without a visible browser window', false)
-        .option('--max-steps <n>', 'cap agent steps', '30')
-        .option('--timeout <s>', 'hard timeout in seconds', '300')
+        .option('--agent', 'emit NDJSON events on stdout (for AI agents / CI)')
+        .option('--headless', 'run without a visible browser window')
+        .option('--max-steps <n>', 'cap agent steps')
+        .option('--timeout <s>', 'hard timeout in seconds')
         .option('--variables <json>', 'inline variables JSON for {{key}} substitution')
         .option('--variables-file <path>', 'variables JSON file')
         .option('--cdp-endpoint <url>', 'CDP endpoint (implies/required by --provider cdp)')
@@ -59,8 +59,38 @@ function exitWith(status: RunStatus): never {
     process.exit(EXIT_CODES[status]);
 }
 
-async function handleRunError(err: unknown, agentMode: boolean): Promise<never> {
-    const message = (err as Error).message ?? String(err);
+function parsePositiveInteger(value: number | string | undefined, name: string): number {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+        throw new Error(`${name} must be a positive integer`);
+    }
+    return parsed;
+}
+
+function parseBooleanConfig(value: string, name: string): boolean {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    throw new Error(`${name} must be true or false`);
+}
+
+function parseEngine(value: string | undefined): EngineId | undefined {
+    if (value === undefined) return undefined;
+    if (value === 'stagehand' || value === 'builtin') return value;
+    throw new Error('engine must be stagehand or builtin');
+}
+
+function resolveProvider(flags: CommonFlags, defaultProvider: string): string {
+    const provider = flags.cdpEndpoint ? 'cdp' : flags.provider ?? defaultProvider;
+    getProvider(provider);
+    return provider;
+}
+
+async function handleRunError(
+    err: unknown,
+    agentMode: boolean,
+    variables: Record<string, VariableValue> = {},
+): Promise<never> {
+    const message = maskSecrets((err as Error).message ?? String(err), variables);
     if (agentMode) {
         process.stdout.write(JSON.stringify({ type: 'run_end', status: 'error', summary: message, final_state: {}, duration_ms: 0, steps_executed: 0 }) + '\n');
     } else {
@@ -76,16 +106,18 @@ addRunFlags(
         .option('--name <name>', 'run name shown on vendor dashboards / saved test recording'),
 ).action(async (objective: string, flags: CommonFlags) => {
     const config = loadConfig();
+    let variables: Record<string, VariableValue> = {};
     try {
+        variables = loadVariables(flags.variables, flags.variablesFile);
         const result = await executeRun({
             objective,
-            provider: flags.cdpEndpoint ? 'cdp' : flags.provider ?? config.defaultProvider,
-            engine: flags.engine,
+            provider: resolveProvider(flags, config.defaultProvider),
+            engine: parseEngine(flags.engine ?? config.engine),
             agent: flags.agent ?? false,
             headless: flags.headless ?? config.headless,
-            maxSteps: Number(flags.maxSteps ?? config.maxSteps),
-            timeoutSec: Number(flags.timeout ?? config.timeoutSec),
-            variables: loadVariables(flags.variables, flags.variablesFile),
+            maxSteps: parsePositiveInteger(flags.maxSteps ?? config.maxSteps, 'max-steps'),
+            timeoutSec: parsePositiveInteger(flags.timeout ?? config.timeoutSec, 'timeout'),
+            variables,
             cdpEndpoint: flags.cdpEndpoint,
             startUrl: flags.url,
             model: flags.model,
@@ -93,7 +125,7 @@ addRunFlags(
         });
         exitWith(result.status);
     } catch (err) {
-        await handleRunError(err, flags.agent ?? false);
+        await handleRunError(err, flags.agent ?? false, variables);
     }
 });
 
@@ -104,22 +136,24 @@ addRunFlags(
         .description('Run a *_test.md file (plain-English steps, @import composition)'),
 ).action(async (file: string, flags: CommonFlags) => {
     const config = loadConfig();
+    let variables: Record<string, VariableValue> = {};
     try {
+        variables = loadVariables(flags.variables, flags.variablesFile);
         const result = await runTestMd(file, {
-            provider: flags.cdpEndpoint ? 'cdp' : flags.provider ?? config.defaultProvider,
-            engine: flags.engine,
+            provider: resolveProvider(flags, config.defaultProvider),
+            engine: parseEngine(flags.engine ?? config.engine),
             agent: flags.agent ?? false,
             headless: flags.headless ?? config.headless,
-            maxSteps: Number(flags.maxSteps ?? config.maxSteps),
-            timeoutSec: Number(flags.timeout ?? config.timeoutSec),
-            variables: loadVariables(flags.variables, flags.variablesFile),
+            maxSteps: parsePositiveInteger(flags.maxSteps ?? config.maxSteps, 'max-steps'),
+            timeoutSec: parsePositiveInteger(flags.timeout ?? config.timeoutSec, 'timeout'),
+            variables,
             cdpEndpoint: flags.cdpEndpoint,
             startUrl: flags.url,
             model: flags.model,
         });
         exitWith(result.status);
     } catch (err) {
-        await handleRunError(err, flags.agent ?? false);
+        await handleRunError(err, flags.agent ?? false, variables);
     }
 });
 
@@ -208,6 +242,7 @@ configCmd
         const config = loadConfig();
         const redacted = {
             ...config,
+            apiKey: config.apiKey ? '*****' : undefined,
             credentials: Object.fromEntries(
                 Object.entries(config.credentials).map(([k, v]) => [k, { ...v, accessKey: v.accessKey ? '*****' : undefined }]),
             ),
@@ -220,7 +255,10 @@ configCmd
     .action((key: string, value: string) => {
         const config = loadConfig();
         switch (key) {
-            case 'defaultProvider': config.defaultProvider = value; break;
+            case 'defaultProvider':
+                getProvider(value);
+                config.defaultProvider = value;
+                break;
             case 'engine':
                 if (value !== 'stagehand' && value !== 'builtin') {
                     process.stderr.write('engine must be stagehand or builtin\n');
@@ -229,9 +267,9 @@ configCmd
                 config.engine = value;
                 break;
             case 'model': config.model = value; break;
-            case 'headless': config.headless = value === 'true'; break;
-            case 'maxSteps': config.maxSteps = Number(value); break;
-            case 'timeoutSec': config.timeoutSec = Number(value); break;
+            case 'headless': config.headless = parseBooleanConfig(value, 'headless'); break;
+            case 'maxSteps': config.maxSteps = parsePositiveInteger(value, 'maxSteps'); break;
+            case 'timeoutSec': config.timeoutSec = parsePositiveInteger(value, 'timeoutSec'); break;
             default:
                 process.stderr.write(`Unknown config key: ${key}\n`);
                 process.exit(2);

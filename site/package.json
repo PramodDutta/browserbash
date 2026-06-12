@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
+    "db:init": "node --env-file=.env.local scripts/db-init.mjs",
     "test": "vitest run"
   },
   "dependencies": {

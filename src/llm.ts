@@ -5,7 +5,8 @@
  *   1. Ollama running locally → ollama/<OLLAMA_MODEL or first installed model>
  *   2. ANTHROPIC_API_KEY set  → claude-opus-4-8
  *   3. OPENAI_API_KEY set     → openai/gpt-4.1
- *   4. error with setup guidance
+ *   4. OPENROUTER_API_KEY set → openrouter/<OPENROUTER_MODEL or openai/gpt-oss-120b:free>
+ *   5. error with setup guidance
  *
  * Any explicit model string is passed through untouched.
  */
@@ -48,10 +49,16 @@ export async function resolveModel(model: string, log: (msg: string) => void): P
         log('Model: openai/gpt-4.1 (no local Ollama found, using OPENAI_API_KEY)');
         return 'openai/gpt-4.1';
     }
+    if (process.env.OPENROUTER_API_KEY) {
+        // || not ?? — an env var set to '' must fall back to the default.
+        const model = process.env.OPENROUTER_MODEL || 'openai/gpt-oss-120b:free';
+        log(`Model: openrouter/${model} (no local Ollama found, using OPENROUTER_API_KEY)`);
+        return `openrouter/${model}`;
+    }
     throw new Error(
         'No LLM backend available. Either:\n' +
         '  - install Ollama and pull a tool-capable model:  ollama pull qwen3   (https://ollama.com — free, open source)\n' +
-        '  - or set ANTHROPIC_API_KEY / OPENAI_API_KEY\n' +
-        '  - or pass --model explicitly (e.g. --model ollama/qwen3)',
+        '  - or set ANTHROPIC_API_KEY / OPENAI_API_KEY / OPENROUTER_API_KEY\n' +
+        '  - or pass --model explicitly (e.g. --model ollama/qwen3 or --model openrouter/openai/gpt-oss-120b:free)',
     );
 }

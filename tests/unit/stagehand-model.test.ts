@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { toStagehandModel } from '../../dist/engine/stagehand.js';
+import { extractFinalState, toStagehandModel } from '../../dist/engine/stagehand.js';
 
 beforeEach(() => {
     vi.stubEnv('OLLAMA_BASE_URL', undefined);
@@ -42,5 +42,31 @@ describe('toStagehandModel', () => {
         expect(toStagehandModel('claude-opus-4-8')).toBe('anthropic/claude-opus-4-8');
         expect(toStagehandModel('gpt-4.1')).toBe('openai/gpt-4.1');
         expect(toStagehandModel('gemini-2.5-flash')).toBe('google/gemini-2.5-flash');
+    });
+});
+
+describe('extractFinalState', () => {
+    it('extracts values from trailing JSON', () => {
+        expect(extractFinalState('Done.\n{"top_story":"Launch HN"}')).toEqual({
+            top_story: 'Launch HN',
+        });
+    });
+
+    it('ignores placeholder JSON values', () => {
+        expect(extractFinalState('Done.\n{"top_story":"..."}', 'store title as \'top_story\'')).toEqual({});
+    });
+
+    it('falls back to Stagehand summary parentheticals', () => {
+        expect(extractFinalState(
+            'Navigated to the page, extracted the first quote author (Albert Einstein) and stored as \'author\'.',
+            'Open https://quotes.toscrape.com and store the first quote author as \'author\'',
+        )).toEqual({ author: 'Albert Einstein' });
+    });
+
+    it('falls back when the key is mentioned after the parenthetical value', () => {
+        expect(extractFinalState(
+            'The assistant extracted the first quote author (Albert Einstein) and returned it. The required JSON with \'author\' was provided.',
+            'Open https://quotes.toscrape.com and store the first quote author as \'author\'',
+        )).toEqual({ author: 'Albert Einstein' });
     });
 });

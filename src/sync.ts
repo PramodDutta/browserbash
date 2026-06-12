@@ -1,8 +1,8 @@
 import type { BrowserBashConfig } from './config.js';
 import type { RunResult, VariableValue } from './types.js';
-import { maskSecrets } from './variables.js';
+import { maskSecretRecord, maskSecrets } from './variables.js';
 
-export const CLI_VERSION = '1.1.0';
+export const CLI_VERSION = '1.1.1';
 
 /**
  * Pushes a finished run to the BrowserBash dashboard. Strictly opt-in:
@@ -40,7 +40,7 @@ export async function syncRun(
                 steps_executed: result.stepsExecuted,
                 provider,
                 model,
-                final_state: result.finalState,
+                final_state: maskSecretRecord(result.finalState, vars),
                 cli_version: CLI_VERSION,
             }),
         });

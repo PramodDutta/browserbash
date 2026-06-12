@@ -77,3 +77,12 @@ export function maskSecrets(text: string, vars: Record<string, VariableValue>): 
     }
     return masked;
 }
+
+export function maskSecretRecord(
+    record: Record<string, string>,
+    vars: Record<string, VariableValue>,
+): Record<string, string> {
+    return Object.fromEntries(
+        Object.entries(record).map(([key, value]) => [key, maskSecrets(value, vars)]),
+    );
+}
