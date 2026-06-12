@@ -35,7 +35,8 @@ await sql`
         label        TEXT DEFAULT 'default',
         cli_version  TEXT,
         created_at   TIMESTAMPTZ DEFAULT now(),
-        last_used_at TIMESTAMPTZ
+        last_used_at TIMESTAMPTZ,
+        expires_at   TIMESTAMPTZ
     )`;
 await sql`CREATE INDEX IF NOT EXISTS api_keys_user ON api_keys (user_id)`;
 

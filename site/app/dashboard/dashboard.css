@@ -465,3 +465,7 @@
 
 .runs__rec { text-align: center; font-size: 15px; }
 .runs__open a { color: var(--accent-deep); font-size: 12px; white-space: nowrap; }
+
+.connect__dot--dead { background: var(--err); }
+.connect__expiry { font-size: 12px; color: var(--ink-soft); }
+.connect__expiry--low { color: var(--accent-deep); font-weight: 600; }

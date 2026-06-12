@@ -9,6 +9,9 @@ interface KeyInfo {
     cliVersion: string | null;
     createdAt: string | null;
     lastUsedAt: string | null;
+    expiresAt: string | null;
+    daysLeft: number | null;
+    expired: boolean;
 }
 
 export function ConnectCard() {
@@ -56,7 +59,7 @@ export function ConnectCard() {
             {freshKey ? (
                 <>
                     <p className="connect__note connect__note--warn">
-                        Copy this now — it is shown once. Run it in your terminal:
+                        Copy this now — it is shown once, and it works for 30 days. Run it in your terminal:
                     </p>
                     <div className="connect__cmd">
                         <code>{connectCmd}</code>
@@ -66,12 +69,23 @@ export function ConnectCard() {
             ) : active ? (
                 <>
                     <p className="connect__status">
-                        <span className="connect__dot" /> Connected key {active.id}
+                        <span className={`connect__dot ${active.expired ? 'connect__dot--dead' : ''}`} /> Connected key {active.id}
                         {active.cliVersion ? ` · CLI v${active.cliVersion}` : ''}
                         {active.lastUsedAt ? ` · last run ${active.lastUsedAt}` : ' · no runs yet'}
                     </p>
+                    {active.expired ? (
+                        <p className="connect__note connect__note--warn">
+                            This key expired. Generate a fresh one and reconnect — runs won&apos;t sync until you do.
+                        </p>
+                    ) : active.daysLeft !== null && (
+                        <p className={`connect__expiry ${active.daysLeft <= 5 ? 'connect__expiry--low' : ''}`}>
+                            Expires {active.expiresAt} · {active.daysLeft} day{active.daysLeft === 1 ? '' : 's'} left
+                        </p>
+                    )}
                     <div className="connect__actions">
-                        <button className="pixel-btn ghost connect__btn" onClick={generate} disabled={busy}>rotate key</button>
+                        <button className="pixel-btn ghost connect__btn" onClick={generate} disabled={busy}>
+                            {active.expired ? 'generate new key' : 'rotate key'}
+                        </button>
                         <button className="connect__revoke" onClick={revoke} disabled={busy}>revoke</button>
                     </div>
                 </>

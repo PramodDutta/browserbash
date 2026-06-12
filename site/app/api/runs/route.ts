@@ -21,9 +21,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (!key) return NextResponse.json({ error: 'Missing Bearer bb_… key' }, { status: 401 });
 
     const hash = hashApiKey(key);
-    const owners = (await sql()`SELECT user_id FROM api_keys WHERE key_hash = ${hash}`) as Array<{ user_id: string }>;
+    const owners = (await sql()`
+        SELECT user_id, (expires_at IS NOT NULL AND expires_at <= now()) AS expired
+        FROM api_keys WHERE key_hash = ${hash}`) as Array<{ user_id: string; expired: boolean }>;
     if (owners.length === 0) return NextResponse.json({ error: 'Unknown or revoked key' }, { status: 401 });
+    if (owners[0].expired) {
+        return NextResponse.json({ error: 'API key expired — generate a fresh one at browserbash.com/dashboard and run: browserbash connect --key bb_…' }, { status: 401 });
+    }
     const userId = owners[0].user_id;
+
+    // Light per-key rate cap: protects the DB without getting in a real user's way.
+    const [{ recent }] = (await sql()`
+        SELECT COUNT(*)::int AS recent FROM runs
+        WHERE user_id = ${userId} AND created_at > now() - interval '1 hour'`) as Array<{ recent: number }>;
+    if (recent >= 300) {
+        return NextResponse.json({ error: 'Rate limit: 300 runs/hour. Try again shortly.' }, { status: 429 });
+    }
 
     let raw: unknown;
     try {

@@ -89,6 +89,9 @@ export async function syncRun(
             if (data.runId && result.artifacts) {
                 await uploadArtifacts(base, apiKey, data.runId, result.artifacts, log);
             }
+        } else if (res.status === 401) {
+            const body = (await res.json().catch(() => ({}))) as { error?: string };
+            log(`Dashboard sync skipped: ${body.error ?? 'key rejected — reconnect with a fresh key'}`);
         } else {
             log(`Dashboard sync skipped: ${res.status} — check 'browserbash connect'`);
         }

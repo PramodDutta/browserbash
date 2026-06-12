@@ -16,8 +16,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     const key = bearerFrom(req.headers.get('authorization'));
     if (!key) return NextResponse.json({ error: 'Missing Bearer bb_… key' }, { status: 401 });
 
-    const owners = (await sql()`SELECT user_id FROM api_keys WHERE key_hash = ${hashApiKey(key)}`) as Array<{ user_id: string }>;
+    const owners = (await sql()`
+        SELECT user_id, (expires_at IS NOT NULL AND expires_at <= now()) AS expired
+        FROM api_keys WHERE key_hash = ${hashApiKey(key)}`) as Array<{ user_id: string; expired: boolean }>;
     if (owners.length === 0) return NextResponse.json({ error: 'Unknown or revoked key' }, { status: 401 });
+    if (owners[0].expired) return NextResponse.json({ error: 'API key expired' }, { status: 401 });
     const userId = owners[0].user_id;
 
     const { id } = await ctx.params;
