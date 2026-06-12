@@ -32,6 +32,7 @@ export default function LearnPage() {
                 </a>
             </nav>
 
+            <main>
             <header className="learn-hero container">
                 <Bo size={84} />
                 <div>
@@ -79,6 +80,8 @@ export default function LearnPage() {
                 </Reveal>
                 <Challenges scenarios={SCENARIOS} />
             </section>
+
+            </main>
 
             <footer className="footer">
                 <div className="container footer__in">

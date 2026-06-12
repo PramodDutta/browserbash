@@ -99,7 +99,7 @@ code, pre, kbd {
     font-size: 14px;
     padding: 12px 20px;
     background: var(--accent);
-    color: var(--accent-ink);
+    color: var(--ink); /* 5.9:1 on the orange — white was 3.08:1 */
     border: 2px solid var(--ink);
     box-shadow: 4px 4px 0 var(--shadow);
     text-decoration: none;

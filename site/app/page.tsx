@@ -40,6 +40,7 @@ export default async function Page() {
                 </a>
             </nav>
 
+            <main>
             <header className="hero container" id="top">
                 <div className="hero__copy">
                     <p className="section-tag">open source · apache-2.0</p>
@@ -187,6 +188,8 @@ browserbash run "…" --agent --headless --timeout 120`}</pre>
                     </div>
                 </Reveal>
             </section>
+
+            </main>
 
             <footer className="footer">
                 <div className="container footer__in">
