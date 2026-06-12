@@ -23,7 +23,7 @@ const program = new Command();
 program
     .name('browserbash')
     .description('Vendor-independent natural-language browser automation CLI')
-    .version('1.0.0');
+    .version('1.0.1');
 
 interface CommonFlags {
     provider?: string;

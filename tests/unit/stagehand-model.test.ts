@@ -24,7 +24,9 @@ describe('toStagehandModel', () => {
     it('maps openrouter/<vendor>/<m> through openrouter.ai with the key', () => {
         vi.stubEnv('OPENROUTER_API_KEY', 'sk-or-test');
         expect(toStagehandModel('openrouter/anthropic/claude-sonnet-4-6')).toEqual({
-            modelName: 'openai/anthropic/claude-sonnet-4-6',
+            // groq prefix = OpenAI-compatible chat completions in Stagehand's
+            // AI-SDK map; openai/ would hit the Responses API OpenRouter rejects.
+            modelName: 'groq/anthropic/claude-sonnet-4-6',
             baseURL: 'https://openrouter.ai/api/v1',
             apiKey: 'sk-or-test',
         });

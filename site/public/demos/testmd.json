@@ -1,13 +1,23 @@
 {
-  "objective": "Run the committable markdown test ./smoke_test.md",
-  "command": "browserbash testmd run ./.browserbash/tests/smoke_test.md --agent --headless",
-  "recordedAt": null,
-  "simulated": true,
+  "objective": "Run the committable markdown test ./hn_top_story_test.md",
+  "command": "browserbash testmd run ./hn_top_story_test.md --agent --headless",
+  "recordedAt": "2026-06-12T09:26:45.222Z",
   "events": [
-    { "t": 300, "line": "{\"type\":\"step\",\"step\":1,\"status\":\"passed\",\"action\":\"navigate\",\"remark\":\"Step 1/4: Open https://news.ycombinator.com\"}" },
-    { "t": 1400, "line": "{\"type\":\"step\",\"step\":2,\"status\":\"passed\",\"action\":\"wait_for\",\"remark\":\"Step 2/4: Stories are visible\"}" },
-    { "t": 2500, "line": "{\"type\":\"step\",\"step\":3,\"status\":\"passed\",\"action\":\"extract\",\"remark\":\"Step 3/4: Top story title stored\"}" },
-    { "t": 3600, "line": "{\"type\":\"step\",\"step\":4,\"status\":\"passed\",\"action\":\"extract\",\"remark\":\"Step 4/4: Top story points stored\"}" },
-    { "t": 4200, "line": "{\"type\":\"run_end\",\"status\":\"passed\",\"summary\":\"All 4 steps passed. Result.md written next to the test file.\",\"final_state\":{\"top_story\":\"Show HN: BrowserBash\",\"top_points\":\"312\"},\"duration_ms\":4150,\"steps_executed\":4,\"provider\":\"local\"}" }
+    {
+      "t": 26460,
+      "line": "{\"type\":\"step\",\"step\":1,\"status\":\"passed\",\"action\":\"goto\",\"remark\":\"\"}"
+    },
+    {
+      "t": 26460,
+      "line": "{\"type\":\"step\",\"step\":2,\"status\":\"passed\",\"action\":\"ariaTree\",\"remark\":\"\"}"
+    },
+    {
+      "t": 26460,
+      "line": "{\"type\":\"step\",\"step\":3,\"status\":\"passed\",\"action\":\"done\",\"remark\":\"The assistant opened Hacker News, verified the page loaded, extracted the first story title and points, and returned them in JSON. All required steps were completed successfully.\"}"
+    },
+    {
+      "t": 26490,
+      "line": "{\"type\":\"run_end\",\"status\":\"passed\",\"summary\":\"The assistant opened Hacker News, verified the page loaded, extracted the first story title and points, and returned them in JSON. All required steps were completed successfully.\",\"final_state\":{},\"duration_ms\":26043,\"steps_executed\":3,\"provider\":\"local\"}"
+    }
   ]
 }

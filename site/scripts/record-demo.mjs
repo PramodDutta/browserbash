@@ -2,10 +2,10 @@
 /**
  * Records a real browserbash run as a replayable demo.
  * Usage:
- *   node scripts/record-demo.mjs "<objective>" <output-name>
+ *   node scripts/record-demo.mjs <output-name> "<display command>" -- <cli args...>
  * Example:
- *   ANTHROPIC_API_KEY=... node scripts/record-demo.mjs \
- *     "Open https://news.ycombinator.com and store the top story title as 'top_story'" hn
+ *   node scripts/record-demo.mjs hn 'browserbash run "..." --agent --headless' -- \
+ *     run "Open https://news.ycombinator.com ..." --agent --headless --timeout 180
  *
  * Output: public/demos/<output-name>.json
  *   { objective, command, recordedAt, events: [{ t, line }] }
@@ -19,19 +19,19 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const cli = join(here, '..', '..', 'dist', 'index.js');
 
-const [objective, name] = process.argv.slice(2);
-if (!objective || !name) {
-    console.error('usage: node scripts/record-demo.mjs "<objective>" <output-name>');
+const sep = process.argv.indexOf('--');
+const [name, displayCommand] = process.argv.slice(2, sep);
+const cliArgs = process.argv.slice(sep + 1);
+if (!name || !displayCommand || cliArgs.length === 0) {
+    console.error('usage: node scripts/record-demo.mjs <name> "<display command>" -- <cli args...>');
     process.exit(1);
 }
 
-const command = `browserbash run "${objective}" --agent --headless`;
+const objective = cliArgs.find((a, i) => i > 0 && !a.startsWith('-') && cliArgs[i - 1] !== '--model' && cliArgs[i - 1] !== '--variables' && cliArgs[i - 1] !== '--timeout') ?? '';
 const start = Date.now();
 const events = [];
 
-const child = spawn('node', [cli, 'run', objective, '--agent', '--headless', '--timeout', '180'], {
-    stdio: ['ignore', 'pipe', 'inherit'],
-});
+const child = spawn('node', [cli, ...cliArgs], { stdio: ['ignore', 'pipe', 'inherit'] });
 
 let buf = '';
 child.stdout.on('data', (chunk) => {
@@ -47,7 +47,7 @@ child.stdout.on('data', (chunk) => {
 child.on('close', (code) => {
     const out = join(here, '..', 'public', 'demos', `${name}.json`);
     mkdirSync(dirname(out), { recursive: true });
-    writeFileSync(out, JSON.stringify({ objective, command, recordedAt: new Date().toISOString(), events }, null, 2));
+    writeFileSync(out, JSON.stringify({ objective, command: displayCommand, recordedAt: new Date().toISOString(), events }, null, 2));
     console.log(`wrote ${out} (${events.length} events, exit ${code})`);
     process.exit(0);
 });

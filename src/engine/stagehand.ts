@@ -52,8 +52,11 @@ export function toStagehandModel(model: string): StagehandModelConfig {
                 'then: export OPENROUTER_API_KEY=sk-or-...',
             );
         }
+        // The 'groq' AI-SDK provider is a plain OpenAI-compatible chat-completions
+        // client honoring baseURL — unlike 'openai/...', which routes to the
+        // Responses API that OpenRouter's beta endpoint rejects for most models.
         return {
-            modelName: `openai/${model.slice('openrouter/'.length)}`,
+            modelName: `groq/${model.slice('openrouter/'.length)}`,
             baseURL: process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1',
             apiKey,
         };

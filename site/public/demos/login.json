@@ -1,14 +1,43 @@
 {
-  "objective": "Log in to {{base_url}} as {{username}} with {{password}} and verify the dashboard is visible",
-  "command": "browserbash run \"Log in to {{base_url}} as {{username}} with {{password}} and verify the dashboard is visible\" --agent --headless --variables-file ./creds.json",
-  "recordedAt": null,
-  "simulated": true,
+  "objective": "Open {{base_url}}/login, log in as {{username}} with password {{password}}, and verify the page says 'You logged into a secure area'",
+  "command": "browserbash run \"Open {{base_url}}/login, log in as {{username}} with password {{password}}, and verify the page says 'You logged into a secure area'\" --agent --headless --variables-file ./creds.json",
+  "recordedAt": "2026-06-12T09:26:18.694Z",
   "events": [
-    { "t": 400, "line": "{\"type\":\"step\",\"step\":1,\"status\":\"passed\",\"action\":\"navigate\",\"remark\":\"Opened https://demo.app/login\"}" },
-    { "t": 1500, "line": "{\"type\":\"step\",\"step\":2,\"status\":\"passed\",\"action\":\"type_text\",\"remark\":\"Typed qa@demo.app into the email field\"}" },
-    { "t": 2500, "line": "{\"type\":\"step\",\"step\":3,\"status\":\"passed\",\"action\":\"type_text\",\"remark\":\"Typed ***** into the password field\"}" },
-    { "t": 3400, "line": "{\"type\":\"step\",\"step\":4,\"status\":\"passed\",\"action\":\"click\",\"remark\":\"Clicked Sign in\"}" },
-    { "t": 4600, "line": "{\"type\":\"step\",\"step\":5,\"status\":\"passed\",\"action\":\"wait_for\",\"remark\":\"Dashboard heading is visible\"}" },
-    { "t": 5200, "line": "{\"type\":\"run_end\",\"status\":\"passed\",\"summary\":\"Logged in and verified the dashboard. Password was masked in every log line.\",\"final_state\":{},\"duration_ms\":5150,\"steps_executed\":5,\"provider\":\"local\"}" }
+    {
+      "t": 66094,
+      "line": "{\"type\":\"step\",\"step\":1,\"status\":\"passed\",\"action\":\"goto\",\"remark\":\"\"}"
+    },
+    {
+      "t": 66094,
+      "line": "{\"type\":\"step\",\"step\":2,\"status\":\"passed\",\"action\":\"ariaTree\",\"remark\":\"\"}"
+    },
+    {
+      "t": 66094,
+      "line": "{\"type\":\"step\",\"step\":3,\"status\":\"passed\",\"action\":\"act\",\"remark\":\"type tomsmith into the Username textbox\"}"
+    },
+    {
+      "t": 66094,
+      "line": "{\"type\":\"step\",\"step\":4,\"status\":\"passed\",\"action\":\"act\",\"remark\":\"type ***** into the Password textbox\"}"
+    },
+    {
+      "t": 66094,
+      "line": "{\"type\":\"step\",\"step\":5,\"status\":\"passed\",\"action\":\"act\",\"remark\":\"type ***** into the Password textbox\"}"
+    },
+    {
+      "t": 66094,
+      "line": "{\"type\":\"step\",\"step\":6,\"status\":\"passed\",\"action\":\"act\",\"remark\":\"click the Login button\"}"
+    },
+    {
+      "t": 66094,
+      "line": "{\"type\":\"step\",\"step\":7,\"status\":\"passed\",\"action\":\"ariaTree\",\"remark\":\"\"}"
+    },
+    {
+      "t": 66094,
+      "line": "{\"type\":\"step\",\"step\":8,\"status\":\"passed\",\"action\":\"done\",\"remark\":\"The assistant navigated to the login page, entered the username and password, clicked login, and verified that the resulting page contained the text 'You logged into a secure area!'. This satisfies th\"}"
+    },
+    {
+      "t": 66127,
+      "line": "{\"type\":\"run_end\",\"status\":\"passed\",\"summary\":\"The assistant navigated to the login page, entered the username and password, clicked login, and verified that the resulting page contained the text 'You logged into a secure area!'. This satisfies the task requirements.\",\"final_state\":{},\"duration_ms\":65685,\"steps_executed\":8,\"provider\":\"local\"}"
+    }
   ]
 }
