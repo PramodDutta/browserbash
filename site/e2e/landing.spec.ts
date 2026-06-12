@@ -75,9 +75,13 @@ test.describe('landing page', () => {
         await expect(demo.locator('.t-raw').first()).toContainText('"type":"step"', { timeout: 15000 });
     });
 
-    test('dashboard is hidden without Clerk config', async ({ page }) => {
+    test('dashboard is never exposed to anonymous visitors', async ({ page }) => {
         const res = await page.goto('/dashboard');
-        expect(res?.status()).toBe(404);
+        // Without Clerk keys: 404. With keys: redirected to the Clerk sign-in page.
+        const status = res?.status() ?? 0;
+        const onClerkSignIn = /accounts\.dev|clerk/.test(page.url());
+        expect(status === 404 || onClerkSignIn).toBe(true);
+        await expect(page.locator('.dash__table')).toHaveCount(0);
     });
 
     test('SEO artifacts respond', async ({ request }) => {

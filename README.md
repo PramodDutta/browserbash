@@ -35,6 +35,7 @@ Default model is `auto`, resolved in this order:
 | **Ollama — local, free, OSS (preferred)** | `auto` or `ollama/<model>` e.g. `ollama/qwen3` | Ollama running; `OLLAMA_BASE_URL` to override `http://localhost:11434/v1`, `OLLAMA_MODEL` to pin auto-detection. Same flag works for any OpenAI-compatible server (vLLM, LM Studio, llama.cpp). |
 | Anthropic | `claude-opus-4-8` | `ANTHROPIC_API_KEY` |
 | OpenAI / Google | `openai/gpt-4.1`, `google/gemini-2.5-flash` | provider key (Stagehand engine) |
+| **OpenRouter — hundreds of models, one key** | `openrouter/<vendor>/<model>` e.g. `openrouter/anthropic/claude-sonnet-4-6`, `openrouter/meta-llama/llama-3.3-70b-instruct` | `OPENROUTER_API_KEY` (https://openrouter.ai/keys); override endpoint with `OPENROUTER_BASE_URL` |
 | Anthropic-compatible gateway | `claude-*` + `ANTHROPIC_BASE_URL` | builtin engine routes through any Anthropic-compatible endpoint (e.g. a LiteLLM proxy fronting local models) |
 
 ### Fully free / open-source stack (the default)

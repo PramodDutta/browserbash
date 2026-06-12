@@ -1,0 +1,93 @@
+.learn-hero {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding-top: 48px;
+    padding-bottom: 16px;
+}
+
+.learn-hero h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    letter-spacing: -0.02em;
+    margin: 12px 0 10px;
+}
+
+.learn-hero__sub {
+    color: var(--ink-soft);
+    max-width: 60ch;
+    font-size: 17px;
+}
+
+@media (max-width: 720px) {
+    .learn-hero { flex-direction: column; align-items: flex-start; gap: 16px; }
+}
+
+.tut {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+    margin-top: 26px;
+}
+
+@media (max-width: 880px) {
+    .tut { grid-template-columns: 1fr; }
+}
+
+.tut__step {
+    padding: 22px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tut__step header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tut__num {
+    font-family: var(--font-pixel), monospace;
+    font-size: 14px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 2px solid var(--ink);
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tut__step h3 {
+    font-size: 17px;
+}
+
+.tut__step > p {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+}
+
+.tut__code {
+    position: relative;
+    background: var(--terminal-bg);
+    color: var(--terminal-ink);
+    padding: 14px 16px;
+    margin-top: auto;
+}
+
+.tut__code pre {
+    font-size: 12.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.tut__code .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
