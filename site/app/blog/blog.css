@@ -1,0 +1,222 @@
+.blog-hero {
+    padding-top: 48px;
+}
+
+.blog-hero h1 {
+    font-size: clamp(30px, 4.5vw, 46px);
+    letter-spacing: -0.02em;
+    margin: 12px 0 10px;
+}
+
+.blog-hero__sub {
+    color: var(--ink-soft);
+    max-width: 62ch;
+}
+
+.blog-grid-wrap {
+    padding-top: 36px;
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+@media (max-width: 880px) {
+    .blog-grid { grid-template-columns: 1fr; }
+}
+
+.blog-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px;
+    text-decoration: none;
+    height: 100%;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.blog-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 var(--shadow);
+}
+
+.blog-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+}
+
+.blog-card__cat {
+    font-family: var(--font-pixel), monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid var(--ink);
+    background: var(--bg-soft);
+}
+
+.blog-card__cat--case-study { background: rgba(47, 191, 113, 0.15); }
+.blog-card__cat--ci { background: rgba(255, 200, 87, 0.25); }
+.blog-card__cat--security { background: rgba(255, 107, 107, 0.18); }
+.blog-card__cat--llm { background: rgba(255, 92, 26, 0.15); }
+.blog-card__cat--comparison { background: rgba(120, 120, 255, 0.15); }
+.blog-card__cat--agents { background: rgba(60, 200, 230, 0.15); }
+
+.blog-card h2 {
+    font-size: 19px;
+    line-height: 1.25;
+}
+
+.blog-card p {
+    font-size: 14px;
+    color: var(--ink-soft);
+}
+
+.blog-card__more {
+    margin-top: auto;
+    font-family: var(--font-pixel), monospace;
+    font-size: 11px;
+    color: var(--accent-deep);
+}
+
+/* --- post page --- */
+.post {
+    max-width: 760px;
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+.post__head h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin: 12px 0;
+}
+
+.post__desc {
+    color: var(--ink-soft);
+    font-size: 17px;
+    margin-bottom: 28px;
+}
+
+.post__body {
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+.post__body h2 {
+    font-size: 24px;
+    margin: 36px 0 12px;
+    letter-spacing: -0.01em;
+}
+
+.post__body h3 {
+    font-size: 18px;
+    margin: 24px 0 8px;
+}
+
+.post__body p {
+    margin: 14px 0;
+}
+
+.post__body ul, .post__body ol {
+    margin: 14px 0;
+    padding-left: 26px;
+}
+
+.post__body li {
+    margin: 6px 0;
+}
+
+.post__body code {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    padding: 1px 6px;
+    font-size: 13.5px;
+}
+
+.post__body pre {
+    background: var(--terminal-bg);
+    color: var(--terminal-ink);
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--shadow);
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 18px 0;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.post__body pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+}
+
+.post__body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 18px 0;
+    font-size: 14px;
+}
+
+.post__body th, .post__body td {
+    border: 1px solid var(--line);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.post__body th {
+    background: var(--bg-soft);
+    font-family: var(--font-pixel), monospace;
+    font-size: 11px;
+}
+
+.post__body blockquote {
+    border-left: 4px solid var(--accent);
+    padding-left: 16px;
+    color: var(--ink-soft);
+    margin: 16px 0;
+}
+
+.post__related {
+    margin-top: 48px;
+}
+
+.post__related ul {
+    list-style: none;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.post__related a {
+    color: var(--accent-deep);
+}
+
+.post__cta {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 24px;
+    flex-wrap: wrap;
+}
+
+.post__cta div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.post__cta code {
+    font-size: 13px;
+    color: var(--accent-deep);
+}

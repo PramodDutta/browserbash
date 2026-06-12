@@ -42,7 +42,7 @@ export function WaitlistForm() {
         return (
             <div className="wl wl--success" role="status">
                 <strong>You&apos;re {position ? `#${position}` : 'in'} on the list 🔨</strong>
-                <span>We launch Monday. Watch your inbox.</span>
+                <span>Watch your inbox — launch news lands there first.</span>
             </div>
         );
     }
@@ -51,7 +51,7 @@ export function WaitlistForm() {
         return (
             <div className="wl wl--success" role="status">
                 <strong>Already on the list ✓</strong>
-                <span>See you at launch.</span>
+                <span>You&apos;re all set.</span>
             </div>
         );
     }

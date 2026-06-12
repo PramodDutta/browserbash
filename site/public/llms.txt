@@ -1,14 +1,24 @@
 # BrowserBash
 
-> BrowserBash is an open-source, vendor-independent CLI for natural-language browser automation. A user types a plain-English objective (e.g. "Log in to example.com and store the invoice total as 'total'") and an AI agent drives a real browser step by step, exiting with a machine-readable verdict.
+> BrowserBash is an open-source, vendor-independent CLI for natural language browser automation. A user types a plain-English objective (e.g. "Log in to example.com and store the invoice total as 'total'") and an AI agent drives a real browser step by step, exiting with a machine-readable verdict. No account, no signup, no metering — Apache-2.0 with the full agent loop in the repository.
 
 Key facts:
-- Install: `npm install -g browserbash-cli` (command: `browserbash`)
+- Install: `npm install -g browserbash-cli` (command: `browserbash`, version 1.0.0)
 - Default stack is 100% free and open source: Stagehand engine (MIT) + local Chromium + Ollama. No API keys required.
 - Providers (where the browser runs): local Chrome, any CDP endpoint, Browserbase, LambdaTest, BrowserStack.
 - Engines: `stagehand` (default) or `builtin` (Anthropic tool-use loop for Playwright-protocol grids).
-- LLM resolution order for `auto`: local Ollama → ANTHROPIC_API_KEY → OPENAI_API_KEY.
+- LLM resolution order for `auto`: local Ollama → ANTHROPIC_API_KEY → OPENAI_API_KEY. OpenRouter via `--model openrouter/<vendor>/<model>` with OPENROUTER_API_KEY.
 - Agent mode: `--agent` emits NDJSON events on stdout; exit codes 0 passed / 1 failed / 2 error / 3 timeout.
-- Markdown test files (`*_test.md`) with `@import` composition; `{{variable}}` substitution with secret masking.
-- License: Apache-2.0. Source: https://github.com/PramodDutta/browserbash
-- Docs for AI agents: https://github.com/PramodDutta/browserbash/blob/main/docs/agents.md
+- Markdown test files (`*_test.md`) with `@import` composition; `{{variable}}` substitution with secret masking (`*****` in all logs).
+- Compared to hosted alternatives: no login required, runs stay on your machine, cloud grids optional and vendor-neutral.
+
+## Docs
+
+- [Getting started + 12 practice scenarios](https://browserbash.com/learn): guided tutorial (install, first run, LLM backends, agent mode, markdown tests, variables, CI) and hands-on challenges.
+- [README](https://github.com/PramodDutta/browserbash/blob/main/README.md): full reference.
+- [AI agent integration guide](https://github.com/PramodDutta/browserbash/blob/main/docs/agents.md): NDJSON schema, exit codes, store-as pattern.
+
+## Source
+
+- [GitHub repository](https://github.com/PramodDutta/browserbash) (Apache-2.0)
+- [npm package](https://www.npmjs.com/package/browserbash-cli)

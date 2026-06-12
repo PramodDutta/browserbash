@@ -13,15 +13,14 @@ export const metadata: Metadata = {
         'Open-source CLI that turns plain English into real browser automation. Local Chrome, LambdaTest, BrowserStack, Browserbase or any CDP endpoint. Ollama-first — no API keys required.',
     alternates: { canonical: '/' },
     openGraph: {
-        title: 'BrowserBash',
-        description: 'Plain English in. Real browser out.',
+        title: 'BrowserBash — natural language browser automation CLI',
+        description: 'Plain English in. Real browser out. Open-source AI browser testing CLI — no account, no API keys required.',
         url: 'https://browserbash.com',
         siteName: 'BrowserBash',
-        images: ['/og.png'],
+        images: [{ url: '/og.png', width: 1200, height: 630, alt: 'BrowserBash — plain English in, real browser out' }],
         type: 'website',
     },
     twitter: { card: 'summary_large_image', images: ['/og.png'] },
-    keywords: ['browser automation', 'AI testing', 'CLI', 'playwright', 'natural language testing', 'open source'],
 };
 
 const jsonLd = {
@@ -30,10 +29,24 @@ const jsonLd = {
     name: 'BrowserBash',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'macOS, Linux, Windows',
-    description: 'Vendor-independent natural-language browser automation CLI. An AI agent drives a real browser from a plain-English objective.',
+    softwareVersion: '1.0.0',
+    datePublished: '2026-06-12',
+    description: 'Vendor-independent natural language browser automation CLI. An AI agent drives a real browser from a plain-English objective — open source, Ollama-first, no account required.',
     url: 'https://browserbash.com',
+    downloadUrl: 'https://www.npmjs.com/package/browserbash-cli',
+    installUrl: 'https://www.npmjs.com/package/browserbash-cli',
+    featureList: [
+        'Plain-English objectives drive a real Chrome browser',
+        'Markdown *_test.md test files with @import composition',
+        'NDJSON agent mode with CI exit codes 0/1/2/3',
+        'Local Chrome, CDP, Browserbase, LambdaTest, BrowserStack providers',
+        'Ollama-first local LLMs, Anthropic and OpenRouter support',
+        'Variable templating with secret masking',
+    ],
+    author: { '@type': 'Organization', name: 'The Testing Academy', url: 'https://thetestingacademy.com' },
+    publisher: { '@type': 'Organization', name: 'The Testing Academy' },
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    sameAs: ['https://github.com/PramodDutta/browserbash'],
+    sameAs: ['https://github.com/PramodDutta/browserbash', 'https://www.npmjs.com/package/browserbash-cli'],
     license: 'https://www.apache.org/licenses/LICENSE-2.0',
 };
 

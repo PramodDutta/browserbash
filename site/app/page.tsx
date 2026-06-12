@@ -34,6 +34,7 @@ export default async function Page() {
                     <a href="#features">Features</a>
                     <a href="#start">Quick start</a>
                     <a href="/learn">Learn</a>
+                    <a href="/blog">Blog</a>
                 </div>
                 <a className="pixel-btn ghost nav__gh" href={GITHUB} target="_blank" rel="noopener noreferrer">
                     GitHub ↗
@@ -49,9 +50,10 @@ export default async function Page() {
                         <span className="hero__accent">Real browser</span> out.
                     </h1>
                     <p className="hero__sub">
-                        BrowserBash is an open-source CLI where an AI agent drives a real browser from a
-                        plain-English objective. Local Chrome, LambdaTest, BrowserStack, Browserbase or any
-                        CDP endpoint — <strong>Ollama-first, zero API keys required</strong>.
+                        BrowserBash is open-source <strong>natural language browser automation</strong> — an
+                        AI browser testing CLI where an agent drives a real browser from a plain-English
+                        objective. Run test automation on local Chrome, LambdaTest, BrowserStack, Browserbase
+                        or any CDP endpoint — <strong>Ollama-first, zero API keys required</strong>.
                     </p>
                     <div className="hero__install pixel-card">
                         <code>$ {INSTALL}</code>
@@ -166,6 +168,33 @@ export default async function Page() {
                 </div>
             </section>
 
+            <section className="section container" id="why">
+                <Reveal>
+                    <p className="section-tag">why browserbash</p>
+                    <h2>No account. No meter. No lock-in.</h2>
+                    <p className="section__sub">
+                        Other AI browser tools want a signup, a credit balance, or their cloud. BrowserBash wants an objective.
+                    </p>
+                </Reveal>
+                <div className="features">
+                    {[
+                        ['No signup, ever', 'npm install and you are automating in sixty seconds. No login command, no credits, no dashboard upload.'],
+                        ['Open source all the way down', 'Apache-2.0 with the full agent loop in the repo. Read it, fork it, fix it — not just the README.'],
+                        ['Your models, your machine', 'Local Ollama by default — free, private, unmetered. Or bring an Anthropic or OpenRouter key and swap models with one flag.'],
+                        ['Cloud-neutral by design', 'Browserbase, LambdaTest, BrowserStack or your own Chrome. Use the grid your team already pays for.'],
+                        ['Private by default', 'Runs never leave your machine unless you point them at a cloud. Nothing phones home.'],
+                        ['Built for CI, not demos', 'Natural-language E2E test automation with exit codes your pipeline already understands.'],
+                    ].map(([title, body], i) => (
+                        <Reveal key={title} delay={(i % 3) * 100}>
+                            <div className="pixel-card feature">
+                                <h3>{title}</h3>
+                                <p>{body}</p>
+                            </div>
+                        </Reveal>
+                    ))}
+                </div>
+            </section>
+
             <section className="section container" id="start">
                 <Reveal>
                     <p className="section-tag">quick start</p>
@@ -199,12 +228,13 @@ browserbash run "…" --agent --headless --timeout 120`}</pre>
                     </div>
                     <div className="footer__links">
                         <a href="/learn">Learn</a>
+                        <a href="/blog">Blog</a>
                         <a href={GITHUB} target="_blank" rel="noopener noreferrer">GitHub</a>
                         <a href="https://www.npmjs.com/package/browserbash-cli" target="_blank" rel="noopener noreferrer">npm</a>
                         <a href={`${GITHUB}/blob/main/docs/agents.md`} target="_blank" rel="noopener noreferrer">Agent docs</a>
                         <a href={`${GITHUB}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer">Apache-2.0</a>
                     </div>
-                    <p className="footer__credit">Built by The Testing Academy · launching Monday</p>
+                    <p className="footer__credit">Built by The Testing Academy</p>
                 </div>
             </footer>
         </>
