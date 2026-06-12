@@ -43,6 +43,12 @@ export const TUTORIAL: TutorialSection[] = [
         body: 'Agent mode and exit codes make CI integration trivial: the job fails exactly when the test fails, with zero output parsing. Run headless, set a timeout, and put your LLM key in repo secrets. Pipe the NDJSON to a file if you want step-by-step logs as a build artifact.',
         code: '# .github/workflows/e2e.yml\nname: e2e\non: [push]\njobs:\n  smoke:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n      - run: npm install -g browserbash-cli\n      - run: browserbash testmd run .browserbash/tests/smoke_test.md --agent --headless --timeout 180\n        env:\n          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}\n# exit code is the verdict: 0 passed · 1 failed · 2 error · 3 timeout',
     },
+    {
+        id: 'record',
+        title: 'Record the session',
+        body: 'Connect the CLI to your dashboard with browserbash connect, then add --record to any run. A final screenshot is captured for every recorded run; on the builtin engine you also get a Playwright video and trace. Everything uploads to your private dashboard and shows up in a per-session view — verdict, extracted values, and the recording side by side.',
+        code: '# one-time: link this machine to your dashboard\nbrowserbash connect --key bb_...   # generate the key at browserbash.com/dashboard\n\n# record a run — screenshot, plus video + trace on the builtin engine\nbrowserbash run "Open https://example.com and store the heading as \'h1\'" --record\n\n# view it at browserbash.com/dashboard -> your runs -> view',
+    },
 ];
 
 export const SCENARIOS: Scenario[] = [
