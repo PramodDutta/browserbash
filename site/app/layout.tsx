@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Bricolage_Grotesque, Silkscreen, JetBrains_Mono } from 'next/font/google';
+import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 
 const body = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
@@ -51,7 +52,7 @@ const jsonLd = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-    return (
+    const page = (
         <html lang="en" className={`${body.variable} ${pixel.variable} ${mono.variable}`}>
             <body>
                 <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
@@ -63,4 +64,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </body>
         </html>
     );
+    // Site must keep building (and prerendering) without Clerk keys.
+    return process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? <ClerkProvider>{page}</ClerkProvider> : page;
 }

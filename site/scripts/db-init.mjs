@@ -20,5 +20,14 @@ await sql`
         created_at TIMESTAMPTZ DEFAULT now()
     )`;
 
+await sql`
+    CREATE TABLE IF NOT EXISTS onboarding (
+        user_id      TEXT NOT NULL,
+        step         TEXT NOT NULL,
+        completed_at TIMESTAMPTZ DEFAULT now(),
+        PRIMARY KEY (user_id, step)
+    )`;
+
 const [{ count }] = await sql`SELECT COUNT(*)::int AS count FROM waitlist`;
-console.log(`waitlist table ready — ${count} rows`);
+const [{ ob }] = await sql`SELECT COUNT(*)::int AS ob FROM onboarding`;
+console.log(`waitlist table ready — ${count} rows · onboarding table ready — ${ob} rows`);
