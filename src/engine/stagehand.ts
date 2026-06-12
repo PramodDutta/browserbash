@@ -117,8 +117,13 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
         if (!options.record) return;
         try {
             const path = join(artifactDir, 'screenshot.png');
-            await (stagehand as unknown as { page: { screenshot(o: { path: string }): Promise<unknown> } })
-                .page.screenshot({ path });
+            const page = (stagehand.context as unknown as {
+                activePage(): { screenshot(o: { path: string }): Promise<unknown> } | undefined;
+                pages(): Array<{ screenshot(o: { path: string }): Promise<unknown> }>;
+            });
+            const target = page.activePage() ?? page.pages()[0];
+            if (!target) throw new Error('no page');
+            await target.screenshot({ path });
             artifacts.screenshot = path;
             options.reporter.info('Captured final screenshot (--record)');
         } catch {
