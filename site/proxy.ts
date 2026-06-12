@@ -3,7 +3,9 @@ import { NextResponse } from 'next/server';
 
 // Next 16: middleware is called proxy. Clerk only engages when keys are
 // configured, so the public site builds and runs without them.
-const isProtected = createRouteMatcher(['/dashboard(.*)', '/api/export', '/api/onboarding']);
+// NOTE: /api/runs is deliberately absent — its POST authenticates CLI calls
+// with a Bearer API key (no browser session); both handlers self-auth.
+const isProtected = createRouteMatcher(['/dashboard(.*)', '/api/export', '/api/onboarding', '/api/keys']);
 const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 export default hasClerk

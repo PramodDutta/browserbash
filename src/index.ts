@@ -23,7 +23,7 @@ const program = new Command();
 program
     .name('browserbash')
     .description('Vendor-independent natural-language browser automation CLI')
-    .version('1.0.1');
+    .version('1.1.0');
 
 interface CommonFlags {
     provider?: string;
@@ -134,6 +134,34 @@ program
         config.credentials[flags.provider] = { username: flags.username, accessKey: flags.accessKey };
         saveConfig(config);
         process.stdout.write(`Stored ${flags.provider} credentials in ${configPath()}\n`);
+    });
+
+program
+    .command('connect')
+    .description('Link this CLI to your browserbash.com dashboard (runs sync after each execution)')
+    .requiredOption('--key <key>', 'API key from https://browserbash.com/dashboard')
+    .option('--api-base <url>', 'override dashboard URL (self-hosted)')
+    .action((flags: { key: string; apiBase?: string }) => {
+        if (!/^bb_[a-f0-9]{40}$/.test(flags.key)) {
+            process.stderr.write('That does not look like a BrowserBash key (expected bb_<40 hex>). Generate one on your dashboard.\n');
+            process.exit(2);
+        }
+        const config = loadConfig();
+        config.apiKey = flags.key;
+        if (flags.apiBase) config.apiBase = flags.apiBase;
+        saveConfig(config);
+        process.stdout.write(`Connected. Runs will appear on ${config.apiBase ?? 'https://browserbash.com'}/dashboard\n`);
+    });
+
+program
+    .command('disconnect')
+    .description('Stop syncing runs to the dashboard')
+    .action(() => {
+        const config = loadConfig();
+        delete config.apiKey;
+        delete config.apiBase;
+        saveConfig(config);
+        process.stdout.write('Disconnected — runs stay on this machine.\n');
     });
 
 program

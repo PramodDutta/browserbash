@@ -315,3 +315,150 @@
     font-size: 11px;
     background: var(--bg-soft);
 }
+
+/* connect card */
+.connect {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.connect__note {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+}
+
+.connect__note--warn {
+    color: var(--accent-deep);
+    font-weight: 600;
+}
+
+.connect__cmd {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--terminal-bg);
+    color: var(--terminal-ink);
+    padding: 10px 12px;
+    flex-wrap: wrap;
+}
+
+.connect__cmd code {
+    font-size: 11.5px;
+    word-break: break-all;
+}
+
+.connect__status {
+    font-size: 13.5px;
+}
+
+.connect__dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    background: var(--ok);
+    margin-right: 6px;
+}
+
+.connect__actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.connect__btn {
+    font-size: 11px;
+    padding: 8px 14px;
+    width: fit-content;
+}
+
+.connect__revoke {
+    background: none;
+    border: none;
+    color: var(--err);
+    font-size: 13px;
+    text-decoration: underline dotted;
+    padding: 0;
+}
+
+/* runs */
+.dash__runs {
+    margin-bottom: 32px;
+}
+
+.dash__runs h2 {
+    font-size: 20px;
+    margin: 10px 0 16px;
+}
+
+.runs__empty {
+    padding: 20px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.runs__empty code {
+    background: var(--terminal-bg);
+    color: var(--terminal-ink);
+    padding: 8px 10px;
+    font-size: 12px;
+    word-break: break-all;
+}
+
+.runs__table {
+    font-size: 13.5px;
+}
+
+.runs__row {
+    cursor: pointer;
+}
+
+.runs__row:hover td {
+    background: var(--bg-soft);
+}
+
+.runs__when {
+    white-space: nowrap;
+    color: var(--ink-soft);
+}
+
+.runs__obj {
+    max-width: 380px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.runs__meta {
+    color: var(--ink-soft);
+    font-size: 12px;
+}
+
+.runs__badge {
+    font-family: var(--font-pixel), monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid var(--ink);
+}
+
+.runs__badge--passed { background: rgba(47, 191, 113, 0.2); }
+.runs__badge--failed { background: rgba(255, 107, 107, 0.25); }
+.runs__badge--error { background: rgba(255, 200, 87, 0.3); }
+.runs__badge--timeout { background: var(--bg-soft); }
+
+.runs__detail pre {
+    background: var(--terminal-bg);
+    color: var(--ok);
+    padding: 12px 14px;
+    font-size: 12px;
+    overflow-x: auto;
+}
+
+.dash__cards--two {
+    grid-template-columns: 1fr;
+    max-width: 560px;
+}

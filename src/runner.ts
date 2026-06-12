@@ -4,6 +4,7 @@ import { runStagehandAgent, stagehandSupports } from './engine/stagehand.js';
 import { resolveModel } from './llm.js';
 import { Reporter } from './output.js';
 import { getProvider } from './providers/index.js';
+import { syncRun } from './sync.js';
 import type { RunOptions, RunResult } from './types.js';
 
 /**
@@ -47,6 +48,10 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
         provider: options.provider,
         test_url: result.testUrl,
     });
+
+    // Opt-in dashboard sync — no-op without `browserbash connect`.
+    await syncRun(config, options.objective, result, options.variables, options.provider, model, (msg) => reporter.info(msg));
+
     return result;
 }
 

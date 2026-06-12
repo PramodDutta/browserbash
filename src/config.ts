@@ -16,6 +16,9 @@ export interface BrowserBashConfig {
     maxSteps: number;
     timeoutSec: number;
     credentials: Record<string, ProviderCredentials>;
+    /** Dashboard sync (browserbash connect) — absent means never phone home. */
+    apiKey?: string;
+    apiBase?: string;
 }
 
 const DEFAULTS: BrowserBashConfig = {

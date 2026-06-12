@@ -4,6 +4,8 @@ import { UserButton } from '@clerk/nextjs';
 import { Bo } from '@/components/Bo';
 import { Onboarding } from '@/components/Onboarding';
 import { BackendPicker } from '@/components/BackendPicker';
+import { ConnectCard } from '@/components/ConnectCard';
+import { RunsTable } from '@/components/RunsTable';
 import { CopyButton } from '@/components/CopyButton';
 import { Terminal, type DemoRecording } from '@/components/Terminal';
 import { sql } from '@/lib/db';
@@ -113,6 +115,16 @@ export default async function Dashboard() {
                             <CopyButton text={INSTALL} />
                         </div>
                     </div>
+                    <ConnectCard />
+                </section>
+
+                <section className="dash__runs">
+                    <p className="section-tag">your runs</p>
+                    <h2>Every verdict, synced from your terminal</h2>
+                    <RunsTable />
+                </section>
+
+                <section className="dash__cards dash__cards--two">
                     <div className="pixel-card dash__backend">
                         <span className="dash__lbl">pick your brain</span>
                         <BackendPicker />
