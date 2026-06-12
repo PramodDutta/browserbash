@@ -108,7 +108,7 @@ export default async function Dashboard() {
                         )}
                     </div>
                     <div className="pixel-card dash__stat">
-                        <span className="dash__num">v1.1.0</span>
+                        <span className="dash__num">v1.1.1</span>
                         <span className="dash__lbl">latest CLI on npm</span>
                         <div className="dash__install">
                             <code>{INSTALL}</code>
