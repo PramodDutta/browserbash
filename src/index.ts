@@ -23,7 +23,7 @@ const program = new Command();
 program
     .name('browserbash')
     .description('Vendor-independent natural-language browser automation CLI')
-    .version('1.1.1');
+    .version('1.2.0');
 
 interface CommonFlags {
     provider?: string;
@@ -38,6 +38,7 @@ interface CommonFlags {
     url?: string;
     model?: string;
     name?: string;
+    record?: boolean;
 }
 
 function addRunFlags(cmd: Command): Command {
@@ -52,7 +53,8 @@ function addRunFlags(cmd: Command): Command {
         .option('--variables-file <path>', 'variables JSON file')
         .option('--cdp-endpoint <url>', 'CDP endpoint (implies/required by --provider cdp)')
         .option('--url <url>', 'start URL to open before the agent begins')
-        .option('--model <id>', 'Anthropic model id override');
+        .option('--model <id>', 'Anthropic model id override')
+        .option('--record', 'capture a session recording (screenshot; video + trace on builtin engine)');
 }
 
 function exitWith(status: RunStatus): never {
@@ -121,6 +123,7 @@ addRunFlags(
             cdpEndpoint: flags.cdpEndpoint,
             startUrl: flags.url,
             model: flags.model,
+            record: flags.record ?? false,
             name: flags.name,
         });
         exitWith(result.status);
@@ -150,6 +153,7 @@ addRunFlags(
             cdpEndpoint: flags.cdpEndpoint,
             startUrl: flags.url,
             model: flags.model,
+            record: flags.record ?? false,
         });
         exitWith(result.status);
     } catch (err) {

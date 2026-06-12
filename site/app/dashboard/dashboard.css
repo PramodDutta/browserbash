@@ -462,3 +462,6 @@
     grid-template-columns: 1fr;
     max-width: 560px;
 }
+
+.runs__rec { text-align: center; font-size: 15px; }
+.runs__open a { color: var(--accent-deep); font-size: 12px; white-space: nowrap; }

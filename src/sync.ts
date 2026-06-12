@@ -1,8 +1,44 @@
+import { readFile } from 'node:fs/promises';
 import type { BrowserBashConfig } from './config.js';
-import type { RunResult, VariableValue } from './types.js';
+import type { RunArtifacts, RunResult, VariableValue } from './types.js';
 import { maskSecretRecord, maskSecrets } from './variables.js';
 
-export const CLI_VERSION = '1.1.1';
+export const CLI_VERSION = '1.2.0';
+
+const ARTIFACT_TYPES: Array<{ kind: 'screenshot' | 'video' | 'trace'; contentType: string }> = [
+    { kind: 'screenshot', contentType: 'image/png' },
+    { kind: 'video', contentType: 'video/webm' },
+    { kind: 'trace', contentType: 'application/zip' },
+];
+
+async function uploadArtifacts(
+    base: string,
+    apiKey: string,
+    runId: number,
+    artifacts: RunArtifacts,
+    log: (msg: string) => void,
+): Promise<void> {
+    for (const { kind, contentType } of ARTIFACT_TYPES) {
+        const path = artifacts[kind];
+        if (!path) continue;
+        try {
+            const data = await readFile(path);
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 30_000);
+            const res = await fetch(`${base}/api/runs/${runId}/artifacts?kind=${kind}`, {
+                method: 'POST',
+                signal: controller.signal,
+                headers: { 'Content-Type': contentType, Authorization: `Bearer ${apiKey}` },
+                body: data,
+            });
+            clearTimeout(timer);
+            if (res.ok) log(`Uploaded ${kind} to dashboard`);
+            else log(`${kind} upload skipped: ${res.status}`);
+        } catch {
+            log(`${kind} upload skipped (network/file)`);
+        }
+    }
+}
 
 /**
  * Pushes a finished run to the BrowserBash dashboard. Strictly opt-in:
@@ -25,7 +61,9 @@ export async function syncRun(
 
     try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 4000);
+        // 10s, not 4s: a fresh CLI process hits cold TLS + a serverless cold
+        // start. Still fire-and-forget — a slow sync never blocks the verdict.
+        const timer = setTimeout(() => controller.abort(), 10_000);
         const res = await fetch(`${base}/api/runs`, {
             method: 'POST',
             signal: controller.signal,
@@ -47,6 +85,10 @@ export async function syncRun(
         clearTimeout(timer);
         if (res.ok) {
             log(`Run synced to dashboard (${base}/dashboard)`);
+            const data = (await res.json().catch(() => ({}))) as { runId?: number };
+            if (data.runId && result.artifacts) {
+                await uploadArtifacts(base, apiKey, data.runId, result.artifacts, log);
+            }
         } else {
             log(`Dashboard sync skipped: ${res.status} — check 'browserbash connect'`);
         }

@@ -67,6 +67,7 @@ async function runWithStagehand(options: RunOptions, reporter: Reporter, default
         model: options.model ?? defaultModel,
         cdpEndpoint: options.cdpEndpoint,
         startUrl: options.startUrl,
+        record: options.record,
     });
 }
 

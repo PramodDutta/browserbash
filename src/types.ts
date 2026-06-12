@@ -22,6 +22,14 @@ export interface RunOptions {
     cdpEndpoint?: string;
     startUrl?: string;
     model?: string;
+    /** Capture a session recording (screenshot always; video + trace on builtin). */
+    record?: boolean;
+}
+
+export interface RunArtifacts {
+    screenshot?: string; // local file path
+    video?: string;
+    trace?: string;
 }
 
 export interface VariableValue {
@@ -55,4 +63,5 @@ export interface RunResult {
     stepsExecuted: number;
     durationMs: number;
     testUrl?: string;
+    artifacts?: RunArtifacts;
 }

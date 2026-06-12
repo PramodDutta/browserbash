@@ -1,6 +1,9 @@
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { Stagehand } from '@browserbasehq/stagehand';
 import type { Reporter } from '../output.js';
-import type { RunResult, VariableValue } from '../types.js';
+import type { RunArtifacts, RunResult, VariableValue } from '../types.js';
 import { substitute } from '../variables.js';
 
 export interface StagehandRunOptions {
@@ -14,6 +17,7 @@ export interface StagehandRunOptions {
     model: string;
     cdpEndpoint?: string;
     startUrl?: string;
+    record?: boolean;
 }
 
 /** Providers the Stagehand engine can drive directly. */
@@ -107,6 +111,21 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
     await stagehand.init();
     options.reporter.info('Engine: stagehand (MIT, stagehand.dev)');
 
+    const artifacts: RunArtifacts = {};
+    const artifactDir = options.record ? mkdtempSync(join(tmpdir(), 'bb-rec-')) : '';
+    async function capture(): Promise<void> {
+        if (!options.record) return;
+        try {
+            const path = join(artifactDir, 'screenshot.png');
+            await (stagehand as unknown as { page: { screenshot(o: { path: string }): Promise<unknown> } })
+                .page.screenshot({ path });
+            artifacts.screenshot = path;
+            options.reporter.info('Captured final screenshot (--record)');
+        } catch {
+            options.reporter.info('Screenshot capture skipped (page unavailable)');
+        }
+    }
+
     try {
         const instruction = [
             options.startUrl ? `Start by navigating to ${options.startUrl}.` : '',
@@ -139,14 +158,17 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
             });
         }
 
+        await capture();
         return {
             status: result.success ? 'passed' : 'failed',
             summary: result.message,
             finalState: extractFinalState(result.message, objective),
             stepsExecuted: result.actions.length,
             durationMs: Date.now() - start,
+            artifacts: options.record ? artifacts : undefined,
         };
     } catch (err) {
+        await capture();
         if ((err as Error).message === '__timeout__') {
             return {
                 status: 'timeout',
@@ -154,6 +176,7 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
                 finalState: {},
                 stepsExecuted: 0,
                 durationMs: Date.now() - start,
+                artifacts: options.record ? artifacts : undefined,
             };
         }
         throw err;

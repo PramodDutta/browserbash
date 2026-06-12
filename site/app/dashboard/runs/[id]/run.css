@@ -1,0 +1,108 @@
+.run {
+    padding-top: 28px;
+    padding-bottom: 80px;
+    max-width: 880px;
+}
+
+.run__back {
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-decoration: none;
+}
+
+.run__head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0 24px;
+}
+
+.run__head h1 {
+    font-size: clamp(26px, 4vw, 36px);
+    letter-spacing: -0.015em;
+}
+
+.run__time {
+    font-size: 13px;
+    color: var(--ink-soft);
+}
+
+.run__objective, .run__state {
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.run__objective p {
+    font-size: 16px;
+    font-style: italic;
+}
+
+.run__meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+}
+
+.run__state pre {
+    background: var(--terminal-bg);
+    color: var(--ok);
+    padding: 12px 14px;
+    font-size: 13px;
+    overflow-x: auto;
+}
+
+.run__artifacts {
+    margin-top: 8px;
+}
+
+.run__art, .run__noart {
+    padding: 16px 18px;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.run__noart code {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    padding: 1px 6px;
+    font-size: 12.5px;
+}
+
+.run__cmd {
+    background: var(--terminal-bg) !important;
+    color: var(--terminal-ink) !important;
+    border: none !important;
+    padding: 10px 12px !important;
+    word-break: break-all;
+}
+
+.run__video {
+    width: 100%;
+    border: 2px solid var(--ink);
+    background: #000;
+}
+
+.run__shot {
+    width: 100%;
+    border: 2px solid var(--ink);
+    display: block;
+}
+
+.run__trace p {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+}
+
+.run__trace a.pixel-btn {
+    width: fit-content;
+    font-size: 11px;
+    padding: 8px 14px;
+}

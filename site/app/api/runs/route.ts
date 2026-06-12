@@ -37,13 +37,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
     const r = parsed.data;
 
-    await sql()`
+    const inserted = (await sql()`
         INSERT INTO runs (user_id, objective, status, duration_ms, steps_executed, provider, model, final_state, cli_version)
         VALUES (${userId}, ${r.objective}, ${r.status}, ${r.duration_ms}, ${r.steps_executed},
-                ${r.provider ?? null}, ${r.model ?? null}, ${JSON.stringify(r.final_state ?? {})}::jsonb, ${r.cli_version ?? null})`;
+                ${r.provider ?? null}, ${r.model ?? null}, ${JSON.stringify(r.final_state ?? {})}::jsonb, ${r.cli_version ?? null})
+        RETURNING id`) as Array<{ id: number }>;
     await sql()`UPDATE api_keys SET last_used_at = now(), cli_version = ${r.cli_version ?? null} WHERE key_hash = ${hash}`;
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, runId: inserted[0]?.id });
 }
 
 /** Dashboard list — authenticated by Clerk session, returns only the caller's runs. */
@@ -53,6 +54,7 @@ export async function GET(): Promise<NextResponse> {
 
     const rows = (await sql()`
         SELECT id, objective, status, duration_ms, steps_executed, provider, model, final_state, cli_version,
+               screenshot_url, video_url, trace_url,
                to_char(created_at, 'YYYY-MM-DD HH24:MI') AS created_at
         FROM runs WHERE user_id = ${user.id} ORDER BY id DESC LIMIT 100`) as Array<Record<string, unknown>>;
 
