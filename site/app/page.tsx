@@ -175,9 +175,10 @@ export default async function Page() {
             <section className="section container" id="why">
                 <Reveal>
                     <p className="section-tag">why browserbash</p>
-                    <h2>No account. No meter. No lock-in.</h2>
+                    <h2>Free. Open source. No lock-in.</h2>
                     <p className="section__sub">
-                        Other AI browser tools want a signup, a credit balance, or their cloud. BrowserBash wants an objective.
+                        Other AI browser tools want a credit balance or their cloud. BrowserBash is free and open
+                        source — run it with no account, no API keys, no meter. An account is optional, only for the dashboard.
                     </p>
                 </Reveal>
                 <div className="features">

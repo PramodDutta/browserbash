@@ -9,8 +9,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
     title: 'Log in — BrowserBash',
     description: 'Log in to your free BrowserBash dashboard to see your runs, recordings and per-run replays.',
-    alternates: { canonical: '/sign-in' },
-    robots: { index: false },
+    robots: { index: false, follow: true },
 };
 
 export default function Page() {

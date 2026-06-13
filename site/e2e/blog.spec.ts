@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { getPosts } from '../lib/blog';
+
+const POST_COUNT = getPosts().length;
 
 test.describe('blog', () => {
-    test('index lists all 10 posts', async ({ page }) => {
+    test('index lists every post, grouped into category sections', async ({ page }) => {
         await page.goto('/blog');
-        await expect(page.getByRole('heading', { level: 1 })).toContainText('Field notes');
-        await expect(page.locator('.blog-card')).toHaveCount(10);
+        await expect(page.getByRole('heading', { level: 1 })).toContainText('Natural language browser automation');
+        await expect(page.locator('.blog-card')).toHaveCount(POST_COUNT);
+        await expect(page.locator('.blog-section').first()).toBeVisible();
     });
 
     test('post renders markdown, FAQ schema and related links', async ({ page }) => {

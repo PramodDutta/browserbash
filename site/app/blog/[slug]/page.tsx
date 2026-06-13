@@ -37,7 +37,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
     const html = await marked.parse(post.content);
     const faqs = extractFaqs(post.content);
-    const related = getPosts().filter((p) => p.slug !== post.slug && p.category === post.category).slice(0, 3);
+    const minutes = Math.max(1, Math.round(post.content.split(/\s+/).filter(Boolean).length / 220));
+
+    // Related: prefer same category, then fill with most-recent others so every post links out.
+    const others = getPosts().filter((p) => p.slug !== post.slug);
+    const sameCat = others.filter((p) => p.category === post.category);
+    const related = [...sameCat, ...others.filter((p) => p.category !== post.category)].slice(0, 3);
 
     const articleLd = {
         '@context': 'https://schema.org',
@@ -45,9 +50,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         headline: post.title,
         description: post.description,
         datePublished: post.date,
-        author: { '@type': 'Organization', name: 'The Testing Academy' },
+        dateModified: post.date,
+        articleSection: post.category,
+        wordCount: post.content.split(/\s+/).filter(Boolean).length,
+        author: { '@type': 'Organization', name: 'The Testing Academy', url: 'https://thetestingacademy.com' },
         publisher: { '@type': 'Organization', name: 'The Testing Academy' },
+        image: 'https://browserbash.com/og.png',
         mainEntityOfPage: `https://browserbash.com/blog/${post.slug}`,
+    };
+    const breadcrumbLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://browserbash.com' },
+            { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://browserbash.com/blog' },
+            { '@type': 'ListItem', position: 3, name: post.title, item: `https://browserbash.com/blog/${post.slug}` },
+        ],
     };
     const faqLd = faqs.length > 0 ? {
         '@context': 'https://schema.org',
@@ -62,6 +80,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     return (
         <>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
             {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
             <nav className="nav container">
@@ -80,10 +99,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </nav>
 
             <main className="container post">
+                <nav className="post__crumbs" aria-label="Breadcrumb">
+                    <a href="/">Home</a> <span>›</span> <a href="/blog">Blog</a> <span>›</span>{' '}
+                    <span className="post__crumbs-current">{post.title}</span>
+                </nav>
                 <header className="post__head">
                     <div className="blog-card__meta">
                         <span className={`blog-card__cat blog-card__cat--${post.category}`}>{post.category}</span>
                         <time dateTime={post.date}>{post.date}</time>
+                        <span>· {minutes} min read</span>
+                        <span>· The Testing Academy</span>
                     </div>
                     <h1>{post.title}</h1>
                     <p className="post__desc">{post.description}</p>

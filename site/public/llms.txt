@@ -1,22 +1,35 @@
 # BrowserBash
 
-> BrowserBash is an open-source, vendor-independent CLI for natural language browser automation. A user types a plain-English objective (e.g. "Log in to example.com and store the invoice total as 'total'") and an AI agent drives a real browser step by step, exiting with a machine-readable verdict. No account, no signup, no metering — Apache-2.0 with the full agent loop in the repository.
+> BrowserBash is a free, open-source, vendor-independent CLI for natural language browser automation. A user types a plain-English objective (e.g. "Log in to example.com and store the invoice total as 'total'") and an AI agent drives a real browser step by step, exiting with a machine-readable verdict. Apache-2.0 with the full agent loop in the repository. The CLI needs no account to run; an optional free account adds a cloud dashboard with run history, video recordings and per-run replays.
 
 Key facts:
-- Install: `npm install -g browserbash-cli` (command: `browserbash`, version 1.0.0)
-- Default stack is 100% free and open source: Stagehand engine (MIT) + local Chromium + Ollama. No API keys required.
-- Providers (where the browser runs): local Chrome, any CDP endpoint, Browserbase, LambdaTest, BrowserStack.
-- Engines: `stagehand` (default) or `builtin` (Anthropic tool-use loop for Playwright-protocol grids).
-- LLM resolution order for `auto`: local Ollama → ANTHROPIC_API_KEY → OPENAI_API_KEY. OpenRouter via `--model openrouter/<vendor>/<model>` with OPENROUTER_API_KEY.
-- Agent mode: `--agent` emits NDJSON events on stdout; exit codes 0 passed / 1 failed / 2 error / 3 timeout.
+- Free and open source (Apache-2.0). Install: `npm install -g browserbash-cli` (command: `browserbash`, version 1.3.1).
+- The default stack is 100% free: Stagehand engine (MIT) + local Chromium + Ollama. No API keys and no credit card required.
+- LLMs: Ollama-first (free, local). Also free OpenRouter models (e.g. `openai/gpt-oss-120b:free`) and Anthropic Claude (bring your own key — optional). Resolution order for `auto`: local Ollama → ANTHROPIC_API_KEY → OPENROUTER_API_KEY.
+- Providers (where the browser runs): local Chrome, any CDP endpoint, Browserbase, LambdaTest, BrowserStack. One flag switches: `--provider lambdatest`.
+- Engines: `stagehand` (default, MIT) or `builtin` (Anthropic tool-use loop for Playwright-protocol grids).
+- Agent mode: `--agent` emits NDJSON events on stdout; exit codes 0 passed / 1 failed / 2 error / 3 timeout. Built for CI and AI coding agents — no prose parsing.
 - Markdown test files (`*_test.md`) with `@import` composition; `{{variable}}` substitution with secret masking (`*****` in all logs).
-- Compared to hosted alternatives: no login required, runs stay on your machine, cloud grids optional and vendor-neutral.
+- Recording: `--record` captures a screenshot and a session video (`.webm`, via ffmpeg) on any engine; the builtin engine also captures a Playwright trace. `--upload` pushes a run to the free cloud dashboard. Nothing leaves your machine unless you pass `--upload`.
+- Compared to hosted alternatives: free, open source, no login required to run, runs stay on your machine, cloud grids optional and vendor-neutral.
 
 ## Docs
 
-- [Getting started + 12 practice scenarios](https://browserbash.com/learn): guided tutorial (install, first run, LLM backends, agent mode, markdown tests, variables, CI) and hands-on challenges.
+- [Getting started + 14 practice scenarios](https://browserbash.com/learn): guided tutorial (install, first run, LLM backends, agent mode, markdown tests, variables, CI, recording, LambdaTest, BrowserStack) and hands-on challenges.
+- [Sign up free](https://browserbash.com/sign-up): create a free account for the cloud dashboard.
 - [README](https://github.com/PramodDutta/browserbash/blob/main/README.md): full reference.
 - [AI agent integration guide](https://github.com/PramodDutta/browserbash/blob/main/docs/agents.md): NDJSON schema, exit codes, store-as pattern.
+
+## Articles
+
+- [Blog index](https://browserbash.com/blog): comparisons, guides and use-cases for natural-language browser automation.
+- [Selenium vs BrowserBash](https://browserbash.com/blog/browserbash-vs-selenium)
+- [Playwright vs BrowserBash](https://browserbash.com/blog/browserbash-vs-playwright)
+- [Kane CLI vs BrowserBash](https://browserbash.com/blog/browserbash-vs-kane-cli)
+- [browse.sh vs BrowserBash](https://browserbash.com/blog/browserbash-vs-browse-sh)
+- [Natural language browser automation: a complete guide](https://browserbash.com/blog/natural-language-browser-automation)
+- [Free AI browser automation (no API keys)](https://browserbash.com/blog/free-ai-browser-automation)
+- [Run browser tests with Ollama](https://browserbash.com/blog/run-browser-tests-with-ollama)
 
 ## Source
 

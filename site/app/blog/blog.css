@@ -64,9 +64,41 @@
 .blog-card__cat--security { background: rgba(255, 107, 107, 0.18); }
 .blog-card__cat--llm { background: rgba(255, 92, 26, 0.15); }
 .blog-card__cat--comparison { background: rgba(120, 120, 255, 0.15); }
+.blog-card__cat--alternatives { background: rgba(120, 120, 255, 0.15); }
+.blog-card__cat--guide { background: rgba(255, 200, 87, 0.2); }
+.blog-card__cat--use-case { background: rgba(47, 191, 113, 0.13); }
+.blog-card__cat--testing { background: rgba(255, 92, 26, 0.12); }
 .blog-card__cat--agents { background: rgba(60, 200, 230, 0.15); }
 
-.blog-card h2 {
+.post__crumbs {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 18px 0 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+.post__crumbs a { color: var(--accent-deep); text-decoration: none; }
+.post__crumbs-current { color: var(--ink-soft); max-width: 380px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* category sections */
+.blog-section { margin-bottom: 40px; }
+
+.blog-section__title {
+    font-size: 22px;
+    margin: 0 0 18px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ink);
+}
+
+.blog-section__title span {
+    font-family: var(--font-pixel), monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+.blog-card h2, .blog-card h3 {
     font-size: 19px;
     line-height: 1.25;
 }

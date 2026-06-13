@@ -9,8 +9,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
     title: 'Sign up free — BrowserBash',
     description: 'Create a free BrowserBash account. Open-source, natural-language browser automation — run history, video recordings and per-run replays on your dashboard.',
-    alternates: { canonical: '/sign-up' },
-    robots: { index: false },
+    robots: { index: false, follow: true },
 };
 
 export default function Page() {

@@ -9,13 +9,13 @@ const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', displ
 
 export const metadata: Metadata = {
     metadataBase: new URL('https://browserbash.com'),
-    title: 'BrowserBash — plain-English browser automation CLI',
+    title: 'BrowserBash — free, open-source plain-English browser automation CLI',
     description:
-        'Open-source CLI that turns plain English into real browser automation. Local Chrome, LambdaTest, BrowserStack, Browserbase or any CDP endpoint. Ollama-first — no API keys required.',
+        'Free, open-source CLI that turns plain English into real browser automation. Runs on free local (Ollama) or free OpenRouter models — no API keys, no credit card. Local Chrome, LambdaTest, BrowserStack, Browserbase or any CDP endpoint.',
     alternates: { canonical: '/' },
     openGraph: {
         title: 'BrowserBash — natural language browser automation CLI',
-        description: 'Plain English in. Real browser out. Open-source AI browser testing CLI — no account, no API keys required.',
+        description: 'Plain English in. Real browser out. Free, open-source AI browser testing CLI — no API keys needed to run, no credit card.',
         url: 'https://browserbash.com',
         siteName: 'BrowserBash',
         images: [{ url: '/og.png', width: 1200, height: 630, alt: 'BrowserBash — plain English in, real browser out' }],
@@ -30,9 +30,9 @@ const jsonLd = {
     name: 'BrowserBash',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'macOS, Linux, Windows',
-    softwareVersion: '1.3.0',
+    softwareVersion: '1.3.1',
     datePublished: '2026-06-12',
-    description: 'Vendor-independent natural language browser automation CLI. An AI agent drives a real browser from a plain-English objective — open source, Ollama-first, no account required.',
+    description: 'Free, open-source natural language browser automation CLI. An AI agent drives a real browser from a plain-English objective — Ollama-first and free OpenRouter models, no API keys needed to run.',
     url: 'https://browserbash.com',
     downloadUrl: 'https://www.npmjs.com/package/browserbash-cli',
     installUrl: 'https://www.npmjs.com/package/browserbash-cli',
