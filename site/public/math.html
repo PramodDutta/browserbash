@@ -41,7 +41,11 @@
   .barwrap{display:flex;align-items:center;gap:10px;justify-content:flex-end}
   .mo{font-weight:800;white-space:nowrap}
   tr.self td{background:rgba(47,191,113,.10)}
-  tr.tested .mname::after{content:" ✓ tested";color:var(--ok);font-size:11px;font-weight:700}
+  tr.failrow td{opacity:.7}
+  .rel{font-size:10px;font-weight:700;padding:1px 6px;border:1px solid var(--ink);white-space:nowrap}
+  .rel.ok{background:rgba(47,191,113,.2);color:#08361d}
+  .rel.bad{background:rgba(255,107,107,.25);color:#7a0c0c}
+  .rel.unk{background:var(--bg);color:var(--soft)}
   .save{color:var(--accent-deep);font-weight:700}
   .callout{background:rgba(47,191,113,.10);border:2px solid var(--ok);box-shadow:5px 5px 0 #bfe8cf}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -91,8 +95,9 @@
     <ul style="margin:0;font-size:14px">
       <li><strong>DeepSeek V4 Flash</strong> — login passed (112s) and the full 20-step checkout passed <strong>first try in 88s</strong>, using batched form-fill. <span class="pill">in $0.098/M · out $0.196/M · 1M context</span></li>
       <li><strong>gpt-oss-120b (free)</strong> — passed too, but slower and needed a retry on checkout.</li>
+      <li><strong>Tencent HY3 Preview</strong> — cheapest on price, but <strong>failed</strong>: it returned no usable tool calls and timed out. Cheapest ≠ usable.</li>
     </ul>
-    <p class="tiny" style="margin-top:10px;color:var(--ink)">So the cheap tiers below aren't just cheaper on paper — they actually drive the agent to a green verdict.</p>
+    <p class="tiny" style="margin-top:10px;color:var(--ink)"><strong>The lesson:</strong> a low price (or a "supports tools" flag) doesn't mean a model can drive an agent. Always test before you trust the row — the "drives the agent" badges above are from real BrowserBash runs.</p>
   </div>
 
   <div class="grid2">
@@ -137,8 +142,10 @@ const MODELS = [
   { name:"Gemini 2.5 Flash",       tag:"Google · cheap",              in:0.30,  out:2.50 },
   { name:"GPT-4o mini",            tag:"OpenAI · cheap",              in:0.15,  out:0.60 },
   { name:"Llama 3.3 70B",          tag:"Meta · open",                 in:0.10,  out:0.32 },
-  { name:"DeepSeek V4 Flash",      tag:"DeepSeek · 1M ctx",           in:0.098, out:0.196, tested:true },
+  { name:"Gemini 2.5 Flash-Lite",  tag:"Google · cheapest Gemini",    in:0.10,  out:0.40, rel:"untested" },
+  { name:"DeepSeek V4 Flash",      tag:"DeepSeek · 1M ctx",           in:0.098, out:0.196, rel:"pass" },
   { name:"Qwen3-32B (Coin)",       tag:"Alibaba Qwen · cheap",        in:0.08,  out:0.28 },
+  { name:"Tencent HY3 Preview",    tag:"Tencent · preview",           in:0.063, out:0.21, rel:"fail" },
   { name:"gpt-oss-120b (OpenGPT)", tag:"OpenAI open model",           in:0.039, out:0.18 },
   { name:"gpt-oss-20b (OpenGPT)",  tag:"OpenAI open model · tiny",    in:0.029, out:0.14 },
   { name:"Gemma 3 27B — self-hosted", tag:"Mac M4 · 128 GB · local", self:true, monthlyFixed:145 }, // ~$130 hw amort + ~$15 power
@@ -176,8 +183,11 @@ function compute(){
     const priceIn  = c.self ? "—" : "$"+c.in.toFixed(3);
     const priceOut = c.self ? "—" : "$"+c.out.toFixed(3);
     const perTest  = c.self ? "≈$0" : fmt(c.perTest);
-    return `<tr class="${c.self?'self':''} ${c.tested?'tested':''}">
-      <td><span class="mname">${c.name}</span><br/><span class="mtag">${c.tag}</span></td>
+    const relBadge = c.rel === "pass" ? '<span class="rel ok">✓ drives the agent</span>'
+                   : c.rel === "fail" ? '<span class="rel bad">✗ failed to drive</span>'
+                   : c.rel === "untested" ? '<span class="rel unk">untested</span>' : '';
+    return `<tr class="${c.self?'self':''} ${c.rel==='fail'?'failrow':''}">
+      <td><span class="mname">${c.name}</span> ${relBadge}<br/><span class="mtag">${c.tag}</span></td>
       <td>${priceIn}</td><td>${priceOut}</td>
       <td>${perTest}</td>
       <td>${fmt(c.day)}</td>
