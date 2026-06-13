@@ -40,7 +40,7 @@
     "homepage": "https://browserbash.com",
     "bugs": "https://github.com/PramodDutta/browserbash/issues",
     "engines": {
-        "node": ">=18"
+        "node": ">=18 <=22"
     },
     "dependencies": {
         "@anthropic-ai/sdk": "^0.104.1",
