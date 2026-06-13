@@ -31,6 +31,8 @@ Key facts:
 - [Free AI browser automation (no API keys)](https://browserbash.com/blog/free-ai-browser-automation)
 - [Run browser tests with Ollama](https://browserbash.com/blog/run-browser-tests-with-ollama)
 
+- [RSS feed](https://browserbash.com/feed.xml): subscribe to new articles.
+
 ## Source
 
 - [GitHub repository](https://github.com/PramodDutta/browserbash) (Apache-2.0)

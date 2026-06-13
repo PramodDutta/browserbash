@@ -23,9 +23,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             description: post.description,
             url: `https://browserbash.com/blog/${post.slug}`,
             siteName: 'BrowserBash',
-            images: [{ url: '/og.png', width: 1200, height: 630, alt: post.title }],
             type: 'article',
             publishedTime: post.date,
+            authors: ['Pramod Dutta'],
         },
     };
 }
@@ -40,9 +40,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     const minutes = Math.max(1, Math.round(post.content.split(/\s+/).filter(Boolean).length / 220));
 
     // Related: prefer same category, then fill with most-recent others so every post links out.
+    // Related: same-category first, then the pillar guides, then anything — 6 links
+    // so no article is an internal dead-end (helps crawl depth + link equity).
+    const PILLARS = ['natural-language-browser-automation', 'ai-browser-testing-cli', 'free-ai-browser-automation'];
     const others = getPosts().filter((p) => p.slug !== post.slug);
     const sameCat = others.filter((p) => p.category === post.category);
-    const related = [...sameCat, ...others.filter((p) => p.category !== post.category)].slice(0, 3);
+    const pillars = others.filter((p) => PILLARS.includes(p.slug));
+    const seen = new Set<string>();
+    const related = [...sameCat, ...pillars, ...others]
+        .filter((p) => !seen.has(p.slug) && (seen.add(p.slug), true))
+        .slice(0, 6);
 
     const articleLd = {
         '@context': 'https://schema.org',
@@ -53,9 +60,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         dateModified: post.date,
         articleSection: post.category,
         wordCount: post.content.split(/\s+/).filter(Boolean).length,
-        author: { '@type': 'Organization', name: 'The Testing Academy', url: 'https://thetestingacademy.com' },
-        publisher: { '@type': 'Organization', name: 'The Testing Academy' },
-        image: 'https://browserbash.com/og.png',
+        author: { '@type': 'Person', name: 'Pramod Dutta', url: 'https://thetestingacademy.com' },
+        publisher: { '@type': 'Organization', name: 'The Testing Academy', '@id': 'https://browserbash.com/#org' },
+        image: `https://browserbash.com/blog/${post.slug}/opengraph-image`,
         mainEntityOfPage: `https://browserbash.com/blog/${post.slug}`,
     };
     const breadcrumbLd = {
@@ -108,7 +115,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         <span className={`blog-card__cat blog-card__cat--${post.category}`}>{post.category}</span>
                         <time dateTime={post.date}>{post.date}</time>
                         <span>· {minutes} min read</span>
-                        <span>· The Testing Academy</span>
+                        <span>· by Pramod Dutta</span>
                     </div>
                     <h1>{post.title}</h1>
                     <p className="post__desc">{post.description}</p>

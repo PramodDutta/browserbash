@@ -15,16 +15,17 @@ async function gotoHydrated(page: Page): Promise<void> {
 test.describe('landing page', () => {
     test('renders hero, demo terminal and sections', async ({ page }) => {
         await page.goto('/');
-        await expect(page.getByRole('heading', { level: 1 })).toContainText('Plain English in');
-        await expect(page.locator('.hero__install code')).toContainText('npm install -g browserbash-cli');
+        // Both A/B variants are in the static DOM; assert against the visible control (A).
+        await expect(page.locator('.hero__copy--a h1')).toContainText('Plain English in');
+        await expect(page.locator('.hero__copy--a .hero__install code')).toContainText('npm install -g browserbash-cli');
         await expect(page.locator('#demo .terminal')).toBeVisible();
         await expect(page.locator('#features .feature')).toHaveCount(6);
     });
 
     test('hero CTA and nav route to the free sign-up / log-in', async ({ page }) => {
         await page.goto('/');
-        const cta = page.locator('.hero__cta-go');
-        // Default (no cookie) is variant A; CTA carries the A/B tag in the query.
+        // Both A/B variants are in the static DOM; A (control) is visible by default.
+        const cta = page.locator('.hero__copy--a .hero__cta-go');
         await expect(cta).toContainText('Create your free account');
         await expect(cta).toHaveAttribute('href', /\/sign-up/);
         // Sign up + Log in are clearly visible in the nav.

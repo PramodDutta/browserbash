@@ -128,9 +128,16 @@
 }
 
 .hero__accent {
-    color: var(--accent);
+    /* --accent-deep (#d8430b ≈ 4.6:1 on cream) passes WCAG AA; --accent fails at ~2.9:1 */
+    color: var(--accent-deep);
     text-shadow: 3px 3px 0 var(--shadow);
 }
+
+/* A/B hero: both variants in static HTML; the layout's inline script flips
+   html.ab-b before paint so the right one shows with no flicker. */
+.hero__copy--b { display: none; }
+html.ab-b .hero__copy--a { display: none; }
+html.ab-b .hero__copy--b { display: block; }
 
 .hero__sub {
     font-size: 18px;

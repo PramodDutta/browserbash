@@ -3,16 +3,18 @@ import { Bricolage_Grotesque, Silkscreen, JetBrains_Mono } from 'next/font/googl
 import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 
+// Only the body font (LCP text) is preloaded; the pixel + mono faces are used
+// below/beside the fold, so skip their preload to free first-paint bandwidth.
 const body = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
-const pixel = Silkscreen({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-pixel', display: 'swap' });
-const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' });
+const pixel = Silkscreen({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-pixel', display: 'swap', preload: false });
+const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap', preload: false });
 
 export const metadata: Metadata = {
     metadataBase: new URL('https://browserbash.com'),
     title: 'BrowserBash — free, open-source plain-English browser automation CLI',
     description:
         'Free, open-source CLI that turns plain English into real browser automation. Runs on free local (Ollama) or free OpenRouter models — no API keys, no credit card. Local Chrome, LambdaTest, BrowserStack, Browserbase or any CDP endpoint.',
-    alternates: { canonical: '/' },
+    alternates: { canonical: '/', types: { 'application/rss+xml': '/feed.xml' } },
     openGraph: {
         title: 'BrowserBash — natural language browser automation CLI',
         description: 'Plain English in. Real browser out. Free, open-source AI browser testing CLI — no API keys needed to run, no credit card.',
@@ -53,15 +55,52 @@ const jsonLd = {
     license: 'https://www.apache.org/licenses/LICENSE-2.0',
 };
 
+// Site-wide brand graph: Organization + WebSite so search + AI engines can
+// anchor the brand entity (logo, sameAs, publisher) on every page.
+const orgLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+        {
+            '@type': 'Organization',
+            '@id': 'https://browserbash.com/#org',
+            name: 'BrowserBash',
+            url: 'https://browserbash.com',
+            logo: 'https://browserbash.com/icon.png',
+            description: 'Free, open-source natural language browser automation CLI by The Testing Academy.',
+            founder: { '@type': 'Person', name: 'Pramod Dutta', url: 'https://thetestingacademy.com' },
+            sameAs: [
+                'https://github.com/PramodDutta/browserbash',
+                'https://www.npmjs.com/package/browserbash-cli',
+                'https://thetestingacademy.com',
+            ],
+        },
+        {
+            '@type': 'WebSite',
+            '@id': 'https://browserbash.com/#website',
+            name: 'BrowserBash',
+            url: 'https://browserbash.com',
+            publisher: { '@id': 'https://browserbash.com/#org' },
+            inLanguage: 'en',
+        },
+    ],
+};
+
+// Pick the A/B hero variant before paint (cookie or ?v=), with no flicker, so
+// the landing can stay statically rendered + CDN-cached.
+const AB_SCRIPT =
+    "document.documentElement.classList.add('js');" +
+    "(function(){try{var p=new URLSearchParams(location.search).get('v');" +
+    "var c=document.cookie.match(/(?:^|; )bb_hero=([ab])/);" +
+    "var v=(p==='a'||p==='b')?p:(c?c[1]:'a');" +
+    "if(v==='b')document.documentElement.classList.add('ab-b');}catch(e){}})();";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     const page = (
         <html lang="en" className={`${body.variable} ${pixel.variable} ${mono.variable}`}>
             <body>
-                <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-                />
+                <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
                 {children}
             </body>
         </html>

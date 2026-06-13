@@ -29,6 +29,7 @@ const CATEGORY_ORDER: Array<{ key: string; label: string }> = [
     { key: 'ci', label: 'CI/CD' },
     { key: 'llm', label: 'LLMs & models' },
     { key: 'testing', label: 'Testing' },
+    { key: 'case-study', label: 'Case studies' },
     { key: 'security', label: 'Security' },
 ];
 
