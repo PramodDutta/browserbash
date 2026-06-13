@@ -59,14 +59,17 @@ export default async function Dashboard() {
 
                 <section className="dash__cards">
                     <div className="pixel-card dash__stat">
-                        <span className="dash__num">{plan === 'pro' ? 'Pro' : 'Free'}</span>
-                        <span className="dash__lbl">your plan</span>
+                        <span className="dash__num">Free</span>
+                        <span className="dash__lbl">open source · free to use</span>
                         {plan === 'pro' ? (
-                            <p className="dash__join">Cloud runs kept forever. Thanks for supporting BrowserBash 🔨</p>
-                        ) : (
+                            <p className="dash__join">Your cloud runs are kept beyond {RETENTION_DAYS} days. Thanks for supporting BrowserBash 🔨</p>
+                        ) : process.env.NEXT_PUBLIC_STRIPE_LINK ? (
                             <p className="dash__join">
-                                Cloud runs kept {RETENTION_DAYS} days. <a href="/pricing">Upgrade to keep them →</a>
+                                Cloud runs kept {RETENTION_DAYS} days.{' '}
+                                <a href={process.env.NEXT_PUBLIC_STRIPE_LINK} target="_blank" rel="noopener noreferrer">Keep my data →</a>
                             </p>
+                        ) : (
+                            <p className="dash__join">Cloud runs kept {RETENTION_DAYS} days. Longer retention coming soon.</p>
                         )}
                     </div>
                     <div className="pixel-card dash__stat">

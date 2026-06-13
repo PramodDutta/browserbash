@@ -1,0 +1,33 @@
+.authpage {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 48px;
+    padding-bottom: 64px;
+    gap: 10px;
+}
+
+.authpage__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-pixel), monospace;
+    font-size: 16px;
+    text-decoration: none;
+    margin-bottom: 18px;
+}
+
+.authpage__title {
+    font-size: clamp(24px, 4vw, 34px);
+    letter-spacing: -0.015em;
+    text-align: center;
+}
+
+.authpage__sub {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-bottom: 18px;
+    max-width: 420px;
+}

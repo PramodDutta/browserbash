@@ -37,8 +37,77 @@
     padding: 8px 14px;
 }
 
+.nav__auth {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav__login, .nav__signup {
+    font-size: 12px;
+    padding: 9px 16px;
+}
+
 @media (max-width: 720px) {
     .nav__links { display: none; }
+    .nav { gap: 14px; }
+    .nav__auth { margin-left: auto; }
+}
+
+/* --- 3-step quick start --- */
+.steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 8px;
+}
+
+@media (max-width: 880px) {
+    .steps { grid-template-columns: 1fr; }
+}
+
+.step__card {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    position: relative;
+}
+
+.step__n {
+    font-family: var(--font-pixel), monospace;
+    font-size: 13px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--shadow);
+}
+
+.step__card h3 { font-size: 17px; margin-top: 4px; }
+.step__card p { font-size: 13.5px; color: var(--ink-soft); }
+
+.step__card pre {
+    background: var(--terminal-bg);
+    color: var(--terminal-ink);
+    padding: 10px 12px;
+    font-size: 11.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-top: auto;
+}
+
+.step__cta {
+    font-size: 11px;
+    padding: 10px 16px;
+    width: fit-content;
+    margin-top: 10px;
 }
 
 /* --- hero --- */

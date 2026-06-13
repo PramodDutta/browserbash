@@ -52,7 +52,7 @@ export const TUTORIAL: TutorialSection[] = [
     {
         id: 'dashboard',
         title: 'Your dashboard: local (free) or cloud (optional)',
-        body: 'Every run is kept in a private on-disk store. browserbash dashboard opens a free local web dashboard — left panel of runs, main pane with the verdict, extracted values and the recording, side by side, exactly like the hosted one. Nothing leaves your machine. Want history across machines and shareable links? Create a free account at browserbash.com, connect once, and push a run with --upload. Cloud runs are kept 15 days on the free plan; Pro keeps them forever.',
+        body: 'Every run is kept in a private on-disk store. browserbash dashboard opens a free local web dashboard — left panel of runs, main pane with the verdict, extracted values and the recording, side by side, exactly like the hosted one. Nothing leaves your machine. Want history across machines and shareable links? Create a free account at browserbash.com, connect once, and push a run with --upload. It is all free; cloud runs are kept 15 days.',
         code: '# free, local, no account — opens http://localhost:4477\nbrowserbash dashboard\n\n# run and pop the local dashboard open on this run\nbrowserbash run "Open https://example.com and store the heading as \'h1\'" --record --dashboard\n\n# optional cloud: connect once, then push the runs you choose\nbrowserbash connect --key bb_...      # key from browserbash.com/dashboard\nbrowserbash run "..." --record --upload',
     },
     {

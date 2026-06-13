@@ -21,13 +21,24 @@ test.describe('landing page', () => {
         await expect(page.locator('#features .feature')).toHaveCount(6);
     });
 
-    test('hero CTA points anonymous visitors at the dashboard signup', async ({ page }) => {
+    test('hero CTA and nav route to the free sign-up / log-in', async ({ page }) => {
         await page.goto('/');
         const cta = page.locator('.hero__cta-go');
         await expect(cta).toContainText('Create your free account');
-        await expect(cta).toHaveAttribute('href', '/dashboard');
-        // No waitlist form should remain anywhere on the page.
+        await expect(cta).toHaveAttribute('href', '/sign-up');
+        // Sign up + Log in are clearly visible in the nav.
+        await expect(page.locator('.nav__signup')).toHaveAttribute('href', '/sign-up');
+        await expect(page.locator('.nav__login')).toHaveAttribute('href', '/sign-in');
+        // No waitlist form and no pricing link remain.
         await expect(page.locator('.wl, .counter')).toHaveCount(0);
+        await expect(page.locator('a[href="/pricing"]')).toHaveCount(0);
+    });
+
+    test('sign-up and sign-in pages render', async ({ page }) => {
+        await page.goto('/sign-up');
+        await expect(page.locator('.authpage__title')).toContainText('Create your free account');
+        await page.goto('/sign-in');
+        await expect(page.locator('.authpage__title')).toContainText('Welcome back');
     });
 
     test('try-it switches recordings', async ({ page }) => {

@@ -60,7 +60,7 @@ export function RunsTable() {
                             <td>{r.steps_executed}</td>
                             <td>{(r.duration_ms / 1000).toFixed(1)}s</td>
                             <td className="runs__rec">{r.video_url ? '📹' : r.screenshot_url ? '🖼' : r.trace_url ? '◈' : '—'}</td>
-                            <td className={`runs__kept ${r.days_left !== null && r.days_left <= 3 ? 'runs__kept--low' : ''}`} title={r.days_left === null ? 'Pro — kept forever' : `Deleted in ${r.days_left} day(s) on the free plan`}>{kept}</td>
+                            <td className={`runs__kept ${r.days_left !== null && r.days_left <= 3 ? 'runs__kept--low' : ''}`} title={r.days_left === null ? 'Retention extended — kept' : `Deleted in ${r.days_left} day(s)`}>{kept}</td>
                             <td className="runs__open"><a href={`/dashboard/runs/${r.id}`}>view →</a></td>
                         </tr>
                     );

@@ -32,37 +32,38 @@ export default async function Page() {
                     <a href="#start">Quick start</a>
                     <a href="/learn">Learn</a>
                     <a href="/blog">Blog</a>
-                    <a href="/pricing">Pricing</a>
                 </div>
-                <a className="pixel-btn ghost nav__gh" href="/dashboard">Sign in ↗</a>
+                <div className="nav__auth">
+                    <a className="pixel-btn ghost nav__login" href="/sign-in">Log in</a>
+                    <a className="pixel-btn nav__signup" href="/sign-up">Sign up free</a>
+                </div>
             </nav>
 
             <main>
             <header className="hero container" id="top">
                 <div className="hero__copy">
-                    <p className="section-tag">open source · apache-2.0</p>
+                    <p className="section-tag">free · open source · apache-2.0</p>
                     <h1>
                         Plain English in.<br />
                         <span className="hero__accent">Real browser</span> out.
                     </h1>
                     <p className="hero__sub">
-                        BrowserBash is open-source <strong>natural language browser automation</strong> — an
-                        AI browser testing CLI where an agent drives a real browser from a plain-English
-                        objective. Run test automation on local Chrome, LambdaTest, BrowserStack, Browserbase
-                        or any CDP endpoint — <strong>Ollama-first, zero API keys required</strong>.
+                        BrowserBash is a <strong>free, open-source</strong> natural-language browser automation
+                        CLI — an AI agent drives a real browser from a plain-English objective. Runs on{' '}
+                        <strong>free local models (Ollama) or free OpenRouter models — zero API keys, no credit card</strong>.
+                        Bring an Anthropic or OpenRouter key only if you want to.
                     </p>
                     <div className="hero__install pixel-card">
                         <code>$ {INSTALL}</code>
                         <CopyButton text={INSTALL} />
                     </div>
                     <div className="hero__cta">
-                        <a className="pixel-btn hero__cta-go" href="/dashboard">Create your free account →</a>
-                        <a className="pixel-btn ghost" href="#demo">Watch a run</a>
+                        <a className="pixel-btn hero__cta-go" href="/sign-up">Create your free account →</a>
+                        <a className="pixel-btn ghost" href="#start">3-step quick start</a>
                     </div>
                     <p className="hero__cta-note">
-                        Free, no card. The CLI runs fully local with zero signup — create an account only for the
-                        dashboard: run history, recordings and a per-run replay. Cloud runs are kept <strong>15 days</strong> on
-                        the free plan.
+                        100% free to use. Install the CLI and automate in seconds — no signup needed to run.
+                        Create a free account for the dashboard: run history, video recordings and per-run replay.
                     </p>
                 </div>
                 <HeroScene />
@@ -201,24 +202,38 @@ export default async function Page() {
             <section className="section container" id="start">
                 <Reveal>
                     <p className="section-tag">quick start</p>
-                    <h2>Ninety seconds to your first run</h2>
+                    <h2>From zero to your first run in 3 steps</h2>
+                    <p className="section__sub">All free. No credit card, no paid API keys.</p>
                 </Reveal>
-                <Reveal delay={100}>
-                    <div className="start pixel-card">
-                        <pre>{`# install
-${INSTALL}
-
-# free local stack (or set ANTHROPIC_API_KEY)
-ollama pull qwen3
-
-# go
-browserbash run "Open https://news.ycombinator.com and store the top story title as 'top_story'"
-
-# agent mode for CI / AI tools
-browserbash run "…" --agent --headless --timeout 120`}</pre>
-                        <CopyButton text={INSTALL} label="copy install" />
-                    </div>
-                </Reveal>
+                <div className="steps">
+                    <Reveal className="step" delay={0}>
+                        <div className="pixel-card step__card">
+                            <span className="step__n">1</span>
+                            <h3>Install the CLI</h3>
+                            <p>One line from npm. Free and open source.</p>
+                            <pre>{INSTALL}</pre>
+                        </div>
+                    </Reveal>
+                    <Reveal className="step" delay={120}>
+                        <div className="pixel-card step__card">
+                            <span className="step__n">2</span>
+                            <h3>Run with a free model</h3>
+                            <p>Local Ollama or a free OpenRouter model — no keys.</p>
+                            <pre>{`ollama pull qwen3
+browserbash run "Open example.com and store the heading as 'h1'"`}</pre>
+                        </div>
+                    </Reveal>
+                    <Reveal className="step" delay={240}>
+                        <div className="pixel-card step__card">
+                            <span className="step__n">3</span>
+                            <h3>Create a free account</h3>
+                            <p>Connect once, then see every run, recording and replay on your dashboard.</p>
+                            <pre>{`browserbash connect --key bb_...
+browserbash run "..." --record --upload`}</pre>
+                            <a className="pixel-btn step__cta" href="/sign-up">Create free account →</a>
+                        </div>
+                    </Reveal>
+                </div>
             </section>
 
             </main>
@@ -232,7 +247,7 @@ browserbash run "…" --agent --headless --timeout 120`}</pre>
                     <div className="footer__links">
                         <a href="/learn">Learn</a>
                         <a href="/blog">Blog</a>
-                        <a href="/pricing">Pricing</a>
+                        <a href="/sign-up">Sign up</a>
                         <a href="/dashboard">Dashboard</a>
                         <a href="https://www.npmjs.com/package/browserbash-cli" target="_blank" rel="noopener noreferrer">npm</a>
                     </div>

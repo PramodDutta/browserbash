@@ -118,7 +118,7 @@ browserbash connect --key bb_...      # one-time, key from browserbash.com/dashb
 browserbash run "..." --record --upload   # push THIS run (verdict + recording) to the cloud
 ```
 
-Without `--upload` nothing is sent to the cloud. Free cloud runs are kept 15 days; [Pro](https://browserbash.com/pricing) keeps them forever.
+Without `--upload` nothing is sent to the cloud. BrowserBash is free and open source; cloud runs are kept 15 days.
 
 ## Test files (`*_test.md`)
 

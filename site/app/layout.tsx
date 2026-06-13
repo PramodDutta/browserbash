@@ -67,5 +67,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </html>
     );
     // Site must keep building (and prerendering) without Clerk keys.
-    return process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? <ClerkProvider>{page}</ClerkProvider> : page;
+    return process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
+        <ClerkProvider
+            signInUrl="/sign-in"
+            signUpUrl="/sign-up"
+            signInFallbackRedirectUrl="/dashboard"
+            signUpFallbackRedirectUrl="/dashboard"
+        >
+            {page}
+        </ClerkProvider>
+    ) : (
+        page
+    );
 }

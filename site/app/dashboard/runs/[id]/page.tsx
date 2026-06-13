@@ -69,11 +69,10 @@ export default async function RunDetail({ params }: { params: Promise<{ id: stri
                     <h1>Run #{run.id}</h1>
                     <p className="run__time">{run.created_at} · {(run.duration_ms / 1000).toFixed(1)}s · {run.steps_executed} steps</p>
                     {run.days_left === null ? (
-                        <p className="run__retention">Kept forever · Pro plan</p>
+                        <p className="run__retention">Kept — retention extended</p>
                     ) : (
                         <p className="run__retention run__retention--free">
-                            Free plan — this run and its recording are deleted on {run.expires_at} ({run.days_left} day{run.days_left === 1 ? '' : 's'} left).{' '}
-                            <a href="/pricing">Upgrade to keep it →</a>
+                            This run and its recording are deleted on {run.expires_at} ({run.days_left} day{run.days_left === 1 ? '' : 's'} left).
                         </p>
                     )}
                 </header>
