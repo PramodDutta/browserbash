@@ -25,7 +25,7 @@ const program = new Command();
 program
     .name('browserbash')
     .description('Vendor-independent natural-language browser automation CLI')
-    .version('1.3.0');
+    .version('1.3.1');
 
 interface CommonFlags {
     provider?: string;
@@ -59,7 +59,7 @@ function addRunFlags(cmd: Command): Command {
         .option('--cdp-endpoint <url>', 'CDP endpoint (implies/required by --provider cdp)')
         .option('--url <url>', 'start URL to open before the agent begins')
         .option('--model <id>', 'Anthropic model id override')
-        .option('--record', 'capture a session recording (screenshot; video + trace on builtin engine)')
+        .option('--record', 'capture a session recording (screenshot + video on any engine; trace adds on builtin; needs ffmpeg)')
         .option('--upload', 'push this run to your cloud dashboard (needs: browserbash connect)')
         .option('--dashboard', 'open the local web dashboard when the run finishes')
         .option('--port <n>', 'port for the local dashboard (with --dashboard)', '4477');

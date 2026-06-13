@@ -46,8 +46,8 @@ export const TUTORIAL: TutorialSection[] = [
     {
         id: 'record',
         title: 'Record the session',
-        body: 'Add --record to any run and a final screenshot is captured; on the builtin engine you also get a Playwright video and trace. Recordings are saved locally with the run — view them in the local dashboard (next step) or push them to your cloud dashboard with --upload.',
-        code: '# record a run — screenshot, plus video + trace on the builtin engine\nbrowserbash run "Open https://example.com and store the heading as \'h1\'" --record\n\n# the recording is saved locally; see it with: browserbash dashboard',
+        body: 'Add --record to any run and BrowserBash captures a screenshot and a full session video — on every engine, including the free Stagehand default (the video is stitched from a CDP screencast with ffmpeg, which ships with the CLI). The builtin engine additionally captures a Playwright trace. Recordings are saved locally with the run — view them in the local dashboard (next step) or push them to your cloud dashboard with --upload.',
+        code: '# record a run — screenshot + session video on any engine\nbrowserbash run "Open https://example.com and store the heading as \'h1\'" --record\n\n# the recording is saved locally; see it with: browserbash dashboard',
     },
     {
         id: 'dashboard',

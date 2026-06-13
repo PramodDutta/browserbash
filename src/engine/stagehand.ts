@@ -5,6 +5,7 @@ import { Stagehand } from '@browserbasehq/stagehand';
 import type { Reporter } from '../output.js';
 import type { RunArtifacts, RunResult, VariableValue } from '../types.js';
 import { substitute } from '../variables.js';
+import { startScreencast, type CdpSession, type ScreencastRecorder } from './screencast.js';
 
 export interface StagehandRunOptions {
     objective: string;
@@ -113,8 +114,40 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
 
     const artifacts: RunArtifacts = {};
     const artifactDir = options.record ? mkdtempSync(join(tmpdir(), 'bb-rec-')) : '';
+
+    // Tap Stagehand's own CDP session for a session video (best-effort — a
+    // missing ffmpeg or capture hiccup just means no video, never a failed run).
+    let recorder: ScreencastRecorder | undefined;
+    if (options.record) {
+        try {
+            const active = (stagehand.context as unknown as {
+                activePage(): { mainSession?: CdpSession } | undefined;
+            }).activePage();
+            if (active?.mainSession) {
+                recorder = await startScreencast(active.mainSession, artifactDir);
+                options.reporter.info('Recording session video (--record)');
+            }
+        } catch {
+            // no video; the final screenshot below still works
+        }
+    }
+
     async function capture(): Promise<void> {
         if (!options.record) return;
+        // Stop + encode the video first, while the browser is still open.
+        if (recorder) {
+            const rec = recorder;
+            recorder = undefined;
+            try {
+                const video = await rec.stop();
+                if (video) {
+                    artifacts.video = video;
+                    options.reporter.info('Captured session video (--record)');
+                }
+            } catch {
+                // video is best-effort
+            }
+        }
         try {
             const path = join(artifactDir, 'screenshot.png');
             const page = (stagehand.context as unknown as {

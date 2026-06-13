@@ -3,7 +3,7 @@ import type { BrowserBashConfig } from './config.js';
 import type { RunArtifacts, RunResult, VariableValue } from './types.js';
 import { maskSecretRecord, maskSecrets } from './variables.js';
 
-export const CLI_VERSION = '1.3.0';
+export const CLI_VERSION = '1.3.1';
 
 const ARTIFACT_TYPES: Array<{ kind: 'screenshot' | 'video' | 'trace'; contentType: string }> = [
     { kind: 'screenshot', contentType: 'image/png' },

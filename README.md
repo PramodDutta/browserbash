@@ -109,7 +109,7 @@ browserbash run "..." --record --dashboard   # run, then open the dashboard on t
 browserbash dashboard --clear         # wipe the local store
 ```
 
-Left panel lists your runs; the main pane shows the verdict, extracted values and the recording (screenshot, plus video + trace on the builtin engine). Nothing leaves your machine.
+Left panel lists your runs; the main pane shows the verdict, extracted values and the recording — a screenshot **and a session video** on any engine (video needs `ffmpeg`, bundled), plus a Playwright trace on the builtin engine. Nothing leaves your machine.
 
 **Cloud dashboard — optional, opt-in per run:** a hosted dashboard at [browserbash.com/dashboard](https://browserbash.com/dashboard) with run history across machines and shareable per-run pages.
 
