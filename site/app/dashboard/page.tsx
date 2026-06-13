@@ -9,6 +9,7 @@ import { RunsTable } from '@/components/RunsTable';
 import { CopyButton } from '@/components/CopyButton';
 import { Terminal, type DemoRecording } from '@/components/Terminal';
 import { sql } from '@/lib/db';
+import { getPlan, RETENTION_DAYS } from '@/lib/plans';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import '../landing.css';
@@ -17,7 +18,6 @@ import './dashboard.css';
 export const dynamic = 'force-dynamic';
 
 const INSTALL = 'npm install -g browserbash-cli';
-const RETENTION_DAYS = 15;
 
 export default async function Dashboard() {
     if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) notFound();
@@ -28,6 +28,7 @@ export default async function Dashboard() {
     const firstName = user.firstName ?? email.split('@')[0] ?? 'tester';
 
     const db = sql();
+    const plan = await getPlan(user.id);
     const doneSteps = ((await db`SELECT step FROM onboarding WHERE user_id = ${user.id}`) as Array<{ step: string }>).map((r) => r.step);
 
     const demoRaw = await fs.readFile(path.join(process.cwd(), 'public/demos/login.json'), 'utf8');
@@ -58,11 +59,15 @@ export default async function Dashboard() {
 
                 <section className="dash__cards">
                     <div className="pixel-card dash__stat">
-                        <span className="dash__num">Free</span>
+                        <span className="dash__num">{plan === 'pro' ? 'Pro' : 'Free'}</span>
                         <span className="dash__lbl">your plan</span>
-                        <p className="dash__join">
-                            Cloud runs kept {RETENTION_DAYS} days. <a href="/pricing">Upgrade to keep them →</a>
-                        </p>
+                        {plan === 'pro' ? (
+                            <p className="dash__join">Cloud runs kept forever. Thanks for supporting BrowserBash 🔨</p>
+                        ) : (
+                            <p className="dash__join">
+                                Cloud runs kept {RETENTION_DAYS} days. <a href="/pricing">Upgrade to keep them →</a>
+                            </p>
+                        )}
                     </div>
                     <div className="pixel-card dash__stat">
                         <span className="dash__num">v1.3.0</span>

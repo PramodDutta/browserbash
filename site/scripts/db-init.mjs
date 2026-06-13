@@ -42,10 +42,24 @@ await sql`
         model          TEXT,
         final_state    JSONB DEFAULT '{}'::jsonb,
         cli_version    TEXT,
-        created_at     TIMESTAMPTZ DEFAULT now()
+        created_at     TIMESTAMPTZ DEFAULT now(),
+        expires_at     TIMESTAMPTZ
     )`;
 await sql`CREATE INDEX IF NOT EXISTS runs_user_time ON runs (user_id, created_at DESC)`;
+// Free-plan retention: existing rows added before this column get a 15-day window.
+await sql`ALTER TABLE runs ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ`;
+await sql`UPDATE runs SET expires_at = created_at + interval '15 days' WHERE expires_at IS NULL`;
+await sql`CREATE INDEX IF NOT EXISTS runs_expiry ON runs (expires_at)`;
+
+// Paid plans. Absent row ⇒ free (15-day retention). plan='pro' ⇒ kept forever.
+await sql`
+    CREATE TABLE IF NOT EXISTS plans (
+        user_id    TEXT PRIMARY KEY,
+        plan       TEXT NOT NULL DEFAULT 'free',
+        updated_at TIMESTAMPTZ DEFAULT now()
+    )`;
 
 const [{ ob }] = await sql`SELECT COUNT(*)::int AS ob FROM onboarding`;
 const [{ rn }] = await sql`SELECT COUNT(*)::int AS rn FROM runs`;
-console.log(`onboarding ${ob} · runs ${rn} — all tables ready`);
+const [{ pl }] = await sql`SELECT COUNT(*)::int AS pl FROM plans`;
+console.log(`onboarding ${ob} · runs ${rn} · plans ${pl} — all tables ready`);

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { currentUser } from '@clerk/nextjs/server';
 import { sql } from '@/lib/db';
 import { hashApiKey, bearerFrom } from '@/lib/apikeys';
+import { getPlan, runExpiry } from '@/lib/plans';
 
 const RunInput = z.object({
     objective: z.string().trim().min(1).max(2000),
@@ -50,10 +51,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
     const r = parsed.data;
 
+    // Free runs expire after the retention window; pro runs are kept forever.
+    const expiresAt = runExpiry(await getPlan(userId));
+
     const inserted = (await sql()`
-        INSERT INTO runs (user_id, objective, status, duration_ms, steps_executed, provider, model, final_state, cli_version)
+        INSERT INTO runs (user_id, objective, status, duration_ms, steps_executed, provider, model, final_state, cli_version, expires_at)
         VALUES (${userId}, ${r.objective}, ${r.status}, ${r.duration_ms}, ${r.steps_executed},
-                ${r.provider ?? null}, ${r.model ?? null}, ${JSON.stringify(r.final_state ?? {})}::jsonb, ${r.cli_version ?? null})
+                ${r.provider ?? null}, ${r.model ?? null}, ${JSON.stringify(r.final_state ?? {})}::jsonb, ${r.cli_version ?? null}, ${expiresAt})
         RETURNING id`) as Array<{ id: number }>;
     await sql()`UPDATE api_keys SET last_used_at = now(), cli_version = ${r.cli_version ?? null} WHERE key_hash = ${hash}`;
 
@@ -65,11 +69,17 @@ export async function GET(): Promise<NextResponse> {
     const user = await currentUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    // Hide already-expired runs immediately (the cron hard-deletes them daily).
     const rows = (await sql()`
         SELECT id, objective, status, duration_ms, steps_executed, provider, model, final_state, cli_version,
                screenshot_url, video_url, trace_url,
-               to_char(created_at, 'YYYY-MM-DD HH24:MI') AS created_at
-        FROM runs WHERE user_id = ${user.id} ORDER BY id DESC LIMIT 100`) as Array<Record<string, unknown>>;
+               to_char(created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
+               to_char(expires_at, 'YYYY-MM-DD') AS expires_at,
+               CASE WHEN expires_at IS NULL THEN NULL
+                    ELSE GREATEST(0, CEIL(EXTRACT(EPOCH FROM (expires_at - now())) / 86400))::int END AS days_left
+        FROM runs
+        WHERE user_id = ${user.id} AND (expires_at IS NULL OR expires_at > now())
+        ORDER BY id DESC LIMIT 100`) as Array<Record<string, unknown>>;
 
     return NextResponse.json({ runs: rows });
 }

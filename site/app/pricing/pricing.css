@@ -1,0 +1,129 @@
+.pricing {
+    padding-top: 28px;
+    padding-bottom: 80px;
+    max-width: 1000px;
+}
+
+.pricing__head {
+    max-width: 720px;
+    margin-bottom: 36px;
+}
+
+.pricing__head h1 {
+    font-size: clamp(28px, 4.5vw, 44px);
+    letter-spacing: -0.02em;
+    margin: 8px 0 14px;
+}
+
+.pricing__sub {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+}
+
+.pricing__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 48px;
+}
+
+@media (max-width: 760px) {
+    .pricing__grid { grid-template-columns: 1fr; }
+}
+
+.pricing__plan {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+}
+
+.pricing__plan--pro {
+    border-color: var(--accent);
+    box-shadow: 6px 6px 0 var(--accent);
+}
+
+.pricing__badge {
+    position: absolute;
+    top: -12px;
+    right: 18px;
+    font-family: var(--font-pixel), monospace;
+    font-size: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 2px solid var(--ink);
+    padding: 4px 10px;
+}
+
+.pricing__plan h2 {
+    font-size: 24px;
+}
+
+.pricing__price {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--accent-deep);
+    line-height: 1;
+}
+
+.pricing__price span {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    margin-left: 6px;
+}
+
+.pricing__feats {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 14.5px;
+    line-height: 1.4;
+}
+
+.pricing__limit {
+    color: var(--accent-deep);
+}
+
+.pricing__cta {
+    margin-top: auto;
+    width: fit-content;
+    font-size: 12px;
+    padding: 12px 20px;
+}
+
+.pricing__note {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+}
+
+.pricing__faq h2 {
+    font-size: 22px;
+    margin-bottom: 18px;
+}
+
+.pricing__faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+}
+
+@media (max-width: 760px) {
+    .pricing__faq-grid { grid-template-columns: 1fr; }
+}
+
+.pricing__faq-grid strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 15.5px;
+}
+
+.pricing__faq-grid p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+}

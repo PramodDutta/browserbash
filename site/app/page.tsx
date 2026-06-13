@@ -33,6 +33,7 @@ export default async function Page() {
                     <a href="#start">Quick start</a>
                     <a href="/learn">Learn</a>
                     <a href="/blog">Blog</a>
+                    <a href="/pricing">Pricing</a>
                 </div>
                 <a className="pixel-btn ghost nav__gh" href={GITHUB} target="_blank" rel="noopener noreferrer">
                     GitHub ↗
@@ -234,6 +235,7 @@ browserbash run "…" --agent --headless --timeout 120`}</pre>
                     <div className="footer__links">
                         <a href="/learn">Learn</a>
                         <a href="/blog">Blog</a>
+                        <a href="/pricing">Pricing</a>
                         <a href={GITHUB} target="_blank" rel="noopener noreferrer">GitHub</a>
                         <a href="https://www.npmjs.com/package/browserbash-cli" target="_blank" rel="noopener noreferrer">npm</a>
                         <a href={`${GITHUB}/blob/main/docs/agents.md`} target="_blank" rel="noopener noreferrer">Agent docs</a>

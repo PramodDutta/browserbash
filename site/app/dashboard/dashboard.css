@@ -464,6 +464,8 @@
 }
 
 .runs__rec { text-align: center; font-size: 15px; }
+.runs__kept { text-align: center; font-family: var(--font-pixel), monospace; font-size: 10px; color: var(--ink-soft); white-space: nowrap; }
+.runs__kept--low { color: var(--accent-deep); font-weight: 700; }
 .runs__open a { color: var(--accent-deep); font-size: 12px; white-space: nowrap; }
 
 .connect__dot--dead { background: var(--err); }

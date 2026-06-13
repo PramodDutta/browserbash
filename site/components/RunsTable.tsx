@@ -16,6 +16,8 @@ interface Run {
     screenshot_url: string | null;
     video_url: string | null;
     trace_url: string | null;
+    expires_at: string | null;
+    days_left: number | null;
 }
 
 export function RunsTable() {
@@ -43,10 +45,13 @@ export function RunsTable() {
     return (
         <table className="dash__table pixel-card runs__table">
             <thead>
-                <tr><th>When</th><th>Objective</th><th>Verdict</th><th>Steps</th><th>Time</th><th>Rec</th><th></th></tr>
+                <tr><th>When</th><th>Objective</th><th>Verdict</th><th>Steps</th><th>Time</th><th>Rec</th><th>Kept</th><th></th></tr>
             </thead>
             <tbody>
                 {runs.map((r) => {
+                    const kept = r.days_left === null
+                        ? '∞'
+                        : r.days_left <= 0 ? 'today' : `${r.days_left}d`;
                     return (
                         <tr key={r.id} className="runs__row" onClick={() => { window.location.href = `/dashboard/runs/${r.id}`; }}>
                             <td className="runs__when">{r.created_at}</td>
@@ -55,6 +60,7 @@ export function RunsTable() {
                             <td>{r.steps_executed}</td>
                             <td>{(r.duration_ms / 1000).toFixed(1)}s</td>
                             <td className="runs__rec">{r.video_url ? '📹' : r.screenshot_url ? '🖼' : r.trace_url ? '◈' : '—'}</td>
+                            <td className={`runs__kept ${r.days_left !== null && r.days_left <= 3 ? 'runs__kept--low' : ''}`} title={r.days_left === null ? 'Pro — kept forever' : `Deleted in ${r.days_left} day(s) on the free plan`}>{kept}</td>
                             <td className="runs__open"><a href={`/dashboard/runs/${r.id}`}>view →</a></td>
                         </tr>
                     );

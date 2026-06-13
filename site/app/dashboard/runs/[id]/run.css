@@ -4,6 +4,17 @@
     max-width: 880px;
 }
 
+.run__retention {
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+}
+
+.run__retention--free a {
+    color: var(--accent-deep);
+    font-weight: 600;
+}
+
 .run__back {
     font-size: 13px;
     color: var(--ink-soft);

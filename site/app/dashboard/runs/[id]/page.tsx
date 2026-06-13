@@ -22,6 +22,8 @@ interface RunRow {
     video_url: string | null;
     trace_url: string | null;
     created_at: string;
+    expires_at: string | null;
+    days_left: number | null;
 }
 
 export default async function RunDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -36,7 +38,10 @@ export default async function RunDetail({ params }: { params: Promise<{ id: stri
     const rows = (await sql()`
         SELECT id, objective, status, duration_ms, steps_executed, provider, model, final_state, cli_version,
                screenshot_url, video_url, trace_url,
-               to_char(created_at, 'YYYY-MM-DD HH24:MI') AS created_at
+               to_char(created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
+               to_char(expires_at, 'YYYY-MM-DD') AS expires_at,
+               CASE WHEN expires_at IS NULL THEN NULL
+                    ELSE GREATEST(0, CEIL(EXTRACT(EPOCH FROM (expires_at - now())) / 86400))::int END AS days_left
         FROM runs WHERE id = ${runId} AND user_id = ${user.id}`) as unknown as RunRow[];
     if (rows.length === 0) notFound();
     const run = rows[0];
@@ -63,6 +68,14 @@ export default async function RunDetail({ params }: { params: Promise<{ id: stri
                     <span className={`runs__badge runs__badge--${run.status}`}>{run.status}</span>
                     <h1>Run #{run.id}</h1>
                     <p className="run__time">{run.created_at} · {(run.duration_ms / 1000).toFixed(1)}s · {run.steps_executed} steps</p>
+                    {run.days_left === null ? (
+                        <p className="run__retention">Kept forever · Pro plan</p>
+                    ) : (
+                        <p className="run__retention run__retention--free">
+                            Free plan — this run and its recording are deleted on {run.expires_at} ({run.days_left} day{run.days_left === 1 ? '' : 's'} left).{' '}
+                            <a href="/pricing">Upgrade to keep it →</a>
+                        </p>
+                    )}
                 </header>
 
                 <section className="run__objective pixel-card">
