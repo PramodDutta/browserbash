@@ -46,8 +46,14 @@ export const TUTORIAL: TutorialSection[] = [
     {
         id: 'record',
         title: 'Record the session',
-        body: 'Connect the CLI to your dashboard with browserbash connect, then add --record to any run. A final screenshot is captured for every recorded run; on the builtin engine you also get a Playwright video and trace. Everything uploads to your private dashboard and shows up in a per-session view — verdict, extracted values, and the recording side by side.',
-        code: '# one-time: link this machine to your dashboard\nbrowserbash connect --key bb_...   # generate the key at browserbash.com/dashboard\n\n# record a run — screenshot, plus video + trace on the builtin engine\nbrowserbash run "Open https://example.com and store the heading as \'h1\'" --record\n\n# view it at browserbash.com/dashboard -> your runs -> view',
+        body: 'Add --record to any run and a final screenshot is captured; on the builtin engine you also get a Playwright video and trace. Recordings are saved locally with the run — view them in the local dashboard (next step) or push them to your cloud dashboard with --upload.',
+        code: '# record a run — screenshot, plus video + trace on the builtin engine\nbrowserbash run "Open https://example.com and store the heading as \'h1\'" --record\n\n# the recording is saved locally; see it with: browserbash dashboard',
+    },
+    {
+        id: 'dashboard',
+        title: 'Your dashboard: local (free) or cloud (optional)',
+        body: 'Every run is kept in a private on-disk store. browserbash dashboard opens a free local web dashboard — left panel of runs, main pane with the verdict, extracted values and the recording, side by side, exactly like the hosted one. Nothing leaves your machine. Want history across machines and shareable links? Create a free account at browserbash.com, connect once, and push a run with --upload. Cloud runs are kept 15 days on the free plan; Pro keeps them forever.',
+        code: '# free, local, no account — opens http://localhost:4477\nbrowserbash dashboard\n\n# run and pop the local dashboard open on this run\nbrowserbash run "Open https://example.com and store the heading as \'h1\'" --record --dashboard\n\n# optional cloud: connect once, then push the runs you choose\nbrowserbash connect --key bb_...      # key from browserbash.com/dashboard\nbrowserbash run "..." --record --upload',
     },
     {
         id: 'lambdatest',

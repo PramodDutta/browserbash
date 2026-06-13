@@ -9,7 +9,7 @@
     "main": "dist/index.js",
     "files": [
         "dist",
-        "docs",
+        "docs/agents.md",
         "README.md"
     ],
     "scripts": {
