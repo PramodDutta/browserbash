@@ -6,6 +6,8 @@ import { configDir, configPath, loadConfig, projectDir, saveConfig } from './con
 import { getProvider, listProviders } from './providers/index.js';
 import { executeRun } from './runner.js';
 import { runTestMd } from './testmd/runner.js';
+import { clearRuns } from './local-store.js';
+import { startDashboard, openBrowser } from './dashboard/server.js';
 import { EXIT_CODES, type EngineId, type RunStatus, type VariableValue } from './types.js';
 import { loadVariables, maskSecrets } from './variables.js';
 
@@ -23,7 +25,7 @@ const program = new Command();
 program
     .name('browserbash')
     .description('Vendor-independent natural-language browser automation CLI')
-    .version('1.2.0');
+    .version('1.3.0');
 
 interface CommonFlags {
     provider?: string;
@@ -39,6 +41,9 @@ interface CommonFlags {
     model?: string;
     name?: string;
     record?: boolean;
+    upload?: boolean;
+    dashboard?: boolean;
+    port?: string;
 }
 
 function addRunFlags(cmd: Command): Command {
@@ -54,11 +59,26 @@ function addRunFlags(cmd: Command): Command {
         .option('--cdp-endpoint <url>', 'CDP endpoint (implies/required by --provider cdp)')
         .option('--url <url>', 'start URL to open before the agent begins')
         .option('--model <id>', 'Anthropic model id override')
-        .option('--record', 'capture a session recording (screenshot; video + trace on builtin engine)');
+        .option('--record', 'capture a session recording (screenshot; video + trace on builtin engine)')
+        .option('--upload', 'push this run to your cloud dashboard (needs: browserbash connect)')
+        .option('--dashboard', 'open the local web dashboard when the run finishes')
+        .option('--port <n>', 'port for the local dashboard (with --dashboard)', '4477');
 }
 
 function exitWith(status: RunStatus): never {
     process.exit(EXIT_CODES[status]);
+}
+
+/** Serve the local dashboard and block until Ctrl-C, then exit with the run's
+ * verdict code. Used by `run --dashboard` / `testmd run --dashboard`. */
+async function serveDashboardThenExit(port: number, exitStatus: RunStatus): Promise<never> {
+    const handle = await startDashboard(port);
+    process.stdout.write(`\nLocal dashboard: ${handle.url}  (Ctrl-C to stop)\n`);
+    openBrowser(handle.url);
+    process.on('SIGINT', () => {
+        void handle.close().then(() => process.exit(EXIT_CODES[exitStatus]));
+    });
+    return new Promise<never>(() => {}); // keep the process alive
 }
 
 function parsePositiveInteger(value: number | string | undefined, name: string): number {
@@ -125,7 +145,12 @@ addRunFlags(
             model: flags.model,
             record: flags.record ?? false,
             name: flags.name,
+            upload: flags.upload ?? false,
+            dashboard: flags.dashboard ?? false,
         });
+        if (flags.dashboard) {
+            await serveDashboardThenExit(parsePositiveInteger(flags.port ?? '4477', 'port'), result.status);
+        }
         exitWith(result.status);
     } catch (err) {
         await handleRunError(err, flags.agent ?? false, variables);
@@ -154,12 +179,39 @@ addRunFlags(
             startUrl: flags.url,
             model: flags.model,
             record: flags.record ?? false,
+            upload: flags.upload ?? false,
+            dashboard: flags.dashboard ?? false,
         });
+        if (flags.dashboard) {
+            await serveDashboardThenExit(parsePositiveInteger(flags.port ?? '4477', 'port'), result.status);
+        }
         exitWith(result.status);
     } catch (err) {
         await handleRunError(err, flags.agent ?? false, variables);
     }
 });
+
+program
+    .command('dashboard')
+    .description('Open a local web dashboard of your runs — free, no account, fully local')
+    .option('--port <n>', 'port to serve on', '4477')
+    .option('--no-open', 'do not open the browser automatically')
+    .option('--clear', 'delete all locally stored runs and exit')
+    .action(async (flags: { port?: string; open?: boolean; clear?: boolean }) => {
+        if (flags.clear) {
+            const n = clearRuns();
+            process.stdout.write(`Cleared ${n} local run${n === 1 ? '' : 's'} from ~/.browserbash/runs.\n`);
+            return;
+        }
+        const port = parsePositiveInteger(flags.port ?? '4477', 'port');
+        const handle = await startDashboard(port);
+        process.stdout.write(`Local dashboard: ${handle.url}  (Ctrl-C to stop)\n`);
+        if (flags.open !== false) openBrowser(handle.url);
+        process.on('SIGINT', () => {
+            void handle.close().then(() => process.exit(0));
+        });
+        await new Promise(() => {}); // keep the process alive
+    });
 
 program
     .command('login')

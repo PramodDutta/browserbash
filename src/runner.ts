@@ -5,6 +5,7 @@ import { resolveModel } from './llm.js';
 import { Reporter } from './output.js';
 import { getProvider } from './providers/index.js';
 import { syncRun } from './sync.js';
+import { persistRun } from './local-store.js';
 import type { RunOptions, RunResult } from './types.js';
 
 /**
@@ -49,8 +50,16 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
         test_url: result.testUrl,
     });
 
-    // Opt-in dashboard sync — no-op without `browserbash connect`.
-    await syncRun(config, options.objective, result, options.variables, options.provider, model, (msg) => reporter.info(msg));
+    // Always keep a private local copy for `browserbash dashboard` (on-disk,
+    // never leaves the machine, secrets masked).
+    persistRun({ objective: options.objective, result, provider: options.provider, model, variables: options.variables });
+
+    // Cloud sync is opt-in per run via --upload (and needs `browserbash connect`).
+    if (options.upload) {
+        await syncRun(config, options.objective, result, options.variables, options.provider, model, (msg) => reporter.info(msg));
+    } else if (config.apiKey && !options.agent) {
+        reporter.info('Kept local. Add --upload to push this run to your cloud dashboard.');
+    }
 
     return result;
 }

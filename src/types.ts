@@ -24,6 +24,12 @@ export interface RunOptions {
     model?: string;
     /** Capture a session recording (screenshot always; video + trace on builtin). */
     record?: boolean;
+    /** Push this run to the cloud dashboard (requires `browserbash connect`). */
+    upload?: boolean;
+    /** Open the local web dashboard after the run finishes. */
+    dashboard?: boolean;
+    /** Port for the local dashboard (with --dashboard). */
+    dashboardPort?: number;
 }
 
 export interface RunArtifacts {

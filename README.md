@@ -97,6 +97,29 @@ Exit codes: `0` passed · `1` failed · `2` error · `3` timeout.
 
 Full agent integration guide: [docs/agents.md](docs/agents.md).
 
+## Dashboards
+
+Every run is kept in a private on-disk store (`~/.browserbash/runs`, secrets masked, capped at 200). Two ways to see them:
+
+**Local dashboard — free, no account, fully local:**
+
+```bash
+browserbash dashboard                 # serve http://localhost:4477 and open it
+browserbash run "..." --record --dashboard   # run, then open the dashboard on this run
+browserbash dashboard --clear         # wipe the local store
+```
+
+Left panel lists your runs; the main pane shows the verdict, extracted values and the recording (screenshot, plus video + trace on the builtin engine). Nothing leaves your machine.
+
+**Cloud dashboard — optional, opt-in per run:** a hosted dashboard at [browserbash.com/dashboard](https://browserbash.com/dashboard) with run history across machines and shareable per-run pages.
+
+```bash
+browserbash connect --key bb_...      # one-time, key from browserbash.com/dashboard
+browserbash run "..." --record --upload   # push THIS run (verdict + recording) to the cloud
+```
+
+Without `--upload` nothing is sent to the cloud. Free cloud runs are kept 15 days; [Pro](https://browserbash.com/pricing) keeps them forever.
+
 ## Test files (`*_test.md`)
 
 Committable, reviewable Markdown tests:
