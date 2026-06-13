@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import './bo.css';
 
 /**
@@ -19,9 +19,12 @@ const PALETTE: Record<string, string> = {
     H: '#8a5a2b',             // hammer handle wood
 };
 
-const BODY: string[] = [
+const ANTENNA: string[] = [
     '.......AA.......',
     '.......DD.......',
+];
+
+const BODY: string[] = [
     '...DDDDDDDDDD...',
     '..DOOOOOOOOOOD..',
     '.DOOOOOOOOOOOOD.',
@@ -69,21 +72,32 @@ function Px({ rows, y = 0 }: { rows: string[]; y?: number }) {
 
 export type BoPose = 'idle' | 'walk';
 
-export function Bo({ pose = 'idle', size = 96, interactive = true, className = '' }: {
+export function Bo({ pose = 'idle', size = 96, interactive = true, className = '', bashSignal = 0 }: {
     pose?: BoPose;
     size?: number;
     interactive?: boolean;
     className?: string;
+    /** Bump this number to make Bo swing — lets a parent drive ambient bashes. */
+    bashSignal?: number;
 }) {
     const [bashing, setBashing] = useState(false);
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const bash = useCallback(() => {
-        if (!interactive) return;
+    const swing = useCallback(() => {
         setBashing(true);
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(() => setBashing(false), 650);
-    }, [interactive]);
+    }, []);
+
+    const bash = useCallback(() => {
+        if (!interactive) return;
+        swing();
+    }, [interactive, swing]);
+
+    // Parent-driven ambient swing (skip the initial 0 so it doesn't fire on mount).
+    useEffect(() => {
+        if (bashSignal > 0) swing();
+    }, [bashSignal, swing]);
 
     return (
         <svg
@@ -97,7 +111,8 @@ export function Bo({ pose = 'idle', size = 96, interactive = true, className = '
             aria-label={interactive ? 'Bo the BrowserBash mascot — click to bash' : 'Bo the BrowserBash mascot'}
         >
             <g className="bo__body">
-                <Px rows={BODY} />
+                <g className="bo__antenna"><Px rows={ANTENNA} /></g>
+                <Px rows={BODY} y={2} />
                 {/* eyelids for blink */}
                 <g className="bo__lids">
                     <rect x={4} y={5} width={2} height={2} fill="var(--accent)" />

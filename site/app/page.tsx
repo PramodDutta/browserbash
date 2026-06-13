@@ -8,7 +8,6 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import './landing.css';
 
-const GITHUB = 'https://github.com/PramodDutta/browserbash';
 const INSTALL = 'npm install -g browserbash-cli';
 
 async function heroDemo(): Promise<DemoRecording> {
@@ -35,9 +34,7 @@ export default async function Page() {
                     <a href="/blog">Blog</a>
                     <a href="/pricing">Pricing</a>
                 </div>
-                <a className="pixel-btn ghost nav__gh" href={GITHUB} target="_blank" rel="noopener noreferrer">
-                    GitHub ↗
-                </a>
+                <a className="pixel-btn ghost nav__gh" href="/dashboard">Sign in ↗</a>
             </nav>
 
             <main>
@@ -236,12 +233,10 @@ browserbash run "…" --agent --headless --timeout 120`}</pre>
                         <a href="/learn">Learn</a>
                         <a href="/blog">Blog</a>
                         <a href="/pricing">Pricing</a>
-                        <a href={GITHUB} target="_blank" rel="noopener noreferrer">GitHub</a>
+                        <a href="/dashboard">Dashboard</a>
                         <a href="https://www.npmjs.com/package/browserbash-cli" target="_blank" rel="noopener noreferrer">npm</a>
-                        <a href={`${GITHUB}/blob/main/docs/agents.md`} target="_blank" rel="noopener noreferrer">Agent docs</a>
-                        <a href={`${GITHUB}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer">Apache-2.0</a>
                     </div>
-                    <p className="footer__credit">Built by The Testing Academy</p>
+                    <p className="footer__credit">Built by The Testing Academy · Apache-2.0</p>
                 </div>
             </footer>
         </>

@@ -5,14 +5,35 @@
     user-select: none;
 }
 
-/* --- body bob --- */
+/* --- body bob (a touch more bounce) --- */
 .bo__body {
-    animation: bo-bob 1.2s steps(2) infinite;
+    animation: bo-bob 1s steps(3) infinite;
 }
 
 @keyframes bo-bob {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-0.5px); }
+    50% { transform: translateY(-1px); }
+}
+
+/* --- antenna: springy sway + tip pulse --- */
+.bo__antenna {
+    transform-origin: 7.5px 2px;
+    animation: bo-antenna 2.2s ease-in-out infinite;
+}
+
+@keyframes bo-antenna {
+    0%, 100% { transform: rotate(-7deg); }
+    50% { transform: rotate(7deg); }
+}
+
+/* --- idle hammer: little ready-tap when not mid-bash --- */
+.bo--idle .bo__hammer {
+    animation: bo-tap 2.8s ease-in-out infinite;
+}
+
+@keyframes bo-tap {
+    0%, 70%, 100% { transform: translate(13.6px, 2.2px) rotate(24deg); }
+    82% { transform: translate(13.4px, 1.4px) rotate(10deg); }
 }
 
 /* --- blink: lids hidden, flash on every 4s --- */
@@ -96,7 +117,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .bo__body, .bo__lids, .bo__legs--a, .bo__legs--b, .bo__hammer, .bo, .bwin {
+    .bo__body, .bo__antenna, .bo__lids, .bo__legs--a, .bo__legs--b,
+    .bo--idle .bo__hammer, .bo__hammer, .bo, .bwin {
         animation: none !important;
     }
 }
