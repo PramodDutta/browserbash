@@ -166,15 +166,50 @@
 /* --- hero scene --- */
 .hero-scene {
     position: relative;
-    height: 340px;
+    height: 400px;
     cursor: pointer;
 }
+
+/* terminal command being "typed" — the plain-English input */
+.hero-scene__cmd {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    background: var(--terminal-bg);
+    color: var(--terminal-ink);
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--shadow);
+    padding: 9px 12px;
+    font-family: var(--font-mono), monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    min-height: 40px;
+    overflow: hidden;
+}
+
+.hero-scene__prompt { color: var(--accent); margin-right: 6px; white-space: nowrap; }
+.hero-scene__type { color: #f4f1ea; }
+
+.hero-scene__caret {
+    display: inline-block;
+    width: 7px;
+    height: 13px;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 1px;
+    animation: bo-caret 1s steps(2) infinite;
+}
+
+@keyframes bo-caret { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 .hero-scene__bo {
     position: absolute;
     bottom: 12px;
     left: 50%;
     transform: translateX(-58%);
+    z-index: 2;
 }
 
 .hero-scene__win {
@@ -182,13 +217,34 @@
     animation: float 5s ease-in-out infinite;
 }
 
-.hero-scene__win--1 { top: 6%; left: 6%; animation-delay: 0s; }
-.hero-scene__win--2 { top: 22%; right: 4%; animation-delay: 1.2s; }
-.hero-scene__win--3 { top: 58%; left: 12%; animation-delay: 2.4s; }
+.hero-scene__win--1 { top: 20%; left: 4%; animation-delay: 0s; }
+.hero-scene__win--2 { top: 34%; right: 2%; animation-delay: 1.2s; }
+.hero-scene__win--3 { top: 64%; left: 10%; animation-delay: 2.4s; }
 
 @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
+}
+
+/* green verdict badge that flashes on a window when the run passes */
+.hero-scene__pass {
+    position: absolute;
+    top: -10px;
+    right: -8px;
+    font-family: var(--font-pixel), monospace;
+    font-size: 9px;
+    background: var(--ok);
+    color: #08361d;
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--shadow);
+    padding: 3px 7px;
+    white-space: nowrap;
+    animation: bo-pass-pop 220ms steps(3);
+}
+
+@keyframes bo-pass-pop {
+    0% { transform: scale(0.4); }
+    100% { transform: scale(1); }
 }
 
 .hero-scene__hint {
@@ -201,9 +257,13 @@
     color: var(--ink-soft);
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .hero-scene__win, .hero-scene__caret, .hero-scene__pass { animation: none !important; }
+}
+
 @media (max-width: 880px) {
     .hero { grid-template-columns: 1fr; }
-    .hero-scene { height: 260px; }
+    .hero-scene { height: 340px; }
 }
 
 /* --- hero CTA --- */
