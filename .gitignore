@@ -9,3 +9,7 @@ Result.md
 .env
 .env.*
 !.env.local.example
+.vercel
+
+# local preview config (Claude dev server)
+site/.claude/
