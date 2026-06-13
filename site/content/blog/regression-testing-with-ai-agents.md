@@ -49,7 +49,7 @@ The fastest way to feel the loop is a one-shot objective. This runs as printed a
 browserbash run "Open https://practicetestautomation.com/practice-test-login/, type 'student' into the username field and 'Password123' into the password field, click Submit, confirm the text 'Congratulations' is visible, and store the page heading as 'heading'" --headless
 ```
 
-The agent opens a real browser, works through the objective, and prints a verdict plus any stored values; `store ... as 'heading'` is how you pull a structured value out of a run for a later stage. A single `browserbash run` is perfect for a smoke check, but a regression *suite* wants something you can commit, review in a pull request, and rerun unchanged for months. That is the next section.
+The agent opens a real browser, works through the objective, and prints a verdict plus any stored values; `store ... as 'heading'` is how you pull a structured value out of a run for a later stage. A single `browserbash run` is perfect for a smoke check, but a regression *suite* wants something you can commit, review in a pull request, and rerun unchanged for months.
 
 ## Build the suite with committable markdown tests
 
@@ -92,7 +92,7 @@ Notice the `{{base_url}}`, `{{username}}`, and `{{password}}` placeholders above
 }
 ```
 
-A plain `"key": "value"` is a normal substitution. The object form `{ "value": "...", "secret": true }` marks a value as a secret, and a secret is **masked as `*****`** everywhere it would otherwise appear — console output, logs, and the `Result.md` report. The agent still uses the real value to drive the browser; you simply never see it printed. That masking is what makes it safe to commit a `_test.md` that *references* `{{password}}`: the sensitive value lives in a separate file you keep out of version control. The same check now runs against staging, a preview, or a production-like environment by swapping which variables file you point at — the test never changes.
+A plain `"key": "value"` is a normal substitution. The object form `{ "value": "...", "secret": true }` marks a value as a secret, and a secret is **masked as `*****`** everywhere it would otherwise appear — console output, logs, and the `Result.md` report. The agent still uses the real value to drive the browser; you never see it printed. That masking is what makes it safe to commit a `_test.md` that *references* `{{password}}`: the sensitive value lives in a separate file you keep out of version control. The same check runs against staging, a preview, or a production-like environment by swapping which variables file you point at — the test never changes.
 
 ### Factor shared steps with @import
 
@@ -121,7 +121,7 @@ Then pull it into any test exactly where those steps belong in the flow:
 - Verify the "Place order" button is visible
 ```
 
-Mechanically, `@import` splices the helper's steps into the test at that line, in order, so the agent sees one flat sequence — exactly as if you had typed the login steps inline. The payoff is the maintenance win every regression suite needs: when the login field is renamed or the sign-in button moves, you fix `helpers/login.md` once and every check that imports it is fixed. Twenty tests that each begin with the same login no longer mean twenty edits.
+Mechanically, `@import` splices the helper's steps into the test at that line, so the agent sees one flat sequence — exactly as if you had typed the login steps inline. The payoff is the maintenance win every regression suite needs: when the login field is renamed or the sign-in button moves, you fix `helpers/login.md` once and every check that imports it is fixed. Twenty tests that each begin with the same login no longer mean twenty edits.
 
 A sensible layout for the whole suite:
 
@@ -138,7 +138,7 @@ A sensible layout for the whole suite:
     └── preview.json
 ```
 
-Keep helpers small and imperative — one action per line, the same rules as any test — and name them for the flow they encapsulate (`login.md`, `add_to_cart.md`, `open_admin.md`).
+Keep helpers small and imperative — one action per line — and name them for the flow they encapsulate (`login.md`, `add_to_cart.md`, `open_admin.md`).
 
 ## Make it deterministic enough to trust
 
@@ -204,7 +204,7 @@ jobs:
           path: ${{ matrix.flow }}.ndjson
 ```
 
-Three details are doing the quiet work. `fail-fast: false` lets every flow report its own result instead of cancelling siblings the moment one goes red. The redirect (`> login.ndjson`) captures the clean NDJSON on stdout while the Actions log still shows readable progress on stderr. And `if: always()` on the upload step means a *failing* run — exactly when you most want the evidence — still archives its artifact. There is no "parse results" step, because the run step already failed precisely when the regression check failed.
+Three details are doing the quiet work. `fail-fast: false` lets every flow report its own result instead of cancelling siblings the moment one goes red. The redirect (`> login.ndjson`) captures the clean NDJSON on stdout while the Actions log still shows readable progress on stderr. And `if: always()` on the upload step means a *failing* run — exactly when you most want the evidence — still archives its artifact. There is no "parse results" step, because the run step already failed when the regression check did.
 
 The final NDJSON line is always a single `run_end` event carrying the verdict, duration, and any stored values, so `tail -1 login.ndjson | jq` pulls the result and the `order_id` you captured. There is a fuller treatment of CI wiring, secrets, and matrix patterns on the [BrowserBash blog](https://browserbash.com/blog).
 
