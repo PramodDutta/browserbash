@@ -1,7 +1,5 @@
 import { Bo } from '@/components/Bo';
 import { HeroScene } from '@/components/HeroScene';
-import { WaitlistForm } from '@/components/WaitlistForm';
-import { Counter } from '@/components/Counter';
 import { TryIt } from '@/components/TryIt';
 import { CopyButton } from '@/components/CopyButton';
 import { Reveal } from '@/components/Reveal';
@@ -59,8 +57,15 @@ export default async function Page() {
                         <code>$ {INSTALL}</code>
                         <CopyButton text={INSTALL} />
                     </div>
-                    <WaitlistForm />
-                    <Counter />
+                    <div className="hero__cta">
+                        <a className="pixel-btn hero__cta-go" href="/dashboard">Create your free account →</a>
+                        <a className="pixel-btn ghost" href="#demo">Watch a run</a>
+                    </div>
+                    <p className="hero__cta-note">
+                        Free, no card. The CLI runs fully local with zero signup — create an account only for the
+                        dashboard: run history, recordings and a per-run replay. Cloud runs are kept <strong>15 days</strong> on
+                        the free plan.
+                    </p>
                 </div>
                 <HeroScene />
             </header>
@@ -178,11 +183,11 @@ export default async function Page() {
                 </Reveal>
                 <div className="features">
                     {[
-                        ['No signup, ever', 'npm install and you are automating in sixty seconds. No login command, no credits, no dashboard upload.'],
+                        ['Zero signup to run', 'npm install and automate in sixty seconds — no account needed for the CLI. A free dashboard account is optional, for run history and recordings.'],
                         ['Open source all the way down', 'Apache-2.0 with the full agent loop in the repo. Read it, fork it, fix it — not just the README.'],
                         ['Your models, your machine', 'Local Ollama by default — free, private, unmetered. Or bring an Anthropic or OpenRouter key and swap models with one flag.'],
                         ['Cloud-neutral by design', 'Browserbase, LambdaTest, BrowserStack or your own Chrome. Use the grid your team already pays for.'],
-                        ['Private by default', 'Runs never leave your machine unless you point them at a cloud. Nothing phones home.'],
+                        ['Private by default', 'Runs never leave your machine unless you add --upload. Nothing phones home on its own.'],
                         ['Built for CI, not demos', 'Natural-language E2E test automation with exit codes your pipeline already understands.'],
                     ].map(([title, body], i) => (
                         <Reveal key={title} delay={(i % 3) * 100}>

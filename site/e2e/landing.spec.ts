@@ -1,14 +1,15 @@
 import { test, expect, type Page } from '@playwright/test';
 
 /**
- * The Counter fetches /api/stats on mount, which makes it a reliable
- * "React has hydrated" signal — interacting earlier loses input to the
- * hydration swap.
+ * The landing page is mostly server-rendered; the interactive bits (TryIt
+ * tabs, Terminal autoplay) need React to hydrate first. Waiting for the demo
+ * terminal to paint plus a network-idle settle is a reliable "hydrated" proxy
+ * now that the waitlist Counter (which used to fetch /api/stats) is gone.
  */
 async function gotoHydrated(page: Page): Promise<void> {
-    const mounted = page.waitForRequest('**/api/stats', { timeout: 15000 });
     await page.goto('/');
-    await mounted;
+    await page.locator('#demo .terminal').waitFor({ state: 'visible' });
+    await page.waitForLoadState('networkidle');
 }
 
 test.describe('landing page', () => {
@@ -20,45 +21,13 @@ test.describe('landing page', () => {
         await expect(page.locator('#features .feature')).toHaveCount(6);
     });
 
-    test('waitlist submit success shows position', async ({ page }) => {
-        await page.route('**/api/waitlist', (route) =>
-            route.fulfill({ json: { position: 42, already: false } }),
-        );
-        await gotoHydrated(page);
-        await page.getByLabel('Email address').fill('qa@example.com');
-        await page.getByRole('button', { name: 'Join waitlist' }).click();
-        await expect(page.locator('.wl--success')).toContainText('#42');
-    });
-
-    test('duplicate email shows already-on-list state', async ({ page }) => {
-        await page.route('**/api/waitlist', (route) =>
-            route.fulfill({ json: { position: 7, already: true } }),
-        );
-        await gotoHydrated(page);
-        await page.getByLabel('Email address').fill('dup@example.com');
-        await page.getByRole('button', { name: 'Join waitlist' }).click();
-        await expect(page.locator('.wl--success')).toContainText('Already on the list');
-    });
-
-    test('API error shows retry message', async ({ page }) => {
-        await page.route('**/api/waitlist', (route) =>
-            route.fulfill({ status: 503, json: { error: 'Could not save right now — please retry.' } }),
-        );
-        await gotoHydrated(page);
-        await page.getByLabel('Email address').fill('err@example.com');
-        await page.getByRole('button', { name: 'Join waitlist' }).click();
-        await expect(page.locator('.wl__error')).toContainText('retry');
-    });
-
-    test('counter shows when stats available, hides when null', async ({ page }) => {
-        await page.route('**/api/stats', (route) => route.fulfill({ json: { count: 128 } }));
-        await gotoHydrated(page);
-        await expect(page.locator('.counter')).toContainText('128');
-
-        await page.unroute('**/api/stats');
-        await page.route('**/api/stats', (route) => route.fulfill({ json: { count: null } }));
-        await gotoHydrated(page);
-        await expect(page.locator('.counter')).toHaveCount(0);
+    test('hero CTA points anonymous visitors at the dashboard signup', async ({ page }) => {
+        await page.goto('/');
+        const cta = page.locator('.hero__cta-go');
+        await expect(cta).toContainText('Create your free account');
+        await expect(cta).toHaveAttribute('href', '/dashboard');
+        // No waitlist form should remain anywhere on the page.
+        await expect(page.locator('.wl, .counter')).toHaveCount(0);
     });
 
     test('try-it switches recordings', async ({ page }) => {
@@ -81,7 +50,7 @@ test.describe('landing page', () => {
         const status = res?.status() ?? 0;
         const onClerkSignIn = /accounts\.dev|clerk/.test(page.url());
         expect(status === 404 || onClerkSignIn).toBe(true);
-        await expect(page.locator('.dash__table')).toHaveCount(0);
+        await expect(page.locator('.dash__runs')).toHaveCount(0);
     });
 
     test('SEO artifacts respond', async ({ request }) => {

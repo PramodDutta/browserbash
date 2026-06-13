@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Creates the waitlist table. Usage: DATABASE_URL=... node scripts/db-init.mjs
+// Creates the dashboard tables. Usage: DATABASE_URL=... node scripts/db-init.mjs
 import { neon } from '@neondatabase/serverless';
 
 const url = process.env.DATABASE_URL;
@@ -9,16 +9,6 @@ if (!url) {
 }
 
 const sql = neon(url);
-
-await sql`
-    CREATE TABLE IF NOT EXISTS waitlist (
-        id         SERIAL PRIMARY KEY,
-        email      TEXT UNIQUE NOT NULL,
-        name       TEXT,
-        use_case   TEXT,
-        source     TEXT DEFAULT 'landing',
-        created_at TIMESTAMPTZ DEFAULT now()
-    )`;
 
 await sql`
     CREATE TABLE IF NOT EXISTS onboarding (
@@ -56,7 +46,6 @@ await sql`
     )`;
 await sql`CREATE INDEX IF NOT EXISTS runs_user_time ON runs (user_id, created_at DESC)`;
 
-const [{ count }] = await sql`SELECT COUNT(*)::int AS count FROM waitlist`;
 const [{ ob }] = await sql`SELECT COUNT(*)::int AS ob FROM onboarding`;
 const [{ rn }] = await sql`SELECT COUNT(*)::int AS rn FROM runs`;
-console.log(`waitlist ${count} · onboarding ${ob} · runs ${rn} — all tables ready`);
+console.log(`onboarding ${ob} · runs ${rn} — all tables ready`);

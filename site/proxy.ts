@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 // configured, so the public site builds and runs without them.
 // NOTE: /api/runs is deliberately absent — its POST authenticates CLI calls
 // with a Bearer API key (no browser session); both handlers self-auth.
-const isProtected = createRouteMatcher(['/dashboard(.*)', '/api/export', '/api/onboarding', '/api/keys']);
+const isProtected = createRouteMatcher(['/dashboard(.*)', '/api/onboarding', '/api/keys']);
 const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 export default hasClerk

@@ -9,7 +9,6 @@ import { RunsTable } from '@/components/RunsTable';
 import { CopyButton } from '@/components/CopyButton';
 import { Terminal, type DemoRecording } from '@/components/Terminal';
 import { sql } from '@/lib/db';
-import { isAdmin } from '@/lib/admin';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import '../landing.css';
@@ -17,20 +16,8 @@ import './dashboard.css';
 
 export const dynamic = 'force-dynamic';
 
-interface Row {
-    id: number;
-    email: string;
-    name: string | null;
-    use_case: string | null;
-    created_at: string;
-}
-
-interface DayCount {
-    day: string;
-    count: number;
-}
-
 const INSTALL = 'npm install -g browserbash-cli';
+const RETENTION_DAYS = 15;
 
 export default async function Dashboard() {
     if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) notFound();
@@ -39,35 +26,12 @@ export default async function Dashboard() {
     if (!user) notFound(); // proxy redirects first; belt-and-braces
     const email = (user.primaryEmailAddress?.emailAddress ?? user.emailAddresses?.[0]?.emailAddress ?? '').toLowerCase();
     const firstName = user.firstName ?? email.split('@')[0] ?? 'tester';
-    const admin = isAdmin(email);
 
     const db = sql();
-
-    // user data
-    const wl = (await db`SELECT id FROM waitlist WHERE email = ${email} LIMIT 1`) as Array<{ id: number }>;
-    const position = wl.length > 0
-        ? Number(((await db`SELECT COUNT(*)::int AS pos FROM waitlist WHERE id <= ${wl[0].id}`) as Array<{ pos: number }>)[0].pos)
-        : null;
     const doneSteps = ((await db`SELECT step FROM onboarding WHERE user_id = ${user.id}`) as Array<{ step: string }>).map((r) => r.step);
 
     const demoRaw = await fs.readFile(path.join(process.cwd(), 'public/demos/login.json'), 'utf8');
     const demo = JSON.parse(demoRaw) as DemoRecording;
-
-    // admin data
-    let total = 0;
-    let days: DayCount[] = [];
-    let rows: Row[] = [];
-    if (admin) {
-        total = Number(((await db`SELECT COUNT(*)::int AS total FROM waitlist`) as Array<{ total: number }>)[0].total);
-        days = (await db`
-            SELECT to_char(created_at::date, 'YYYY-MM-DD') AS day, COUNT(*)::int AS count
-            FROM waitlist WHERE created_at > now() - interval '7 days'
-            GROUP BY 1 ORDER BY 1`) as unknown as DayCount[];
-        rows = (await db`
-            SELECT id, email, name, use_case, to_char(created_at, 'YYYY-MM-DD HH24:MI') AS created_at
-            FROM waitlist ORDER BY id DESC LIMIT 50`) as unknown as Row[];
-    }
-    const max = Math.max(1, ...days.map((d) => d.count));
 
     return (
         <>
@@ -94,21 +58,14 @@ export default async function Dashboard() {
 
                 <section className="dash__cards">
                     <div className="pixel-card dash__stat">
-                        {position !== null ? (
-                            <>
-                                <span className="dash__num">#{position}</span>
-                                <span className="dash__lbl">your waitlist spot</span>
-                            </>
-                        ) : (
-                            <>
-                                <span className="dash__num">—</span>
-                                <span className="dash__lbl">not on the waitlist yet</span>
-                                <a href="/#top" className="dash__join">join with {email} →</a>
-                            </>
-                        )}
+                        <span className="dash__num">Free</span>
+                        <span className="dash__lbl">your plan</span>
+                        <p className="dash__join">
+                            Cloud runs kept {RETENTION_DAYS} days. <a href="/pricing">Upgrade to keep them →</a>
+                        </p>
                     </div>
                     <div className="pixel-card dash__stat">
-                        <span className="dash__num">v1.2.0</span>
+                        <span className="dash__num">v1.3.0</span>
                         <span className="dash__lbl">latest CLI on npm</span>
                         <div className="dash__install">
                             <code>{INSTALL}</code>
@@ -142,53 +99,6 @@ export default async function Dashboard() {
                         </div>
                     </div>
                 </section>
-
-                {admin && (
-                    <section className="dash__admin">
-                        <header className="dash__head">
-                            <h2>Admin — waitlist</h2>
-                            <a className="pixel-btn ghost" href="/api/export">Export CSV</a>
-                        </header>
-                        <div className="dash__cards">
-                            <div className="pixel-card dash__stat">
-                                <span className="dash__num">{total.toLocaleString()}</span>
-                                <span className="dash__lbl">total signups</span>
-                            </div>
-                            <div className="pixel-card dash__stat">
-                                <span className="dash__num">{days.reduce((a, d) => a + d.count, 0)}</span>
-                                <span className="dash__lbl">last 7 days</span>
-                            </div>
-                            <div className="pixel-card dash__chart" aria-label="Signups per day, last 7 days">
-                                {days.length === 0 && <span className="dash__lbl">no signups yet</span>}
-                                {days.map((d) => (
-                                    <div className="dash__bar" key={d.day} title={`${d.day}: ${d.count}`}>
-                                        <div className="dash__bar-fill" style={{ height: `${(d.count / max) * 100}%` }} />
-                                        <span>{d.day.slice(5)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <table className="dash__table pixel-card">
-                            <thead>
-                                <tr><th>#</th><th>Email</th><th>Name</th><th>Use case</th><th>When</th></tr>
-                            </thead>
-                            <tbody>
-                                {rows.map((r) => (
-                                    <tr key={r.id}>
-                                        <td>{r.id}</td>
-                                        <td>{r.email}</td>
-                                        <td>{r.name ?? '—'}</td>
-                                        <td>{r.use_case ?? '—'}</td>
-                                        <td>{r.created_at}</td>
-                                    </tr>
-                                ))}
-                                {rows.length === 0 && (
-                                    <tr><td colSpan={5}>Nobody yet — share the link.</td></tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </section>
-                )}
             </main>
         </>
     );
