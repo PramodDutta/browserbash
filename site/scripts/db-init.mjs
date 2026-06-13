@@ -59,6 +59,16 @@ await sql`
         updated_at TIMESTAMPTZ DEFAULT now()
     )`;
 
+// Landing hero A/B test events (impressions + cta_clicks per variant).
+await sql`
+    CREATE TABLE IF NOT EXISTS ab_events (
+        id         BIGSERIAL PRIMARY KEY,
+        variant    TEXT NOT NULL,
+        event      TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT now()
+    )`;
+await sql`CREATE INDEX IF NOT EXISTS ab_events_variant ON ab_events (variant, event)`;
+
 const [{ ob }] = await sql`SELECT COUNT(*)::int AS ob FROM onboarding`;
 const [{ rn }] = await sql`SELECT COUNT(*)::int AS rn FROM runs`;
 const [{ pl }] = await sql`SELECT COUNT(*)::int AS pl FROM plans`;

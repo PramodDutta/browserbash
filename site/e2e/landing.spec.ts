@@ -24,8 +24,9 @@ test.describe('landing page', () => {
     test('hero CTA and nav route to the free sign-up / log-in', async ({ page }) => {
         await page.goto('/');
         const cta = page.locator('.hero__cta-go');
+        // Default (no cookie) is variant A; CTA carries the A/B tag in the query.
         await expect(cta).toContainText('Create your free account');
-        await expect(cta).toHaveAttribute('href', '/sign-up');
+        await expect(cta).toHaveAttribute('href', /\/sign-up/);
         // Sign up + Log in are clearly visible in the nav.
         await expect(page.locator('.nav__signup')).toHaveAttribute('href', '/sign-up');
         await expect(page.locator('.nav__login')).toHaveAttribute('href', '/sign-in');

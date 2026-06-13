@@ -1,8 +1,10 @@
+import { cookies } from 'next/headers';
 import { Bo } from '@/components/Bo';
 import { HeroScene } from '@/components/HeroScene';
 import { TryIt } from '@/components/TryIt';
 import { CopyButton } from '@/components/CopyButton';
 import { Reveal } from '@/components/Reveal';
+import { AbTrack } from '@/components/AbTrack';
 import { Terminal, type DemoRecording } from '@/components/Terminal';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -15,8 +17,20 @@ async function heroDemo(): Promise<DemoRecording> {
     return JSON.parse(raw) as DemoRecording;
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }: { searchParams: Promise<{ v?: string | string[] }> }) {
     const demo = await heroDemo();
+
+    // A/B hero test: ?v=a|b forces a variant (preview); otherwise the bb_hero
+    // cookie (assigned 50/50 by the proxy) decides. Default 'a' for crawlers.
+    const sp = await searchParams;
+    const forced = Array.isArray(sp?.v) ? sp.v[0] : sp?.v;
+    const cookieStore = await cookies();
+    const variant: 'a' | 'b' =
+        forced === 'a' || forced === 'b'
+            ? forced
+            : cookieStore.get('bb_hero')?.value === 'b'
+              ? 'b'
+              : 'a';
 
     return (
         <>
@@ -41,30 +55,61 @@ export default async function Page() {
 
             <main>
             <header className="hero container" id="top">
-                <div className="hero__copy">
-                    <p className="section-tag">free · open source · apache-2.0</p>
-                    <h1>
-                        Plain English in.<br />
-                        <span className="hero__accent">Real browser</span> out.
-                    </h1>
-                    <p className="hero__sub">
-                        BrowserBash is a <strong>free, open-source</strong> natural-language browser automation
-                        CLI — an AI agent drives a real browser from a plain-English objective. Runs on{' '}
-                        <strong>free local models (Ollama) or free OpenRouter models — zero API keys, no credit card</strong>.
-                        Bring an Anthropic or OpenRouter key only if you want to.
-                    </p>
-                    <div className="hero__install pixel-card">
-                        <code>$ {INSTALL}</code>
-                        <CopyButton text={INSTALL} />
-                    </div>
-                    <div className="hero__cta">
-                        <a className="pixel-btn hero__cta-go" href="/sign-up">Create your free account →</a>
-                        <a className="pixel-btn ghost" href="#start">3-step quick start</a>
-                    </div>
-                    <p className="hero__cta-note">
-                        100% free to use. Install the CLI and automate in seconds — no signup needed to run.
-                        Create a free account for the dashboard: run history, video recordings and per-run replay.
-                    </p>
+                <AbTrack variant={variant} />
+                <div className="hero__copy" data-variant={variant}>
+                    {variant === 'b' ? (
+                        <>
+                            <p className="section-tag">100% free · no API keys · open source</p>
+                            <h1>
+                                Describe a test.<br />
+                                <span className="hero__accent">Watch AI run it.</span>
+                            </h1>
+                            <p className="hero__sub">
+                                BrowserBash turns one plain-English sentence into a real browser test —{' '}
+                                <strong>no selectors, no code, no flaky locators</strong>. It runs on{' '}
+                                <strong>free local (Ollama) or free OpenRouter models</strong>, so there are zero
+                                API keys and no credit card. Open source, Apache-2.0.
+                            </p>
+                            <div className="hero__install pixel-card">
+                                <code>$ {INSTALL}</code>
+                                <CopyButton text={INSTALL} />
+                            </div>
+                            <div className="hero__cta">
+                                <a className="pixel-btn hero__cta-go" href="/sign-up?v=b" data-ab="cta">Start free in 60 seconds →</a>
+                                <a className="pixel-btn ghost" href="#demo">See it run</a>
+                            </div>
+                            <p className="hero__cta-note">
+                                Free forever for the CLI — install and automate any site in seconds. A free account
+                                adds a dashboard with run history, video recordings and per-run replays.
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <p className="section-tag">free · open source · apache-2.0</p>
+                            <h1>
+                                Plain English in.<br />
+                                <span className="hero__accent">Real browser</span> out.
+                            </h1>
+                            <p className="hero__sub">
+                                BrowserBash is a <strong>free, open-source</strong> natural-language browser automation
+                                CLI — an AI agent drives a real browser from a plain-English objective. Runs on{' '}
+                                <strong>free local models (Ollama) or free OpenRouter models — zero API keys, no credit card</strong>.
+                                Bring an Anthropic or OpenRouter key only if you want to.
+                            </p>
+                            <div className="hero__install pixel-card">
+                                <code>$ {INSTALL}</code>
+                                <CopyButton text={INSTALL} />
+                            </div>
+                            <div className="hero__cta">
+                                <a className="pixel-btn hero__cta-go" href="/sign-up?v=a" data-ab="cta">Create your free account →</a>
+                                <a className="pixel-btn ghost" href="#start">3-step quick start</a>
+                            </div>
+                            <p className="hero__cta-note">
+                                100% free to use. Install the CLI and automate in seconds — no signup needed to run.
+                                Create a free account for the dashboard: run history, video recordings and per-run replay.
+                            </p>
+                        </>
+                    )}
                 </div>
                 <HeroScene />
             </header>
