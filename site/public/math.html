@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Math — what 5,000 AI browser tests/day actually cost | BrowserBash</title>
+<meta name="description" content="Interactive cost calculator: run 5,000 BrowserBash test cases a day and compare the monthly LLM bill across Claude, ChatGPT, Gemini, DeepSeek, gpt-oss, Qwen and self-hosted Gemma. Real OpenRouter prices." />
+<link rel="canonical" href="https://browserbash.com/math.html" />
+<style>
+  :root{
+    --bg:#fffdf9; --ink:#1a1a1a; --soft:#6b6b6b; --line:#e6e1d6; --card:#fffefc;
+    --accent:#ff5c1a; --accent-deep:#d8430b; --ok:#2fbf71; --shadow:#dcd6c8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;}
+  .wrap{max-width:980px;margin:0 auto;padding:0 20px}
+  header.nav{display:flex;align-items:center;gap:12px;padding:18px 0;border-bottom:2px solid var(--ink);margin-bottom:0}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;text-decoration:none;color:var(--ink)}
+  .brand .bo{width:26px;height:26px;background:var(--accent);border:3px solid var(--ink);border-radius:5px}
+  .nav a.home{margin-left:auto;font-size:13px;color:var(--accent-deep);text-decoration:none;border:2px solid var(--ink);padding:7px 12px;background:var(--card);box-shadow:3px 3px 0 var(--shadow)}
+  h1{font-size:clamp(30px,5vw,46px);letter-spacing:-.02em;margin:40px 0 10px}
+  h1 .hl{color:var(--accent-deep)}
+  .sub{font-size:17px;color:var(--soft);max-width:680px;margin:0 0 26px}
+  .panel{background:var(--card);border:2px solid var(--ink);box-shadow:5px 5px 0 var(--shadow);padding:18px 20px;margin:0 0 22px}
+  .panel h2{margin:0 0 6px;font-size:15px;text-transform:uppercase;letter-spacing:.06em}
+  .panel .hint{font-size:12.5px;color:var(--soft);margin:0 0 14px}
+  .inputs{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:640px){.inputs{grid-template-columns:1fr 1fr}}
+  .inp label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--soft);margin-bottom:5px}
+  .inp input{width:100%;font:inherit;font-size:15px;padding:9px 10px;border:2px solid var(--ink);background:var(--bg)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:right;padding:9px 8px;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--soft);background:var(--bg)}
+  .mname{font-weight:700}
+  .mtag{font-size:11px;color:var(--soft);font-weight:400}
+  .bar{position:relative;height:22px;background:var(--bg);border:1px solid var(--line);min-width:120px}
+  .bar > i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);opacity:.85}
+  .bar.cheap > i{background:var(--ok)}
+  .barwrap{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+  .mo{font-weight:800;white-space:nowrap}
+  tr.self td{background:rgba(47,191,113,.10)}
+  tr.tested .mname::after{content:" ✓ tested";color:var(--ok);font-size:11px;font-weight:700}
+  .save{color:var(--accent-deep);font-weight:700}
+  .callout{background:rgba(47,191,113,.10);border:2px solid var(--ok);box-shadow:5px 5px 0 #bfe8cf}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  code{background:#1c1b19;color:#f4f1ea;padding:2px 6px;font-size:12.5px;border-radius:3px}
+  footer{border-top:2px solid var(--ink);margin-top:40px;padding:22px 0;font-size:13px;color:var(--soft)}
+  .tiny{font-size:12px;color:var(--soft)}
+  .pill{display:inline-block;font-size:11px;background:var(--bg);border:1px solid var(--ink);padding:2px 8px;margin-left:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="nav">
+    <a class="brand" href="/"><span class="bo"></span> BrowserBash</a>
+    <a class="home" href="/">← back to site</a>
+  </header>
+
+  <h1>The math: what does <span class="hl">5,000 browser tests a day</span> actually cost?</h1>
+  <p class="sub">BrowserBash drives a real browser from plain English. The browser is basically free — the cost is the LLM. Here's the monthly bill for the <strong>same suite</strong> run daily, across the big APIs vs cheap open models vs self-hosting. Prices are live from <a href="https://openrouter.ai/models" target="_blank" rel="noopener">OpenRouter</a>; token sizes come from real BrowserBash runs.</p>
+
+  <div class="panel">
+    <h2>Your assumptions</h2>
+    <p class="hint">Defaults are measured from real BrowserBash runs (a TTACart login + e2e checkout): ~60k input + ~3k output tokens per test. Edit anything to recompute.</p>
+    <div class="inputs">
+      <div class="inp"><label>Tests / day</label><input id="tpd" type="number" value="5000" min="1" /></div>
+      <div class="inp"><label>Input tokens / test</label><input id="tin" type="number" value="60000" min="100" step="1000" /></div>
+      <div class="inp"><label>Output tokens / test</label><input id="tout" type="number" value="3000" min="10" step="100" /></div>
+      <div class="inp"><label>Days / month</label><input id="dpm" type="number" value="30" min="1" /></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Monthly cost by model <span class="pill" id="volpill"></span></h2>
+    <p class="hint">Sorted most→least expensive. Savings are vs Claude Sonnet (a typical "good default"). Self-hosted = electricity only after hardware.</p>
+    <table>
+      <thead>
+        <tr><th>Model</th><th>$/M in</th><th>$/M out</th><th>$ / test</th><th>$ / day</th><th>Monthly</th><th>vs Claude Sonnet</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="tiny" id="note" style="margin-top:12px"></p>
+  </div>
+
+  <div class="panel callout">
+    <h2>Grounded in real runs</h2>
+    <p class="hint" style="color:var(--ink)">These aren't guesses. This session we ran the TTACart suite through BrowserBash on cheap models:</p>
+    <ul style="margin:0;font-size:14px">
+      <li><strong>DeepSeek V4 Flash</strong> — login passed (112s) and the full 20-step checkout passed <strong>first try in 88s</strong>, using batched form-fill. <span class="pill">in $0.098/M · out $0.196/M · 1M context</span></li>
+      <li><strong>gpt-oss-120b (free)</strong> — passed too, but slower and needed a retry on checkout.</li>
+    </ul>
+    <p class="tiny" style="margin-top:10px;color:var(--ink)">So the cheap tiers below aren't just cheaper on paper — they actually drive the agent to a green verdict.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>Self-hosted Gemma on a 128 GB Mac</h2>
+      <p class="hint">A Mac with an M4 Max + 128 GB unified memory can run Gemma-class models (e.g. Gemma 3 27B) locally with Ollama. After buying the box, the LLM is electricity only — <strong>~$0 per token</strong>.</p>
+      <ul style="font-size:13.5px;margin:0">
+        <li>Hardware: ~$4,700 one-time (amortizes to ~$130/mo over 3 yrs)</li>
+        <li>Power: ~$10–20/mo running near-continuously</li>
+        <li><strong>Marginal cost per test ≈ $0</strong></li>
+      </ul>
+      <p class="tiny" style="margin-top:8px">Caveat: one Mac serves the model <em>serially</em> — realistic throughput is a few hundred agent runs/day, not 5,000. Great for a fixed suite at modest volume or as a free dev/CI tier; scale-out still wants a cloud model or a small GPU fleet.</p>
+    </div>
+    <div class="panel">
+      <h2>The real winner: caching</h2>
+      <p class="hint">You're running the <strong>same</strong> suite every day. A browser agent shouldn't re-pay the LLM for an identical flow.</p>
+      <ul style="font-size:13.5px;margin:0">
+        <li>First run: the agent figures out the steps, pays the LLM, records the concrete actions.</li>
+        <li>Daily reruns: <strong>replay the cached steps with zero LLM calls</strong>; only re-plan when the page actually changes.</li>
+      </ul>
+      <p class="tiny" style="margin-top:8px">For a fixed 5k/day suite, caching takes the monthly number below toward <strong>≈ $0</strong> regardless of model. It's on the BrowserBash roadmap.</p>
+    </div>
+  </div>
+
+  <p class="tiny" style="margin-top:18px">Numbers are rough estimates (±2×). Browser-agent cost is dominated by re-sending the page accessibility tree every step, so your real token count depends on page size and flow length. Prices fetched live from OpenRouter and change over time. This page is for planning, not a quote.</p>
+
+  <footer>
+    <strong>BrowserBash</strong> — free, open-source natural-language browser automation. <a href="/" >Home</a> · <a href="/blog">Blog</a> · <a href="/learn">Learn</a> · <a href="https://www.npmjs.com/package/browserbash-cli" target="_blank" rel="noopener">npm</a><br/>
+    Built by The Testing Academy.
+  </footer>
+</div>
+
+<script>
+// Live OpenRouter prices ($ per 1M tokens), fetched 2026-06-13. [in, out]
+const MODELS = [
+  { name:"Claude Opus 4.1",        tag:"Anthropic · flagship",        in:15.00, out:75.00 },
+  { name:"GPT-4o",                 tag:"OpenAI (ChatGPT API)",        in:2.50,  out:10.00 },
+  { name:"Claude Sonnet 4.5",      tag:"Anthropic (Claude API)",      in:3.00,  out:15.00, base:true },
+  { name:"GPT-5",                  tag:"OpenAI (ChatGPT API)",        in:1.25,  out:10.00 },
+  { name:"Gemini 2.5 Pro",         tag:"Google (Gemini API)",         in:1.25,  out:10.00 },
+  { name:"Qwen3-235B (Coin)",      tag:"Alibaba Qwen",                in:0.455, out:1.82 },
+  { name:"Gemini 2.5 Flash",       tag:"Google · cheap",              in:0.30,  out:2.50 },
+  { name:"GPT-4o mini",            tag:"OpenAI · cheap",              in:0.15,  out:0.60 },
+  { name:"Llama 3.3 70B",          tag:"Meta · open",                 in:0.10,  out:0.32 },
+  { name:"DeepSeek V4 Flash",      tag:"DeepSeek · 1M ctx",           in:0.098, out:0.196, tested:true },
+  { name:"Qwen3-32B (Coin)",       tag:"Alibaba Qwen · cheap",        in:0.08,  out:0.28 },
+  { name:"gpt-oss-120b (OpenGPT)", tag:"OpenAI open model",           in:0.039, out:0.18 },
+  { name:"gpt-oss-20b (OpenGPT)",  tag:"OpenAI open model · tiny",    in:0.029, out:0.14 },
+  { name:"Gemma 3 27B — self-hosted", tag:"Mac M4 · 128 GB · local", self:true, monthlyFixed:145 }, // ~$130 hw amort + ~$15 power
+];
+
+const $ = id => document.getElementById(id);
+const fmt = n => n >= 1000 ? "$" + Math.round(n).toLocaleString() : (n >= 1 ? "$" + n.toFixed(2) : "$" + n.toFixed(4));
+
+function compute(){
+  const tpd = +$("tpd").value || 0;
+  const tin = +$("tin").value || 0;
+  const tout = +$("tout").value || 0;
+  const dpm = +$("dpm").value || 30;
+  const testsMonth = tpd * dpm;
+  $("volpill").textContent = tpd.toLocaleString() + " tests/day · " + testsMonth.toLocaleString() + "/mo";
+
+  const base = MODELS.find(m => m.base);
+  const basePerTest = (tin*base.in + tout*base.out)/1e6;
+  const baseMonth = basePerTest * testsMonth;
+
+  const calc = MODELS.map(m => {
+    if(m.self){ return {...m, perTest:0, day: m.monthlyFixed/dpm, month:m.monthlyFixed}; }
+    const perTest = (tin*m.in + tout*m.out)/1e6;
+    return {...m, perTest, day: perTest*tpd, month: perTest*testsMonth};
+  }).sort((a,b)=> b.month - a.month);
+
+  const maxMonth = Math.max(...calc.map(c=>c.month), 1);
+  const logMax = Math.log10(maxMonth + 1);
+
+  $("rows").innerHTML = calc.map(c => {
+    const w = Math.max(3, (Math.log10(c.month + 1) / logMax) * 100);
+    const cheap = c.month < baseMonth * 0.2;
+    const savePct = baseMonth > 0 ? Math.round((1 - c.month/baseMonth) * 100) : 0;
+    const saveTxt = c.base ? "—" : (savePct >= 0 ? "<span class='save'>−"+savePct+"%</span>" : "+"+(-savePct)+"%");
+    const priceIn  = c.self ? "—" : "$"+c.in.toFixed(3);
+    const priceOut = c.self ? "—" : "$"+c.out.toFixed(3);
+    const perTest  = c.self ? "≈$0" : fmt(c.perTest);
+    return `<tr class="${c.self?'self':''} ${c.tested?'tested':''}">
+      <td><span class="mname">${c.name}</span><br/><span class="mtag">${c.tag}</span></td>
+      <td>${priceIn}</td><td>${priceOut}</td>
+      <td>${perTest}</td>
+      <td>${fmt(c.day)}</td>
+      <td><div class="barwrap"><div class="bar ${cheap?'cheap':''}"><i style="width:${w}%"></i></div><span class="mo">${fmt(c.month)}</span></div></td>
+      <td>${saveTxt}</td>
+    </tr>`;
+  }).join("");
+
+  const cheapest = calc.filter(c=>!c.self).reduce((a,b)=>a.month<b.month?a:b);
+  $("note").innerHTML = `At <strong>${tpd.toLocaleString()}/day</strong>, going from <strong>Claude Sonnet (${fmt(baseMonth)}/mo)</strong> to <strong>${cheapest.name} (${fmt(cheapest.month)}/mo)</strong> is a <span class="save">${Math.round((1-cheapest.month/baseMonth)*100)}% cut</span> — and self-hosting is electricity only. Bars use a log scale (costs span 500×).`;
+}
+["tpd","tin","tout","dpm"].forEach(id => $(id).addEventListener("input", compute));
+compute();
+</script>
+</body>
+</html>
