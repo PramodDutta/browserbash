@@ -49,6 +49,18 @@ export const TUTORIAL: TutorialSection[] = [
         body: 'Connect the CLI to your dashboard with browserbash connect, then add --record to any run. A final screenshot is captured for every recorded run; on the builtin engine you also get a Playwright video and trace. Everything uploads to your private dashboard and shows up in a per-session view — verdict, extracted values, and the recording side by side.',
         code: '# one-time: link this machine to your dashboard\nbrowserbash connect --key bb_...   # generate the key at browserbash.com/dashboard\n\n# record a run — screenshot, plus video + trace on the builtin engine\nbrowserbash run "Open https://example.com and store the heading as \'h1\'" --record\n\n# view it at browserbash.com/dashboard -> your runs -> view',
     },
+    {
+        id: 'lambdatest',
+        title: 'Run on LambdaTest — every run recorded in the cloud',
+        body: "Point --provider lambdatest at LambdaTest's cloud grid and the browser runs on their infrastructure instead of your machine. Every session is automatically recorded on their side: full video, network log, and browser console, all waiting in the LambdaTest Automation dashboard the moment the run ends. BrowserBash also pushes the verdict back, so each session shows up already marked passed or failed, and prints the dashboard link as test_url. One note: cloud grids use the builtin engine, which speaks the Anthropic API — set ANTHROPIC_API_KEY (Ollama and OpenRouter models stay local-only).",
+        code: "# credentials: lambdatest.com -> Account Settings -> Password & Security\nexport LT_USERNAME=your_username\nexport LT_ACCESS_KEY=your_access_key\nexport ANTHROPIC_API_KEY=sk-ant-...        # cloud grids use the builtin (Anthropic) engine\n\n# or store creds once instead of env vars:\nbrowserbash login --provider lambdatest --username your_username --access-key your_access_key\n\nbrowserbash run \"Open https://www.saucedemo.com, log in as standard_user with password secret_sauce, and store the first product name as 'product'\" \\\n  --provider lambdatest\n\n# run ends with the session link:\n#   test_url: https://automation.lambdatest.com/build\n# -> open it: video replay, network log, console, and pass/fail status — recorded automatically",
+    },
+    {
+        id: 'browserstack',
+        title: 'Run on BrowserStack — video replay on Automate',
+        body: "The same one flag works for BrowserStack: --provider browserstack runs your plain-English objective on BrowserStack Automate. Their dashboard keeps a video recording of the whole session plus the text and network logs, and BrowserBash reports the verdict through the browserstack_executor protocol, so the session is marked passed or failed without you touching anything. Works for single runs and full testmd files alike — your markdown tests gain cloud video replay with zero changes to the test.",
+        code: "# credentials: browserstack.com -> Account & Profile -> Summary (Automate section)\nexport BROWSERSTACK_USERNAME=your_username\nexport BROWSERSTACK_ACCESS_KEY=your_access_key\nexport ANTHROPIC_API_KEY=sk-ant-...        # cloud grids use the builtin (Anthropic) engine\n\n# or: browserbash login --provider browserstack --username ... --access-key ...\n\n# single run on the grid\nbrowserbash run \"Open https://news.ycombinator.com and store the top story title as 'top_story'\" \\\n  --provider browserstack\n\n# whole markdown test file on the grid — same file, just add the flag\nbrowserbash testmd run .browserbash/tests/login_test.md --provider browserstack\n\n# test_url: https://automate.browserstack.com/dashboard\n# -> video replay + logs per session, already marked passed/failed",
+    },
 ];
 
 export const SCENARIOS: Scenario[] = [
@@ -237,5 +249,37 @@ export const SCENARIOS: Scenario[] = [
         ],
         expected: 'Exit code 0 and a Result.md containing the verdict plus both extracted values.',
         learns: 'Tests as reviewable markdown files your whole team can read.',
+    },
+    {
+        id: 'lambdatest-replay',
+        title: 'Cloud Replay: LambdaTest',
+        difficulty: 'advanced',
+        category: 'cloud',
+        targetUrl: 'https://www.saucedemo.com',
+        objective: "Run the SauceDemo cart flow on LambdaTest's grid and watch the full video replay in their Automation dashboard",
+        command: 'export LT_USERNAME=your_username\nexport LT_ACCESS_KEY=your_access_key\nexport ANTHROPIC_API_KEY=sk-ant-...\n\nbrowserbash run "Open https://www.saucedemo.com, log in as standard_user with password secret_sauce, add the Sauce Labs Backpack to the cart, and store the cart badge count as \'cart_count\'" --provider lambdatest --name "saucedemo cart"',
+        hints: [
+            'No --headless needed — the browser lives on their grid, not your machine.',
+            'The --name flag becomes the test name in the LambdaTest dashboard.',
+            'Cloud grids use the builtin engine, so ANTHROPIC_API_KEY is required.',
+        ],
+        expected: "Run passes with cart_count \"1\"; automation.lambdatest.com shows the session marked passed with full video, network log, and console.",
+        learns: 'Cloud execution: every run auto-recorded with video, no local browser.',
+    },
+    {
+        id: 'browserstack-replay',
+        title: 'Cloud Replay: BrowserStack',
+        difficulty: 'advanced',
+        category: 'cloud',
+        targetUrl: 'https://the-internet.herokuapp.com/login',
+        objective: 'Run a markdown test file on BrowserStack Automate and get a video replay of every step, marked passed or failed',
+        command: "cat > grid_login_test.md <<'EOF'\n# Secure area login (on the grid)\n\n- Open https://the-internet.herokuapp.com/login\n- Log in as tomsmith with password SuperSecretPassword!\n- Verify the page says 'You logged into a secure area'\nEOF\n\nexport BROWSERSTACK_USERNAME=your_username\nexport BROWSERSTACK_ACCESS_KEY=your_access_key\nexport ANTHROPIC_API_KEY=sk-ant-...\n\nbrowserbash testmd run ./grid_login_test.md --provider browserstack",
+        hints: [
+            'Same markdown file runs locally or on the grid — only the flag changes.',
+            'BrowserBash reports the verdict via the browserstack_executor protocol, so Automate shows passed/failed automatically.',
+            'The session video and logs land at automate.browserstack.com the moment the run ends.',
+        ],
+        expected: 'Exit code 0, Result.md written locally, and a BrowserStack Automate session marked passed with video replay.',
+        learns: 'The same reviewable test file, now with cloud video evidence per run.',
     },
 ];

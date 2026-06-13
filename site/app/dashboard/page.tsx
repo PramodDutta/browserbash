@@ -138,7 +138,7 @@ export default async function Dashboard() {
                         <h2>Secret Agent Login — real recorded run</h2>
                         <Terminal demo={demo} autoplay />
                         <div className="dash__demo-cta">
-                            <a className="pixel-btn ghost" href="/learn#challenges">all 12 scenarios →</a>
+                            <a className="pixel-btn ghost" href="/learn#challenges">all 14 scenarios →</a>
                         </div>
                     </div>
                 </section>

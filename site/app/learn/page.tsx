@@ -8,13 +8,13 @@ import '../landing.css';
 import './learn.css';
 
 export const metadata: Metadata = {
-    title: 'Learn BrowserBash — getting started + 12 practice scenarios',
+    title: 'Learn BrowserBash — getting started + 14 practice scenarios',
     description:
-        'Install BrowserBash, run your first plain-English browser test, wire up Ollama / Anthropic / OpenRouter, and practice on 12 real-site scenarios from beginner to advanced.',
+        'Install BrowserBash, run your first plain-English browser test, wire up Ollama / Anthropic / OpenRouter, run on LambdaTest or BrowserStack with cloud video recordings, and practice on 14 real-site scenarios.',
     alternates: { canonical: '/learn' },
     openGraph: {
-        title: 'Learn BrowserBash — tutorial + 12 practice scenarios',
-        description: 'Guided tour of the natural language browser automation CLI, plus 12 hands-on challenges against real sites.',
+        title: 'Learn BrowserBash — tutorial + 14 practice scenarios',
+        description: 'Guided tour of the natural language browser automation CLI, plus 14 hands-on challenges against real sites and cloud grids.',
         url: 'https://browserbash.com/learn',
         siteName: 'BrowserBash',
         images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Learn BrowserBash' }],
