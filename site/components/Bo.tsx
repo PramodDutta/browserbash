@@ -12,11 +12,12 @@ import './bo.css';
 const PALETTE: Record<string, string> = {
     D: 'var(--ink)',          // outline
     O: 'var(--accent)',       // body orange
-    A: 'var(--accent-deep)',  // antenna tip
-    W: '#ffffff',             // eye white
+    A: 'var(--accent-deep)',  // antenna / hair tip
+    W: '#ffffff',             // eye white / teeth
     B: 'var(--ink)',          // pupil
-    M: '#9aa3ad',             // hammer head steel
+    M: '#9aa3ad',             // goggle frame + hammer steel
     H: '#8a5a2b',             // hammer handle wood
+    J: '#3a6ea5',             // denim overall band
 };
 
 const ANTENNA: string[] = [
@@ -24,16 +25,17 @@ const ANTENNA: string[] = [
     '.......DD.......',
 ];
 
+// Minion-ish: domed head, one big goggle eye, wide laughing grin, denim band.
 const BODY: string[] = [
     '...DDDDDDDDDD...',
     '..DOOOOOOOOOOD..',
-    '.DOOOOOOOOOOOOD.',
-    '.DOOWWOOOOWWOOD.',
-    '.DOOWBOOOOWBOOD.',
-    '.DOOOOOOOOOOOOD.',
-    '.DOODDDDDDDOOOD.',
-    '.DOOOOOOOOOOOOD.',
-    '..DOOOOOOOOOOD..',
+    '.DMMMMMMMMMMMMD.',
+    '.DMMMWWWWWWMMMD.',
+    '.DMMMWWBBWWMMMD.',
+    '.DMMMMMMMMMMMMD.',
+    '.DOODWWWWWWDOOD.',
+    '.DOODDDDDDDDOOD.',
+    '.DJJJJJJJJJJJJD.',
     '...DDDDDDDDDD...',
 ];
 

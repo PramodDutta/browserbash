@@ -5,14 +5,17 @@
     user-select: none;
 }
 
-/* --- body bob (a touch more bounce) --- */
+/* --- body: laughing giggle (squash/stretch + bob) --- */
 .bo__body {
-    animation: bo-bob 1s steps(3) infinite;
+    transform-origin: 8px 13px;
+    animation: bo-giggle 0.9s ease-in-out infinite;
 }
 
-@keyframes bo-bob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-1px); }
+@keyframes bo-giggle {
+    0%, 100% { transform: translateY(0) scale(1, 1); }
+    25% { transform: translateY(-1px) scale(1.04, 0.96); }
+    50% { transform: translateY(0) scale(0.97, 1.03); }
+    75% { transform: translateY(-0.5px) scale(1.02, 0.98); }
 }
 
 /* --- antenna: springy sway + tip pulse --- */
