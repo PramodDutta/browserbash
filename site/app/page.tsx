@@ -5,9 +5,11 @@ import { CopyButton } from '@/components/CopyButton';
 import { Reveal } from '@/components/Reveal';
 import { AbTrack } from '@/components/AbTrack';
 import { Terminal, type DemoRecording } from '@/components/Terminal';
+import { SiteFooter } from '@/components/SiteFooter';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import './landing.css';
+import './marketing.css';
 
 const INSTALL = 'npm install -g browserbash-cli';
 
@@ -34,6 +36,8 @@ export default async function Page() {
                     <a href="#how">How it works</a>
                     <a href="#features">Features</a>
                     <a href="#start">Quick start</a>
+                    <a href="/features">Features</a>
+                    <a href="/pricing">Pricing</a>
                     <a href="/learn">Learn</a>
                     <a href="/blog">Blog</a>
                     <a href="/math.html">Cost</a>
@@ -272,22 +276,7 @@ browserbash run "..." --record --upload`}</pre>
 
             </main>
 
-            <footer className="footer">
-                <div className="container footer__in">
-                    <div className="footer__brand">
-                        <Bo size={32} interactive={false} />
-                        <span>BrowserBash</span>
-                    </div>
-                    <div className="footer__links">
-                        <a href="/learn">Learn</a>
-                        <a href="/blog">Blog</a>
-                        <a href="/sign-up">Sign up</a>
-                        <a href="/dashboard">Dashboard</a>
-                        <a href="https://www.npmjs.com/package/browserbash-cli" target="_blank" rel="noopener noreferrer">npm</a>
-                    </div>
-                    <p className="footer__credit">Built by The Testing Academy · Apache-2.0</p>
-                </div>
-            </footer>
+            <SiteFooter />
         </>
     );
 }

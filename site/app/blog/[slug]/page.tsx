@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 import { Bo } from '@/components/Bo';
 import { getPost, getPosts, extractFaqs } from '@/lib/blog';
+import { SiteFooter } from '@/components/SiteFooter';
 import '../../landing.css';
+import '../../marketing.css';
 import '../blog.css';
 
 export function generateStaticParams() {
@@ -143,20 +145,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 </div>
             </main>
 
-            <footer className="footer">
-                <div className="container footer__in">
-                    <div className="footer__brand">
-                        <Bo size={32} interactive={false} />
-                        <span>BrowserBash</span>
-                    </div>
-                    <div className="footer__links">
-                        <a href="/">Home</a>
-                        <a href="/blog">Blog</a>
-                        <a href="/learn">Learn</a>
-                    </div>
-                    <p className="footer__credit">Built by The Testing Academy</p>
-                </div>
-            </footer>
+            <SiteFooter />
         </>
     );
 }

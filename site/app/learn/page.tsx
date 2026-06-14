@@ -4,7 +4,9 @@ import { CopyButton } from '@/components/CopyButton';
 import { Challenges } from '@/components/Challenges';
 import { Reveal } from '@/components/Reveal';
 import { TUTORIAL, SCENARIOS } from '@/lib/learn-data';
+import { SiteFooter } from '@/components/SiteFooter';
 import '../landing.css';
+import '../marketing.css';
 import './learn.css';
 
 export const metadata: Metadata = {
@@ -92,20 +94,7 @@ export default function LearnPage() {
 
             </main>
 
-            <footer className="footer">
-                <div className="container footer__in">
-                    <div className="footer__brand">
-                        <Bo size={32} interactive={false} />
-                        <span>BrowserBash</span>
-                    </div>
-                    <div className="footer__links">
-                        <a href="/">Home</a>
-                        <a href="https://github.com/PramodDutta/browserbash" target="_blank" rel="noopener noreferrer">GitHub</a>
-                        <a href="https://www.npmjs.com/package/browserbash-cli" target="_blank" rel="noopener noreferrer">npm</a>
-                    </div>
-                    <p className="footer__credit">Built by The Testing Academy</p>
-                </div>
-            </footer>
+            <SiteFooter />
         </>
     );
 }

@@ -20,6 +20,20 @@ Key facts:
 - [README](https://github.com/PramodDutta/browserbash/blob/main/README.md): full reference.
 - [AI agent integration guide](https://github.com/PramodDutta/browserbash/blob/main/docs/agents.md): NDJSON schema, exit codes, store-as pattern.
 
+## Product
+
+- [Features](https://browserbash.com/features): full feature breakdown — plain-English objectives, markdown tests, providers, free models, recording, dashboards.
+- [Pricing](https://browserbash.com/pricing): free forever; optional paid cloud data retention only.
+- [FAQ](https://browserbash.com/faq): is it free, do I need an API key, which models, how it differs from Playwright/Selenium, CI, recordings.
+- [Changelog](https://browserbash.com/changelog): release history (v1.0.0 → v1.3.1).
+- [About](https://browserbash.com/about): why BrowserBash exists, built by The Testing Academy.
+- [Contact](https://browserbash.com/contact): support, bug reports, security, press.
+- [Brand & press kit](https://browserbash.com/brand): boilerplate, logos, colors, fast facts.
+
+## Legal
+
+- [Privacy Policy](https://browserbash.com/privacy) · [Terms](https://browserbash.com/terms) · [Cookie Policy](https://browserbash.com/cookies) · [Security](https://browserbash.com/security) · [Refunds](https://browserbash.com/refunds)
+
 ## Articles
 
 - [Blog index](https://browserbash.com/blog): comparisons, guides and use-cases for natural-language browser automation.

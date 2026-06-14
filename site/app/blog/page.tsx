@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { Bo } from '@/components/Bo';
 import { Reveal } from '@/components/Reveal';
 import { getPosts, type BlogPost } from '@/lib/blog';
+import { SiteFooter } from '@/components/SiteFooter';
 import '../landing.css';
+import '../marketing.css';
 import './blog.css';
 
 export const metadata: Metadata = {
@@ -112,21 +114,7 @@ export default function BlogIndex() {
             </section>
             </main>
 
-            <footer className="footer">
-                <div className="container footer__in">
-                    <div className="footer__brand">
-                        <Bo size={32} interactive={false} />
-                        <span>BrowserBash</span>
-                    </div>
-                    <div className="footer__links">
-                        <a href="/">Home</a>
-                        <a href="/learn">Learn</a>
-                        <a href="/sign-up">Sign up</a>
-                        <a href="https://github.com/PramodDutta/browserbash" target="_blank" rel="noopener noreferrer">GitHub</a>
-                    </div>
-                    <p className="footer__credit">Built by The Testing Academy</p>
-                </div>
-            </footer>
+            <SiteFooter />
         </>
     );
 }
