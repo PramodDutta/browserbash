@@ -46,6 +46,12 @@
   .rel.ok{background:rgba(47,191,113,.2);color:#08361d}
   .rel.bad{background:rgba(255,107,107,.25);color:#7a0c0c}
   .rel.unk{background:var(--bg);color:var(--soft)}
+  tr.popular td{background:rgba(255,200,87,.22)}
+  tr.popular td:first-child{border-left:4px solid #f5b301}
+  .pop{font-size:10px;font-weight:800;padding:1px 6px;border:1px solid var(--ink);background:#ffd24a;color:#5a3d00;white-space:nowrap}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--soft);margin:0 0 12px}
+  .legend b{color:var(--ink)}
+  .sw{display:inline-block;width:12px;height:12px;border:1px solid var(--ink);vertical-align:-1px;margin-right:4px}
   .save{color:var(--accent-deep);font-weight:700}
   .callout{background:rgba(47,191,113,.10);border:2px solid var(--ok);box-shadow:5px 5px 0 #bfe8cf}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -63,14 +69,14 @@
     <a class="home" href="/">← back to site</a>
   </header>
 
-  <h1>The math: what does <span class="hl">5,000 browser tests a day</span> actually cost?</h1>
+  <h1>The math: what does <span class="hl">500 browser tests a day</span> actually cost?</h1>
   <p class="sub">BrowserBash drives a real browser from plain English. The browser is basically free — the cost is the LLM. Here's the monthly bill for the <strong>same suite</strong> run daily, across the big APIs vs cheap open models vs self-hosting. Prices are live from <a href="https://openrouter.ai/models" target="_blank" rel="noopener">OpenRouter</a>; token sizes come from real BrowserBash runs.</p>
 
   <div class="panel">
     <h2>Your assumptions</h2>
     <p class="hint">Defaults are measured from real BrowserBash runs (a TTACart login + e2e checkout): ~60k input + ~3k output tokens per test. Edit anything to recompute.</p>
     <div class="inputs">
-      <div class="inp"><label>Tests / day</label><input id="tpd" type="number" value="5000" min="1" /></div>
+      <div class="inp"><label>Tests / day</label><input id="tpd" type="number" value="500" min="1" /></div>
       <div class="inp"><label>Input tokens / test</label><input id="tin" type="number" value="60000" min="100" step="1000" /></div>
       <div class="inp"><label>Output tokens / test</label><input id="tout" type="number" value="3000" min="10" step="100" /></div>
       <div class="inp"><label>Days / month</label><input id="dpm" type="number" value="30" min="1" /></div>
@@ -80,6 +86,10 @@
   <div class="panel">
     <h2>Monthly cost by model <span class="pill" id="volpill"></span></h2>
     <p class="hint">Sorted most→least expensive. Savings are vs Claude Sonnet (a typical "good default"). Self-hosted = electricity only after hardware.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:#ffd24a"></span><b>★ popular picks</b> — DeepSeek, open / free models &amp; local self-hosting (cheap + community favorites)</span>
+      <span><span class="sw" style="background:rgba(47,191,113,.6)"></span>✓ tested to drive the agent</span>
+    </div>
     <table>
       <thead>
         <tr><th>Model</th><th>$/M in</th><th>$/M out</th><th>$ / test</th><th>$ / day</th><th>Monthly</th><th>vs Claude Sonnet</th></tr>
@@ -109,7 +119,7 @@
         <li>Power: ~$10–20/mo running near-continuously</li>
         <li><strong>Marginal cost per test ≈ $0</strong></li>
       </ul>
-      <p class="tiny" style="margin-top:8px">Caveat: one Mac serves the model <em>serially</em> — realistic throughput is a few hundred agent runs/day, not 5,000. Great for a fixed suite at modest volume or as a free dev/CI tier; scale-out still wants a cloud model or a small GPU fleet.</p>
+      <p class="tiny" style="margin-top:8px">Caveat: one Mac serves the model <em>serially</em> — realistic throughput is a few hundred agent runs/day, so <strong>~500/day is doable on a single box</strong>. Scaling to thousands/day wants a cloud model or a small GPU fleet.</p>
     </div>
     <div class="panel">
       <h2>The real winner: caching</h2>
@@ -122,7 +132,7 @@
     </div>
   </div>
 
-  <p class="tiny" style="margin-top:18px">Numbers are rough estimates (±2×). Browser-agent cost is dominated by re-sending the page accessibility tree every step, so your real token count depends on page size and flow length. Prices fetched live from OpenRouter and change over time. This page is for planning, not a quote.</p>
+  <p class="tiny" style="margin-top:18px"><strong>* free tier:</strong> gpt-oss, Qwen and Llama have <code>:free</code> variants on OpenRouter — $0 but rate-limited (fine for dev/low volume, not sustained thousands/day). Numbers are rough estimates (±2×). Browser-agent cost is dominated by re-sending the page accessibility tree every step, so your real token count depends on page size and flow length. Prices fetched live from OpenRouter and change over time. This page is for planning, not a quote.</p>
 
   <footer>
     <strong>BrowserBash</strong> — free, open-source natural-language browser automation. <a href="/" >Home</a> · <a href="/blog">Blog</a> · <a href="/learn">Learn</a> · <a href="https://www.npmjs.com/package/browserbash-cli" target="_blank" rel="noopener">npm</a><br/>
@@ -133,22 +143,23 @@
 <script>
 // Live OpenRouter prices ($ per 1M tokens), fetched 2026-06-13. [in, out]
 const MODELS = [
-  { name:"Claude Opus 4.1",        tag:"Anthropic · flagship",        in:15.00, out:75.00 },
-  { name:"GPT-4o",                 tag:"OpenAI (ChatGPT API)",        in:2.50,  out:10.00 },
-  { name:"Claude Sonnet 4.5",      tag:"Anthropic (Claude API)",      in:3.00,  out:15.00, base:true },
-  { name:"GPT-5",                  tag:"OpenAI (ChatGPT API)",        in:1.25,  out:10.00 },
-  { name:"Gemini 2.5 Pro",         tag:"Google (Gemini API)",         in:1.25,  out:10.00 },
-  { name:"Qwen3-235B (Coin)",      tag:"Alibaba Qwen",                in:0.455, out:1.82 },
-  { name:"Gemini 2.5 Flash",       tag:"Google · cheap",              in:0.30,  out:2.50 },
-  { name:"GPT-4o mini",            tag:"OpenAI · cheap",              in:0.15,  out:0.60 },
-  { name:"Llama 3.3 70B",          tag:"Meta · open",                 in:0.10,  out:0.32 },
-  { name:"Gemini 2.5 Flash-Lite",  tag:"Google · cheapest Gemini",    in:0.10,  out:0.40, rel:"untested" },
-  { name:"DeepSeek V4 Flash",      tag:"DeepSeek · 1M ctx",           in:0.098, out:0.196, rel:"pass" },
-  { name:"Qwen3-32B (Coin)",       tag:"Alibaba Qwen · cheap",        in:0.08,  out:0.28 },
-  { name:"Tencent HY3 Preview",    tag:"Tencent · preview",           in:0.063, out:0.21, rel:"fail" },
-  { name:"gpt-oss-120b (OpenGPT)", tag:"OpenAI open model",           in:0.039, out:0.18 },
-  { name:"gpt-oss-20b (OpenGPT)",  tag:"OpenAI open model · tiny",    in:0.029, out:0.14 },
-  { name:"Gemma 3 27B — self-hosted", tag:"Mac M4 · 128 GB · local", self:true, monthlyFixed:145 }, // ~$130 hw amort + ~$15 power
+  { name:"Claude Opus 4.8",        tag:"Anthropic · flagship",         in:5.00,  out:25.00 },
+  { name:"GPT-5.5",                tag:"OpenAI · latest flagship",     in:5.00,  out:30.00 },
+  { name:"Claude Sonnet 4.6",      tag:"Anthropic (Claude API)",       in:3.00,  out:15.00, base:true },
+  { name:"GPT-5.4",               tag:"OpenAI (ChatGPT API)",         in:2.50,  out:15.00 },
+  { name:"Gemini 2.5 Pro",         tag:"Google (Gemini API)",          in:1.25,  out:10.00 },
+  { name:"GPT-5.4 mini",          tag:"OpenAI · cheap (latest)",      in:0.75,  out:4.50 },
+  { name:"Qwen3-235B (Coin)",      tag:"Alibaba Qwen · open",          in:0.455, out:1.82 },
+  { name:"Gemini 2.5 Flash",       tag:"Google · cheap",               in:0.30,  out:2.50 },
+  { name:"GPT-5.4 nano",          tag:"OpenAI · cheapest (latest)",   in:0.20,  out:1.25 },
+  { name:"Gemini 2.5 Flash-Lite",  tag:"Google · cheapest Gemini",     in:0.10,  out:0.40, rel:"untested" },
+  { name:"Llama 3.3 70B",          tag:"Meta · open / free*",          in:0.10,  out:0.32, popular:true },
+  { name:"DeepSeek V4 Flash",      tag:"DeepSeek · 1M ctx",            in:0.098, out:0.196, rel:"pass", popular:true },
+  { name:"Qwen3-32B (Coin)",       tag:"Alibaba Qwen · open / free*",  in:0.08,  out:0.28, popular:true },
+  { name:"Tencent HY3 Preview",    tag:"Tencent · preview",            in:0.063, out:0.21, rel:"fail" },
+  { name:"gpt-oss-120b (OpenGPT)", tag:"OpenAI open · free* tier",     in:0.039, out:0.18, popular:true },
+  { name:"gpt-oss-20b (OpenGPT)",  tag:"OpenAI open · free* tier",     in:0.029, out:0.14, popular:true },
+  { name:"Gemma 3 27B — self-hosted", tag:"Mac M4 · 128 GB · LOCAL",   self:true, monthlyFixed:145, popular:true }, // ~$130 hw amort + ~$15 power
 ];
 
 const $ = id => document.getElementById(id);
@@ -186,8 +197,9 @@ function compute(){
     const relBadge = c.rel === "pass" ? '<span class="rel ok">✓ drives the agent</span>'
                    : c.rel === "fail" ? '<span class="rel bad">✗ failed to drive</span>'
                    : c.rel === "untested" ? '<span class="rel unk">untested</span>' : '';
-    return `<tr class="${c.self?'self':''} ${c.rel==='fail'?'failrow':''}">
-      <td><span class="mname">${c.name}</span> ${relBadge}<br/><span class="mtag">${c.tag}</span></td>
+    const popBadge = c.popular ? '<span class="pop">★ popular</span>' : '';
+    return `<tr class="${c.self?'self':''} ${c.popular?'popular':''} ${c.rel==='fail'?'failrow':''}">
+      <td><span class="mname">${c.name}</span> ${popBadge} ${relBadge}<br/><span class="mtag">${c.tag}</span></td>
       <td>${priceIn}</td><td>${priceOut}</td>
       <td>${perTest}</td>
       <td>${fmt(c.day)}</td>

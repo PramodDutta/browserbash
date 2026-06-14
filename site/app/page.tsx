@@ -36,6 +36,7 @@ export default async function Page() {
                     <a href="#start">Quick start</a>
                     <a href="/learn">Learn</a>
                     <a href="/blog">Blog</a>
+                    <a href="/math.html">Cost</a>
                 </div>
                 <div className="nav__auth">
                     <a className="pixel-btn ghost nav__login" href="/sign-in">Log in</a>
