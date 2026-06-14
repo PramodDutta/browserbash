@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Bricolage_Grotesque, Silkscreen, JetBrains_Mono } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
+import { GoogleAnalytics } from '@next/third-parties/google';
+import { Analytics } from '@/components/Analytics';
 import './globals.css';
 
 // Only the body font (LCP text) is preloaded; the pixel + mono faces are used
@@ -95,6 +97,7 @@ const AB_SCRIPT =
     "if(v==='b')document.documentElement.classList.add('ab-b');}catch(e){}})();";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+    const gaId = process.env.NEXT_PUBLIC_GA_ID;
     const page = (
         <html lang="en" className={`${body.variable} ${pixel.variable} ${mono.variable}`}>
             <body>
@@ -102,6 +105,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
                 {children}
+                {gaId && <Analytics />}
+                {gaId && <GoogleAnalytics gaId={gaId} />}
             </body>
         </html>
     );

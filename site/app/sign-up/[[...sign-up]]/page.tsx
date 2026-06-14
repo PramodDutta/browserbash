@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SignUp } from '@clerk/nextjs';
 import { Bo } from '@/components/Bo';
+import { TrackEvent } from '@/components/TrackEvent';
 import '../../landing.css';
 import '../../auth.css';
 
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 export default function Page() {
     return (
         <main className="authpage container">
+            <TrackEvent name="sign_up_view" />
             <a href="/" className="authpage__brand">
                 <Bo size={30} interactive={false} pose="idle" />
                 <span>BrowserBash</span>

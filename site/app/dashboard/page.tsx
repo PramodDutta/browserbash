@@ -6,6 +6,7 @@ import { Onboarding } from '@/components/Onboarding';
 import { BackendPicker } from '@/components/BackendPicker';
 import { ConnectCard } from '@/components/ConnectCard';
 import { RunsTable } from '@/components/RunsTable';
+import { TrackEvent } from '@/components/TrackEvent';
 import { CopyButton } from '@/components/CopyButton';
 import { Terminal, type DemoRecording } from '@/components/Terminal';
 import { sql } from '@/lib/db';
@@ -49,6 +50,7 @@ export default async function Dashboard() {
             </nav>
 
             <main className="dash container">
+                <TrackEvent name="login" params={{ plan }} />
                 <header className="dash__hello">
                     <Bo size={56} />
                     <div>
