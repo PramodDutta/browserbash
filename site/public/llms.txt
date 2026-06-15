@@ -23,6 +23,7 @@ Key facts:
 ## Product
 
 - [Features](https://browserbash.com/features): full feature breakdown — plain-English objectives, markdown tests, providers, free models, recording, dashboards.
+- [Case study — a real Playwright suite in plain English](https://browserbash.com/case-study): how The Testing Academy rewrote its production Playwright + TypeScript suite (AdvancePlaywrightFramework1x, testing the TTACart store: login → cart → checkout) as one plain-English BrowserBash markdown file, run with a single command on a free local model, recorded and replayable in the dashboard.
 - [Pricing](https://browserbash.com/pricing): free forever; optional paid cloud data retention only.
 - [FAQ](https://browserbash.com/faq): is it free, do I need an API key, which models, how it differs from Playwright/Selenium, CI, recordings.
 - [Changelog](https://browserbash.com/changelog): release history (v1.0.0 → v1.3.1).

@@ -32,6 +32,7 @@ export function SiteFooter() {
 
                 <nav className="footer__col" aria-label="Resources">
                     <h4>Resources</h4>
+                    <a href="/case-study">Case study</a>
                     <a href="/blog">Blog</a>
                     <a href="/faq">FAQ</a>
                     <a href="/changelog">Changelog</a>

@@ -38,6 +38,7 @@ export default async function Page() {
                     <a href="#start">Quick start</a>
                     <a href="/features">Features</a>
                     <a href="/pricing">Pricing</a>
+                    <a href="/case-study">Case study</a>
                     <a href="/learn">Learn</a>
                     <a href="/blog">Blog</a>
                     <a href="/math.html">Cost</a>
@@ -235,6 +236,44 @@ export default async function Page() {
                         </Reveal>
                     ))}
                 </div>
+            </section>
+
+            <section className="section container" id="proof">
+                <Reveal>
+                    <p className="section-tag">case study</p>
+                    <h2>We pointed it at our own Playwright suite</h2>
+                    <p className="section__sub">
+                        The Testing Academy runs a production Playwright + TypeScript framework against{' '}
+                        <strong>TTACart</strong>. We rewrote its end-to-end checkout — login, cart, checkout,
+                        confirmation — as one plain-English file and ran it with a single command on a free local
+                        model. Same journey, session held to the end, recorded for replay.
+                    </p>
+                </Reveal>
+                <div className="features">
+                    {[
+                        ['6 page objects → 1 file', 'The full login-to-checkout journey, rewritten as one committable *_test.md — no selectors, no page objects.'],
+                        ['Session held to the end', 'The AI agent keeps the logged-in session alive from the first step through the order confirmation screen.'],
+                        ['$0 on a local model', 'Ran on a local Ollama model — no API key, no grid, nothing leaving the machine. Captured with --record.'],
+                    ].map(([title, body], i) => (
+                        <Reveal key={title} delay={(i % 3) * 100}>
+                            <div className="pixel-card feature">
+                                <h3>{title}</h3>
+                                <p>{body}</p>
+                            </div>
+                        </Reveal>
+                    ))}
+                </div>
+                <Reveal delay={160}>
+                    <div className="freestack pixel-card" style={{ flexWrap: 'wrap' }}>
+                        <Bo size={56} interactive={false} />
+                        <div>
+                            <strong>Read the full case study →</strong>
+                            <code>github.com/PramodDutta/AdvancePlaywrightFramework1x → plain English</code>
+                            <span>How we rewrote the suite, ran it with one command, and replayed it in the dashboard.</span>
+                        </div>
+                        <a className="pixel-btn" href="/case-study" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}>Open the case study →</a>
+                    </div>
+                </Reveal>
             </section>
 
             <section className="section container" id="start">

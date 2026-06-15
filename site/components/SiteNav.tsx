@@ -15,6 +15,7 @@ export function SiteNav() {
             <div className="nav__links">
                 <a href="/features">Features</a>
                 <a href="/pricing">Pricing</a>
+                <a href="/case-study">Case study</a>
                 <a href="/learn">Learn</a>
                 <a href="/blog">Blog</a>
                 <a href="/math.html">Cost</a>

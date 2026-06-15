@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const updated = new Date('2026-06-14');
     const marketing: MetadataRoute.Sitemap = [
         { url: 'https://browserbash.com/features', priority: 0.8 },
+        { url: 'https://browserbash.com/case-study', priority: 0.8 },
         { url: 'https://browserbash.com/pricing', priority: 0.8 },
         { url: 'https://browserbash.com/about', priority: 0.7 },
         { url: 'https://browserbash.com/faq', priority: 0.7 },
