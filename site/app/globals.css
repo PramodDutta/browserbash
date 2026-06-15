@@ -103,6 +103,7 @@ code, pre, kbd {
     border: 2px solid var(--ink);
     box-shadow: 4px 4px 0 var(--shadow);
     text-decoration: none;
+    white-space: nowrap;
     transition: transform 80ms ease, box-shadow 80ms ease;
 }
 

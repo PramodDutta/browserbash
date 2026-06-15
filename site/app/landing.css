@@ -26,6 +26,7 @@
     text-decoration: none;
     font-size: 15px;
     color: var(--ink-soft);
+    white-space: nowrap;
 }
 
 .nav__links a:hover {
@@ -41,6 +42,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
 }
 
 .nav__login, .nav__signup {
@@ -48,7 +50,7 @@
     padding: 9px 16px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
     .nav__links { display: none; }
     .nav { gap: 14px; }
     .nav__auth { margin-left: auto; }

@@ -33,9 +33,6 @@ export default async function Page() {
                 </a>
                 <div className="nav__links">
                     <a href="#demo">Demo</a>
-                    <a href="#how">How it works</a>
-                    <a href="#features">Features</a>
-                    <a href="#start">Quick start</a>
                     <a href="/features">Features</a>
                     <a href="/pricing">Pricing</a>
                     <a href="/case-study">Case study</a>
