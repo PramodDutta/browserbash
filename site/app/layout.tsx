@@ -104,6 +104,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
+                {/* aleeup chat widget (third-party, site-wide) */}
+                <script src="https://aleeup.com/embed.js" data-bot="NqLIxxNfaoPeChEFeF8nj" data-color="#eb0000" defer />
                 {children}
                 {gaId && <Analytics />}
                 {gaId && <GoogleAnalytics gaId={gaId} />}
