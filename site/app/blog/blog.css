@@ -13,6 +13,35 @@
     max-width: 62ch;
 }
 
+/* category jump-nav */
+.blog-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 22px;
+    margin-bottom: 6px;
+}
+.blog-cats a {
+    font-family: var(--font-pixel), monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    background: #fffefc;
+    box-shadow: 3px 3px 0 var(--shadow);
+    padding: 7px 12px;
+    transition: transform 100ms ease, box-shadow 100ms ease, background 100ms ease;
+}
+.blog-cats a:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--shadow);
+    background: var(--accent);
+    color: var(--accent-ink);
+}
+.blog-cats a span { color: var(--ink-soft); margin-left: 5px; }
+.blog-cats a:hover span { color: var(--accent-ink); }
+
 .blog-grid-wrap {
     padding-top: 36px;
 }

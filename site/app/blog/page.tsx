@@ -98,6 +98,12 @@ export default function BlogIndex() {
                 </p>
             </header>
 
+            <nav className="blog-cats container" aria-label="Browse by category">
+                {sections.map((sec) => (
+                    <a key={sec.key} href={`#${sec.key}`}>{sec.label} <span>{sec.posts.length}</span></a>
+                ))}
+            </nav>
+
             <section className="section container blog-grid-wrap">
                 {sections.map((sec) => (
                     <div className="blog-section" key={sec.key} id={sec.key}>
