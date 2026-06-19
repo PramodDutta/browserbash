@@ -17,6 +17,7 @@ export function SiteNav() {
                 <a href="/pricing">Pricing</a>
                 <a href="/case-study">Case study</a>
                 <a href="/learn">Learn</a>
+                <a href="/tutorials">Tutorials</a>
                 <a href="/blog">Blog</a>
                 <a href="/math.html">Cost</a>
             </div>

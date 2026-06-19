@@ -37,6 +37,7 @@ Key facts:
 
 ## Articles
 
+- [Tutorials](https://browserbash.com/tutorials): in-depth, runnable step-by-step lessons covering every BrowserBash command, flag, engine, provider and local-model option.
 - [Blog index](https://browserbash.com/blog): comparisons, guides and use-cases for natural-language browser automation.
 - [Selenium vs BrowserBash](https://browserbash.com/blog/browserbash-vs-selenium)
 - [Playwright vs BrowserBash](https://browserbash.com/blog/browserbash-vs-playwright)

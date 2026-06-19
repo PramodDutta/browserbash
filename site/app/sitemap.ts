@@ -48,6 +48,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'weekly',
             priority: 0.7,
         },
+        {
+            url: 'https://browserbash.com/tutorials',
+            lastModified: updated,
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        },
         ...marketing,
         ...legal,
         ...posts,

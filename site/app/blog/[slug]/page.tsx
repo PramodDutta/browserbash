@@ -98,6 +98,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     <span>BrowserBash</span>
                 </a>
                 <div className="nav__links">
+                    <a href="/tutorials">Tutorials</a>
                     <a href="/blog">Blog</a>
                     <a href="/learn">Learn</a>
                     <a href="/#demo">Demo</a>

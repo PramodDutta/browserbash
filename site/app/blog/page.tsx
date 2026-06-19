@@ -23,6 +23,7 @@ export const metadata: Metadata = {
 
 // Display order + human labels for category sections; anything else falls into "More".
 const CATEGORY_ORDER: Array<{ key: string; label: string }> = [
+    { key: 'tutorial', label: 'Tutorials' },
     { key: 'comparison', label: 'Comparisons' },
     { key: 'alternatives', label: 'Alternatives' },
     { key: 'guide', label: 'Guides & tutorials' },
@@ -76,6 +77,7 @@ export default function BlogIndex() {
                     <span>BrowserBash</span>
                 </a>
                 <div className="nav__links">
+                    <a href="/tutorials">Tutorials</a>
                     <a href="/learn">Learn</a>
                     <a href="/#demo">Demo</a>
                     <a href="/#features">Features</a>

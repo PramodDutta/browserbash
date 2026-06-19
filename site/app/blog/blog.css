@@ -98,6 +98,7 @@
 .blog-card__cat--use-case { background: rgba(47, 191, 113, 0.13); }
 .blog-card__cat--testing { background: rgba(255, 92, 26, 0.12); }
 .blog-card__cat--agents { background: rgba(60, 200, 230, 0.15); }
+.blog-card__cat--tutorial { background: rgba(130, 80, 255, 0.2); }
 
 .post__crumbs {
     font-size: 12.5px;
