@@ -35,14 +35,13 @@
 
 ---
 
-## ⏳ Clerk production cutover — PENDING (your action)
-- The account has **multiple Clerk apps**. The LIVE site currently runs on dev instance **`accurate-terrapin-0`**. We created a **production instance** on the `browserbash` app whose dev instance is **`faithful-jaybird-95`** (the `pk_test`/`sk_test` pair pasted earlier belonged to this empty app, NOT the live one).
-- **Done via browser:** created the production instance for the `browserbash` app, domain `browserbash.com`; added all **5 Clerk DNS CNAMEs in Namecheap** (`clerk`→frontend-api.clerk.services, `accounts`→accounts.clerk.services, `clkmail`→mail.r4c0mfzje0x7.clerk.services, `clk._domainkey`→dkim1.…, `clk2._domainkey`→dkim2.…) and verified they saved (apex `A`→Vercel + `www` untouched).
-- **TODO (do NOT swap Vercel keys until DNS verifies, or live sign-in breaks):**
-  1. Clerk → Configure → Domains → **Verify configuration** (wait for propagation → 5/5 + SSL issued).
-  2. Clerk checklist → **Setup Google sign-in** → create your own **Google Cloud OAuth client** (the dev shared Google login does NOT work in production).
-  3. Set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (`pk_live…`) + `CLERK_SECRET_KEY` (`sk_live…`) in **Vercel Production env** → redeploy. (Both keys are in Clerk → API keys; the secret is not stored here.)
-  4. Production is a **fresh user pool** — your dev account won't carry over; re-sign-up.
+## ✅ Clerk production cutover — DONE (2026-06-17)
+- The account has **multiple Clerk apps**. The dev site ran on instance **`accurate-terrapin-0`**. We productionized the `browserbash` app (dev instance `faithful-jaybird-95`) — domain `browserbash.com`.
+- **All steps complete:**
+  1. ✅ **5 Clerk DNS CNAMEs in Namecheap** (`clerk`→frontend-api.clerk.services, `accounts`→accounts.clerk.services, `clkmail`→mail.r4c0mfzje0x7.clerk.services, `clk._domainkey`→dkim1.…, `clk2._domainkey`→dkim2.…) — DNS **Verified**, SSL **Issued**.
+  2. ✅ **Google Cloud OAuth client** created (project `browserbash`, redirect `https://clerk.browserbash.com/v1/oauth_callback`) → custom credentials saved in Clerk → Google OAuth.
+  3. ✅ `pk_live`/`sk_live` set in **Vercel Production env** → redeployed `cd site && vercel --prod --yes`. **Verified live:** `browserbash.com` serves `pk_live_…` (decodes to `clerk.browserbash.com$`), Clerk script loads from `https://clerk.browserbash.com`. Dev 100-user cap + dev banner gone.
+- **Remaining (your action — agent can't create accounts):** one **incognito test sign-up** at https://browserbash.com/sign-up (verify no dev banner, Google + email both work, lands on /dashboard). Note: prod is a **fresh user pool** — dev accounts don't carry over.
 
 ---
 
@@ -64,6 +63,13 @@
 - **Then:** `cd site && npm run build` (validate all compile) → `vercel --prod --yes` → verify `https://browserbash.com/sitemap.xml` + `/blog`.
 
 ---
+
+## 📚 Tutorials section + 142 new posts (2026-06-18) — LIVE
+- **New `/tutorials` route** (`site/app/tutorials/page.tsx`): curriculum-ordered index (ItemList schema), filters `category: tutorial`. Tutorial posts render through the existing `/blog/[slug]` route (no new dynamic route — safe in non-standard Next 16). Wired into `SiteNav`, blog index `CATEGORY_ORDER`, blog navs, `sitemap.ts`, `llms.txt`, and a `--tutorial` category color in `blog.css`.
+- **27 in-depth tutorials** (`category: tutorial`) covering every CLI option: install, run, all flags, stagehand vs builtin engine, every provider (local/cdp/browserbase/lambdatest/browserstack), LLM backends (ollama/openrouter/anthropic/auto), agent mode + exit codes, markdown tests, variables + masked secrets, recording (video/trace), local + cloud dashboards, GitHub Actions, Jenkins, headless/timeouts, writing objectives, extract/store, login→checkout.
+- **115 SEO articles** — competitor-keyword-targeted (KaneCLI, browse.sh, browser-use, Skyvern, Playwright/Selenium/Cypress/Puppeteer comparisons + alternatives + migrations) and AI-agent/GEO/chatbot ("can ChatGPT/Claude control a browser", MCP, computer-use, agent CLIs). Researched live, deduped vs the 282 existing.
+- **Totals:** blog now **424 posts** (282 → 424), 27 of them tutorials. Sitemap = **442 URLs**. All validated (frontmatter + `## FAQ`, every new post ≥2000 words, 0 invalid). `next build` green → deployed to prod → `/tutorials` + sample posts return 200.
+- **Pipeline:** `tools/seo/tutorials-and-articles.workflow.js` (self-contained: 27 tutorial specs + 115 fallback specs + 4 research buckets + the 282 existing slugs embedded for dedupe). Hit a transient Anthropic server rate-limit mid-run; **resumed** via `Workflow({scriptPath, resumeFromRunId})` — research cached, only failed writes re-ran. Re-run the same way if needed.
 
 ## Remaining / next steps
 - [ ] Finish last ~27 articles (resume loop above) → 220/220.

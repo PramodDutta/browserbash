@@ -1,16 +1,16 @@
 # BrowserBash — Production Launch Checklist
 
-> What's needed before going to production. **Secret-free.** Updated 2026-06-15.
+> What's needed before going to production. **Secret-free.** Updated 2026-06-17.
 > Owner legend: **[you]** = Pramod's action (credentials/accounts/OAuth/payments/manual test — things the agent can't do); **[me]** = the agent can handle it.
-> Shortest path to go-live: **blockers #1 + #2.**
+> Shortest path to go-live: **blocker #2** (only one left).
 
 ## 🔴 Blockers (before real launch traffic)
-- [ ] **1. Clerk production cutover** **[you]** — removes the dev 100-user cap + dev banner. Prod instance + all 5 DNS records are already created/added.
-  - [ ] Clerk → Configure → Domains → **Verify configuration** (wait for DNS propagation → 5/5 + SSL issued)
-  - [ ] Create a **Google Cloud OAuth client** for prod → add it in Clerk → Social Connections → Google (the dev shared Google login does NOT work in production)
-  - [ ] Set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (`pk_live…`) + `CLERK_SECRET_KEY` (`sk_live…`) in **Vercel → Production env** → redeploy
+- [x] **1. Clerk production cutover** ✅ DONE 2026-06-17 — live site now on the production instance (`pk_live_…` → `clerk.browserbash.com`), dev 100-user cap + dev banner gone.
+  - [x] DNS verified + SSL **Issued** (Domains page: browserbash.com Verified, SSL certificates Issued)
+  - [x] Google Cloud OAuth client created for prod (project `browserbash`) → custom credentials saved in Clerk → Google
+  - [x] `pk_live`/`sk_live` set in Vercel Production env → redeployed (`browserbash.com` serves `pk_live_…`, Clerk script loads from `clerk.browserbash.com`)
   - [ ] Heads-up: prod is a **fresh user pool** — your dev account won't carry over, re-sign-up
-- [ ] **2. One manual test sign-up** **[you]** — incognito + throwaway email → registration → dashboard works end-to-end (the agent is not allowed to create accounts / type passwords, so this sign-off is yours)
+- [ ] **2. One manual test sign-up** **[you]** — incognito + throwaway email → registration → dashboard works end-to-end (the agent is not allowed to create accounts / type passwords, so this sign-off is yours). Now the ONLY launch blocker left.
 - [ ] **3. Paid-tier decision** **[you]** — launching the data-retention paid tier now? If **yes**: Stripe **live** keys + webhook secret in Vercel + a Product/Price configured. If **no**: confirm free-only and the agent ensures no paid path is exposed.
 
 ## 🟡 Important (ops correctness)
