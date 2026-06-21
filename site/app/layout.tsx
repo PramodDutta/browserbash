@@ -120,8 +120,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                             "s.setAttribute('data-bot','NqLIxxNfaoPeChEFeF8nj');" +
                             "s.setAttribute('data-color','#eb0000');document.body.appendChild(s);}" +
                             "['scroll','pointerdown','keydown','touchstart','mousemove'].forEach(function(e){window.addEventListener(e,l,{once:true,passive:true})});" +
-                            "var fb=function(){setTimeout(l,5000);};" +
-                            "if('requestIdleCallback' in window){requestIdleCallback(fb);}else{window.addEventListener('load',fb);}})();",
+                            "var fb=function(){setTimeout(l,4000);};" +
+                            "if('requestIdleCallback' in window){requestIdleCallback(fb,{timeout:3000});}else{window.addEventListener('load',fb);}})();",
                     }}
                 />
                 {children}
