@@ -10,7 +10,7 @@ import { TrackEvent } from '@/components/TrackEvent';
 import { CopyButton } from '@/components/CopyButton';
 import { Terminal, type DemoRecording } from '@/components/Terminal';
 import { sql } from '@/lib/db';
-import { getPlan, RETENTION_DAYS } from '@/lib/plans';
+import { getPlan, RETENTION_DAYS, type Plan } from '@/lib/plans';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import '../landing.css';
@@ -28,12 +28,26 @@ export default async function Dashboard() {
     const email = (user.primaryEmailAddress?.emailAddress ?? user.emailAddresses?.[0]?.emailAddress ?? '').toLowerCase();
     const firstName = user.firstName ?? email.split('@')[0] ?? 'tester';
 
-    const db = sql();
-    const plan = await getPlan(user.id);
-    const doneSteps = ((await db`SELECT step FROM onboarding WHERE user_id = ${user.id}`) as Array<{ step: string }>).map((r) => r.step);
+    // A brand-new (production) user has no plan/onboarding rows yet. A transient
+    // DB hiccup or a not-yet-migrated table must never take down the whole
+    // dashboard — default to the free plan with no completed steps.
+    let plan: Plan = 'free';
+    let doneSteps: string[] = [];
+    try {
+        plan = await getPlan(user.id);
+        const db = sql();
+        doneSteps = ((await db`SELECT step FROM onboarding WHERE user_id = ${user.id}`) as Array<{ step: string }>).map((r) => r.step);
+    } catch (err) {
+        console.error('[dashboard] data load failed, using defaults:', err);
+    }
 
-    const demoRaw = await fs.readFile(path.join(process.cwd(), 'public/demos/login.json'), 'utf8');
-    const demo = JSON.parse(demoRaw) as DemoRecording;
+    let demo: DemoRecording | null = null;
+    try {
+        const demoRaw = await fs.readFile(path.join(process.cwd(), 'public/demos/login.json'), 'utf8');
+        demo = JSON.parse(demoRaw) as DemoRecording;
+    } catch (err) {
+        console.error('[dashboard] demo recording unavailable:', err);
+    }
 
     return (
         <>
@@ -103,7 +117,7 @@ export default async function Dashboard() {
                     <div className="dash__demo">
                         <p className="section-tag">your first scenario</p>
                         <h2>Secret Agent Login — real recorded run</h2>
-                        <Terminal demo={demo} autoplay />
+                        {demo && <Terminal demo={demo} autoplay />}
                         <div className="dash__demo-cta">
                             <a className="pixel-btn ghost" href="/learn#challenges">all 14 scenarios →</a>
                         </div>
