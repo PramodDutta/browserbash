@@ -1,3 +1,4 @@
+import { NavAuth } from '@/components/NavAuth';
 import { Bo } from '@/components/Bo';
 import { HeroScene } from '@/components/HeroScene';
 import { TryIt } from '@/components/TryIt';
@@ -41,8 +42,14 @@ export default async function Page() {
                     <a href="/math.html">Cost</a>
                 </div>
                 <div className="nav__auth">
-                    <a className="pixel-btn ghost nav__login" href="/sign-in">Log in</a>
-                    <a className="pixel-btn nav__signup" href="/sign-up">Sign up free</a>
+                    {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
+                        <NavAuth />
+                    ) : (
+                        <>
+                            <a className="pixel-btn ghost nav__login" href="/sign-in">Log in</a>
+                            <a className="pixel-btn nav__signup" href="/sign-up">Sign up free</a>
+                        </>
+                    )}
                 </div>
             </nav>
 
