@@ -38,7 +38,7 @@ export default async function Page() {
                         </div>
                     </ClerkLoading>
                     <ClerkLoaded>
-                        <SignIn signUpUrl="/sign-up" fallbackRedirectUrl="/dashboard" />
+                        <SignIn signUpUrl="/sign-up" forceRedirectUrl="/dashboard" />
                     </ClerkLoaded>
                 </>
             ) : (
