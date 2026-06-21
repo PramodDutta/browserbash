@@ -105,7 +105,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
                 {/* aleeup chat widget (third-party, site-wide) */}
-                <script src="https://aleeup.com/embed.js" data-bot="NqLIxxNfaoPeChEFeF8nj" data-color="#eb0000" defer />
+                {/* aleeup chat widget (third-party, site-wide) — lazy-loaded ~1.5s
+                    after window load so its ~1.2s iframe never competes with
+                    first paint or the Clerk auth form on the critical path. */}
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html:
+                            "(function(){function l(){var s=document.createElement('script');" +
+                            "s.src='https://aleeup.com/embed.js';s.async=true;" +
+                            "s.setAttribute('data-bot','NqLIxxNfaoPeChEFeF8nj');" +
+                            "s.setAttribute('data-color','#eb0000');document.body.appendChild(s);}" +
+                            "if(document.readyState==='complete'){setTimeout(l,1500);}" +
+                            "else{window.addEventListener('load',function(){setTimeout(l,1500);});}})();",
+                    }}
+                />
                 {children}
                 {gaId && <Analytics />}
                 {gaId && <GoogleAnalytics gaId={gaId} />}

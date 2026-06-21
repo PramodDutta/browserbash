@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { SignUp } from '@clerk/nextjs';
+import { SignUp, ClerkLoading, ClerkLoaded } from '@clerk/nextjs';
 import { Bo } from '@/components/Bo';
 import { TrackEvent } from '@/components/TrackEvent';
 import '../../landing.css';
@@ -24,7 +24,17 @@ export default function Page() {
             <h1 className="authpage__title">Create your free account</h1>
             <p className="authpage__sub">No credit card. Free and open source — the CLI stays free forever.</p>
             {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
-                <SignUp signInUrl="/sign-in" fallbackRedirectUrl="/dashboard" />
+                <>
+                    <ClerkLoading>
+                        <div className="authpage__loading" aria-live="polite">
+                            <span className="authpage__spinner" aria-hidden="true" />
+                            Loading sign-up…
+                        </div>
+                    </ClerkLoading>
+                    <ClerkLoaded>
+                        <SignUp signInUrl="/sign-in" fallbackRedirectUrl="/dashboard" />
+                    </ClerkLoaded>
+                </>
             ) : (
                 <p className="authpage__sub">Sign-up is not configured in this environment.</p>
             )}
