@@ -104,19 +104,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <script dangerouslySetInnerHTML={{ __html: AB_SCRIPT }} />
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
-                {/* aleeup chat widget (third-party, site-wide) */}
-                {/* aleeup chat widget (third-party, site-wide) — lazy-loaded ~1.5s
-                    after window load so its ~1.2s iframe never competes with
-                    first paint or the Clerk auth form on the critical path. */}
+                {/* aleeup chat widget (third-party). embed.js eagerly loads a ~94KB
+                    chat iframe + a long-lived connection for EVERY visitor, but only
+                    a few ever open chat. So: (1) never load it on the auth/dashboard
+                    pages (they load Clerk and don't need sales chat), and (2) defer
+                    the load until the first real user interaction (with an idle
+                    fallback), so bounce visitors never pay the cost. */}
                 <script
                     dangerouslySetInnerHTML={{
                         __html:
-                            "(function(){function l(){var s=document.createElement('script');" +
-                            "s.src='https://aleeup.com/embed.js';s.async=true;" +
+                            "(function(){if(/^\\/(sign-in|sign-up|dashboard)(\\/|$)/.test(location.pathname))return;" +
+                            "var done=false;function l(){if(done)return;done=true;" +
+                            "['scroll','pointerdown','keydown','touchstart','mousemove'].forEach(function(e){window.removeEventListener(e,l)});" +
+                            "var s=document.createElement('script');s.src='https://aleeup.com/embed.js';s.async=true;" +
                             "s.setAttribute('data-bot','NqLIxxNfaoPeChEFeF8nj');" +
                             "s.setAttribute('data-color','#eb0000');document.body.appendChild(s);}" +
-                            "if(document.readyState==='complete'){setTimeout(l,1500);}" +
-                            "else{window.addEventListener('load',function(){setTimeout(l,1500);});}})();",
+                            "['scroll','pointerdown','keydown','touchstart','mousemove'].forEach(function(e){window.addEventListener(e,l,{once:true,passive:true})});" +
+                            "var fb=function(){setTimeout(l,5000);};" +
+                            "if('requestIdleCallback' in window){requestIdleCallback(fb);}else{window.addEventListener('load',fb);}})();",
                     }}
                 />
                 {children}
