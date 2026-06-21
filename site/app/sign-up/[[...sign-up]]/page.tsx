@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { SignUp, ClerkLoading, ClerkLoaded } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 import { Bo } from '@/components/Bo';
 import { TrackEvent } from '@/components/TrackEvent';
 import '../../landing.css';
@@ -13,7 +15,12 @@ export const metadata: Metadata = {
     robots: { index: false, follow: true },
 };
 
-export default function Page() {
+export default async function Page() {
+    // Already signed in? Skip the blank sign-up form and go straight to the app.
+    if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+        const { userId } = await auth();
+        if (userId) redirect('/dashboard');
+    }
     return (
         <main className="authpage container">
             <TrackEvent name="sign_up_view" />

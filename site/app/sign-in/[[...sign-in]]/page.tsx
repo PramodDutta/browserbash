@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { SignIn, ClerkLoading, ClerkLoaded } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 import { Bo } from '@/components/Bo';
 import '../../landing.css';
 import '../../auth.css';
@@ -12,7 +14,13 @@ export const metadata: Metadata = {
     robots: { index: false, follow: true },
 };
 
-export default function Page() {
+export default async function Page() {
+    // Already signed in? Don't strand the user on a blank "Welcome back" page —
+    // Clerk renders nothing here for an authed user, so send them to the dashboard.
+    if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+        const { userId } = await auth();
+        if (userId) redirect('/dashboard');
+    }
     return (
         <main className="authpage container">
             <a href="/" className="authpage__brand">
