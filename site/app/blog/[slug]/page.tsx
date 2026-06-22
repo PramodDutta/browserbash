@@ -78,7 +78,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         dateModified: post.date,
         articleSection: post.category,
         wordCount: post.content.split(/\s+/).filter(Boolean).length,
-        author: { '@type': 'Person', name: 'Pramod Dutta', url: 'https://thetestingacademy.com' },
+        author: { '@id': 'https://browserbash.com/#pramod' },
         publisher: { '@type': 'Organization', name: 'The Testing Academy', '@id': 'https://browserbash.com/#org' },
         image: `https://browserbash.com/blog/${post.slug}/opengraph-image`,
         mainEntityOfPage: `https://browserbash.com/blog/${post.slug}`,

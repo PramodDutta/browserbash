@@ -69,12 +69,35 @@ const orgLd = {
             url: 'https://browserbash.com',
             logo: 'https://browserbash.com/icon.png',
             description: 'Free, open-source natural language browser automation CLI by The Testing Academy.',
-            founder: { '@type': 'Person', name: 'Pramod Dutta', url: 'https://thetestingacademy.com' },
+            founder: { '@id': 'https://browserbash.com/#pramod' },
             sameAs: [
                 'https://github.com/PramodDutta/browserbash',
                 'https://www.npmjs.com/package/browserbash-cli',
                 'https://thetestingacademy.com',
             ],
+        },
+        {
+            // Author/expert entity — bound to every article (BlogPosting.author)
+            // and the Organization founder via @id, so AI engines can resolve a
+            // verifiable human expert behind the content (E-E-A-T / GEO).
+            '@type': 'Person',
+            '@id': 'https://browserbash.com/#pramod',
+            name: 'Pramod Dutta',
+            url: 'https://thetestingacademy.com',
+            jobTitle: 'Software Development Engineer in Test (SDET)',
+            description:
+                'SDET and test-automation engineer with 10+ years of experience. Founder of The Testing Academy and creator of BrowserBash.',
+            worksFor: { '@id': 'https://browserbash.com/#org' },
+            knowsAbout: [
+                'Browser automation',
+                'Test automation',
+                'SDET',
+                'Playwright',
+                'Selenium',
+                'AI agents',
+                'CI/CD',
+            ],
+            sameAs: ['https://github.com/PramodDutta', 'https://thetestingacademy.com'],
         },
         {
             '@type': 'WebSite',

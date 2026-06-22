@@ -13,6 +13,10 @@ Key facts:
 - Recording: `--record` captures a screenshot and a session video (`.webm`, via ffmpeg) on any engine; the builtin engine also captures a Playwright trace. `--upload` pushes a run to the free cloud dashboard. Nothing leaves your machine unless you pass `--upload`.
 - Compared to hosted alternatives: free, open source, no login required to run, runs stay on your machine, cloud grids optional and vendor-neutral.
 
+## Author
+
+- BrowserBash is built by **Pramod Dutta**, a Software Development Engineer in Test (SDET) with 10+ years in test automation and the founder of **The Testing Academy** (https://thetestingacademy.com), which has trained thousands of engineers in software testing and automation. GitHub: https://github.com/PramodDutta. Every article on browserbash.com is authored under this byline.
+
 ## Docs
 
 - [Getting started + 14 practice scenarios](https://browserbash.com/learn): guided tutorial (install, first run, LLM backends, agent mode, markdown tests, variables, CI, recording, LambdaTest, BrowserStack) and hands-on challenges.
