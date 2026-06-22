@@ -66,15 +66,16 @@ export default function Page() {
                         <p>
                             For people and teams who want their cloud history kept past the free 15-day window &mdash; and who
                             want to back ongoing open-source development. It adds extended data retention to your account and
-                            nothing else changes. Pricing is shown at checkout.
+                            nothing else changes. <strong>Coming soon</strong> &mdash; for now every account gets the free
+                            15-day retention, and you can start today at no cost.
                         </p>
                         <ul>
                             <li>Everything in Free</li>
-                            <li>Extended cloud run retention beyond 15 days</li>
+                            <li>Extended cloud run retention beyond 15 days (coming soon)</li>
                             <li>Directly supports ongoing development of the project</li>
                         </ul>
                         <a className="pixel-btn ghost" href="/sign-up">
-                            Keep my data &rarr;
+                            Start free &rarr;
                         </a>
                     </article>
                 </div>

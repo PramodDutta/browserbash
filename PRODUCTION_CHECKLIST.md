@@ -5,10 +5,10 @@
 > **Shortest path to go-live: confirm blocker #1 (one real login), then decide #2.**
 
 ## 🔴 Blockers (before real launch traffic)
-- [ ] **1. Confirm ONE real login end-to-end** **[you]** — the agent cannot create accounts / type passwords / complete OAuth, so this sign-off is yours.
-  - Fresh incognito → browserbash.com/sign-in → wait for the form (spinner shows while Clerk loads) → **Continue with Google** (or email) → must land on **/dashboard** (Mission Control).
-  - All the code/infra around this is verified correct + hardened this session (see "Auth hardening" below). If it still fails, capture the **Network tab** of the failing request and send it.
-- [ ] **2. Paid-tier decision** **[you]** — launch the data-retention paid tier now? **Yes** → Stripe **live** keys + webhook secret in Vercel + a Product/Price. **No** → confirm free-only (agent ensures no paid path is exposed). Currently no Stripe keys in prod env = free-only by default.
+- [x] **1. Confirm ONE real login end-to-end** ✅ DONE 2026-06-18 — confirmed by Pramod, login → /dashboard works on the production Clerk instance.
+- [x] **2. Paid-tier decision** ✅ DONE 2026-06-22 — **launching FREE-ONLY.** No Stripe in prod env; verified no broken checkout is exposed (the pricing "Supporter" card + dashboard upgrade are coming-soon / env-gated, both route to free `/sign-up`). Paid retention tier can be added post-launch.
+
+## 🚀 Both launch blockers cleared — ready to go live.
 
 ## 🟡 Important (ops correctness)
 - [ ] **3.** Vercel → Settings → Git → **Root Directory = `site`** **[you]** — enables git auto-deploy (today every deploy is a manual `vercel --prod`).
