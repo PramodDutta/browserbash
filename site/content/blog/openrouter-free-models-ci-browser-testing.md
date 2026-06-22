@@ -1,6 +1,6 @@
 ---
 title: Run Browser Tests on OpenRouter Free Models in CI
-description: "Wire BrowserBash to OpenRouter free models browser testing CI: run gpt-oss-120b:free at zero cost, handle rate limits, and fall back to Anthropic for hard flows."
+description: "Wire BrowserBash to OpenRouter free models browser testing CI: run gpt-oss-120b:free at zero cost, handle rate limits, and fall back to Anthropic for hard"
 date: 2026-04-08
 category: llm
 ---

@@ -1,6 +1,6 @@
 ---
 title: Best End-to-End Testing Frameworks in 2026
-description: "The best end-to-end testing frameworks in 2026 ranked: Playwright, Cypress, WebdriverIO, Nightwatch, TestCafe, Puppeteer, plus BrowserBash for selector-free flows."
+description: "The best end-to-end testing frameworks in 2026 ranked: Playwright, Cypress, WebdriverIO, Nightwatch, TestCafe, Puppeteer, plus BrowserBash for selector-free"
 date: 2026-05-27
 category: alternatives
 ---

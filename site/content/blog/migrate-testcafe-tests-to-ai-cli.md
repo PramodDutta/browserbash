@@ -1,6 +1,6 @@
 ---
 title: Migrate TestCafe Tests to an AI Browser Automation CLI
-description: "How to migrate TestCafe to AI automation: replace Selector and ClientFunction code with plain-English objectives, port auth flows, and handle the proxy model gap."
+description: "How to migrate TestCafe to AI automation: replace Selector and ClientFunction code with plain-English objectives, port auth flows, and handle the proxy"
 date: 2026-04-22
 category: guide
 ---

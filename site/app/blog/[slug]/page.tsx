@@ -17,7 +17,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const post = getPost(slug);
     if (!post) return {};
     return {
-        title: `${post.title} — BrowserBash Blog`,
+        // Keep SERP titles under ~60 chars: only append the brand suffix when the
+        // post title is short enough to fit it without truncation.
+        title: post.title.length > 50 ? post.title : `${post.title} — BrowserBash Blog`,
         description: post.description,
         alternates: { canonical: `/blog/${post.slug}` },
         openGraph: {
@@ -45,11 +47,25 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     // Related: same-category first, then the pillar guides, then anything — 6 links
     // so no article is an internal dead-end (helps crawl depth + link equity).
     const PILLARS = ['natural-language-browser-automation', 'ai-browser-testing-cli', 'free-ai-browser-automation'];
+    // Token-aware related: surface posts that share meaningful slug tokens (tool
+    // names like "rpa", "computer", "selenium") FIRST, so the related block is
+    // contextually relevant — e.g. computer-use-vs-rpa links to rpa-vs-ai-*.
+    const STOP = new Set(['vs', 'the', 'for', 'and', 'with', 'your', 'how', 'to', 'a', 'an', 'of', 'in', 'on', 'is',
+        '2026', 'browserbash', 'ai', 'browser', 'automation', 'testing', 'guide', 'best', 'tools', 'free']);
+    const tokensOf = (s: string) => new Set(s.split('-').filter((t) => t.length > 1 && !STOP.has(t)));
+    const myTokens = tokensOf(post.slug);
+    const sharedCount = (slug: string) => {
+        const t = tokensOf(slug);
+        let n = 0;
+        for (const x of myTokens) if (t.has(x)) n += 1;
+        return n;
+    };
     const others = getPosts().filter((p) => p.slug !== post.slug);
+    const tokenMatched = others.filter((p) => sharedCount(p.slug) > 0).sort((a, b) => sharedCount(b.slug) - sharedCount(a.slug));
     const sameCat = others.filter((p) => p.category === post.category);
     const pillars = others.filter((p) => PILLARS.includes(p.slug));
     const seen = new Set<string>();
-    const related = [...sameCat, ...pillars, ...others]
+    const related = [...tokenMatched, ...sameCat, ...pillars, ...others]
         .filter((p) => !seen.has(p.slug) && (seen.add(p.slug), true))
         .slice(0, 6);
 

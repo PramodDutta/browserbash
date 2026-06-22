@@ -1,6 +1,6 @@
 ---
 title: Web Agent Benchmarks Explained: WebVoyager and Beyond
-description: "Web agent benchmarks explained: how WebVoyager scores browser agents, what browser-use and Agent-E report, and how BrowserBash turns the same approach into committable tests."
+description: "Web agent benchmarks explained: how WebVoyager scores browser agents, what browser-use and Agent-E report, and how BrowserBash turns the same approach into"
 date: 2026-04-15
 category: agents
 ---

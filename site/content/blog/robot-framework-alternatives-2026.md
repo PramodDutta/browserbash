@@ -1,6 +1,6 @@
 ---
 title: Robot Framework Alternatives for Modern Test Teams
-description: "Robot Framework alternatives compared for 2026: Playwright, Cypress, Testsigma, and an AI-native option that keeps readable test files without keyword library upkeep."
+description: "Robot Framework alternatives compared for 2026: Playwright, Cypress, Testsigma, and an AI-native option that keeps readable test files without keyword"
 date: 2026-06-04
 category: alternatives
 ---

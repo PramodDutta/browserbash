@@ -20,9 +20,36 @@ export const metadata: Metadata = {
     },
 };
 
+const productLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'BrowserBash CLI',
+    description: 'Free, open-source natural-language browser automation CLI. Optional paid cloud data-retention add-on.',
+    brand: { '@id': 'https://browserbash.com/#org' },
+    url: 'https://browserbash.com/pricing',
+    offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+        availability: 'https://schema.org/InStock',
+        url: 'https://browserbash.com/pricing',
+    },
+};
+
+const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://browserbash.com' },
+        { '@type': 'ListItem', position: 2, name: 'Pricing', item: 'https://browserbash.com/pricing' },
+    ],
+};
+
 export default function Page() {
     return (
         <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
             <SiteNav />
             <main>
                 <section className="mkt-hero">

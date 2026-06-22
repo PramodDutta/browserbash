@@ -1,6 +1,6 @@
 ---
 title: Best Self-Healing Test Automation Tools in 2026
-description: "A senior SDET's honest review of the best self-healing test automation tools in 2026 — Testim, Mabl, Functionize, Healenium, testRigor — plus a no-selector alternative."
+description: "A senior SDET's honest review of the best self-healing test automation tools in 2026 — Testim, Mabl, Functionize, Healenium, testRigor — plus a no-selector"
 date: 2026-05-23
 category: alternatives
 ---

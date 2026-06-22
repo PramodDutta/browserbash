@@ -1,6 +1,6 @@
 ---
 title: "AI Visual Regression Testing: Beyond Pixel Diffing"
-description: "AI visual regression testing compared with pixel-diff tools like Applitools and Percy, plus intent-based visual checks in plain English with screenshots and video."
+description: "AI visual regression testing compared with pixel-diff tools like Applitools and Percy, plus intent-based visual checks in plain English with screenshots and"
 date: 2026-03-18
 category: guide
 ---

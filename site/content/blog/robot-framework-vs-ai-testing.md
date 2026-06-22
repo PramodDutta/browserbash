@@ -1,6 +1,6 @@
 ---
 title: Robot Framework vs AI Testing: Keywords or Natural Language?
-description: "Robot framework vs ai testing compared honestly — keyword-driven syntax versus true natural-language tests, where each wins, and a selector-free plain-English path."
+description: "Robot framework vs ai testing compared honestly — keyword-driven syntax versus true natural-language tests, where each wins, and a selector-free"
 date: 2026-03-28
 category: comparison
 ---

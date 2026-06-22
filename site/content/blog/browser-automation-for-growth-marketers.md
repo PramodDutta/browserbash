@@ -1,6 +1,6 @@
 ---
 title: Browser Automation for Growth Marketers & SEO Teams
-description: "Browser automation for marketers: audit landing pages, check tracking, and verify funnels in plain English on free local models, no engineer or Selenium required."
+description: "Browser automation for marketers: audit landing pages, check tracking, and verify funnels in plain English on free local models, no engineer or Selenium"
 date: 2026-03-18
 category: use-case
 ---

@@ -1,6 +1,6 @@
 ---
 title: Computer Use vs DOM-Based Browser Automation: Which Is Better?
-description: "Computer use vs DOM automation, compared honestly on speed, cost, and reliability — when screenshot-and-click agents beat accessibility-tree drivers, and when they don't."
+description: "Computer use vs DOM automation, compared honestly on speed, cost, and reliability — when screenshot-and-click agents beat accessibility-tree drivers, and"
 date: 2026-03-31
 category: comparison
 ---

@@ -1,6 +1,6 @@
 ---
 title: Migrating Selenium Java to Playwright: A Practical Guide for Java Teams
-description: "A practical Selenium to Playwright Java migration guide: Maven profiles, a legacy folder, command mapping, the TS-only tooling gap, and where a CLI shortcuts the rewrite."
+description: "A practical Selenium to Playwright Java migration guide: Maven profiles, a legacy folder, command mapping, the TS-only tooling gap, and where a CLI"
 date: 2026-05-19
 category: guide
 ---

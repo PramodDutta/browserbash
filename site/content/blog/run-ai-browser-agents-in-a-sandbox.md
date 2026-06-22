@@ -1,6 +1,6 @@
 ---
 title: Running AI Browser Agents Safely: Sandboxing and Isolation
-description: "An ai agent sandbox browser setup keeps an AI from touching your real sessions. Minimum-exposure patterns: clean env, headless, local-only, masked creds, audit trail."
+description: "An ai agent sandbox browser setup keeps an AI from touching your real sessions. Minimum-exposure patterns: clean env, headless, local-only, masked creds"
 date: 2026-03-24
 category: security
 ---

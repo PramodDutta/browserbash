@@ -1,6 +1,6 @@
 ---
 title: AI Testing for EdTech & LMS Platforms in 2026
-description: "AI testing for edtech platforms: verify enrollment, quizzes, and video playback on interactive course UIs that brittle Robot Framework scripts struggle to maintain."
+description: "AI testing for edtech platforms: verify enrollment, quizzes, and video playback on interactive course UIs that brittle Robot Framework scripts struggle to"
 date: 2026-03-24
 category: use-case
 ---

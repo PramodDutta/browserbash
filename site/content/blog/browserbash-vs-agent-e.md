@@ -1,6 +1,6 @@
 ---
 title: Agent-E vs BrowserBash: Research Agent or Production CLI
-description: "Agent-E browser automation compared with BrowserBash: a research multi-agent web agent vs a free, npm-installable CLI with exit codes, recordings, and a QA dashboard."
+description: "Agent-E browser automation compared with BrowserBash: a research multi-agent web agent vs a free, npm-installable CLI with exit codes, recordings, and a QA"
 date: 2026-02-03
 category: agents
 ---

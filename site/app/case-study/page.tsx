@@ -74,8 +74,10 @@ const articleLd = {
     headline: 'Case study: plain-English tests for a real Playwright suite (TTACart)',
     description:
         'A production Playwright + TypeScript suite rewritten as one plain-English BrowserBash file — same login → cart → checkout journey, one command, free local model, recorded and replayable.',
-    author: { '@type': 'Organization', name: 'The Testing Academy', url: 'https://thetestingacademy.com' },
-    publisher: { '@type': 'Organization', name: 'The Testing Academy', '@id': 'https://browserbash.com/#org' },
+    datePublished: '2026-06-15',
+    dateModified: '2026-06-15',
+    author: { '@type': 'Organization', name: 'The Testing Academy', url: 'https://thetestingacademy.com', '@id': 'https://browserbash.com/#org' },
+    publisher: { '@id': 'https://browserbash.com/#org' },
     mainEntityOfPage: 'https://browserbash.com/case-study',
     image: 'https://browserbash.com/og.png',
     about: ['Playwright', 'natural language test automation', 'end-to-end testing', 'BrowserBash'],
