@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --orange:#ff5c1a; --ink:#1a1a1a; --cream:#fffdf9; --muted:#6b6b6b;
+    --sans:'Inter',-apple-system,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono','SF Mono',Menlo,monospace;
+  }
+  html,body{ width:1270px; height:760px; }
+  .slide{
+    position:relative; width:1270px; height:760px; overflow:hidden;
+    background:var(--cream); font-family:var(--sans); color:var(--ink);
+    padding:50px 80px;
+  }
+  .grid-bg{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(26,26,26,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,26,26,.03) 1px, transparent 1px);
+    background-size:46px 46px;
+  }
+  .header{ display:flex; align-items:center; gap:16px; margin-bottom:24px; z-index:2; position:relative; }
+  .mark{ width:46px; height:46px; background:var(--orange); border:5px solid var(--ink); flex:none; }
+  .htext h2{ font-size:48px; font-weight:900; letter-spacing:-1.8px; line-height:1; }
+  .htext h2 .o{ color:var(--orange); }
+  .htext .sub{ font-size:21px; font-weight:600; color:var(--muted); margin-top:6px; }
+  .flag{ font-family:var(--mono); background:var(--ink); color:var(--orange); padding:3px 10px; border-radius:6px; font-size:18px; font-weight:600; }
+
+  .term{
+    position:relative; z-index:2; background:#161616; border:5px solid var(--ink); border-radius:16px;
+    box-shadow:12px 14px 0 rgba(255,92,26,.28); overflow:hidden;
+  }
+  .titlebar{ background:#262626; display:flex; align-items:center; gap:10px; padding:13px 18px; }
+  .titlebar i{ width:13px; height:13px; border-radius:50%; }
+  .titlebar .r{ background:#ff5f56; } .titlebar .y{ background:#ffbd2e; } .titlebar .g{ background:#27c93f; }
+  .titlebar .t{ margin-left:10px; font-family:var(--mono); font-size:16px; color:#bdbdbd; }
+  .body{ padding:22px 26px 24px; font-family:var(--mono); font-size:18px; line-height:1.62; color:#cfcfcf; }
+  .cmdline{ margin-bottom:14px; }
+  .cmdline .o{ color:var(--orange); font-weight:700; } .cmdline .flagi{ color:#7aa2f7; }
+  .json{ white-space:nowrap; }
+  .brace{ color:#7d8590; }
+  .key{ color:#7aa2f7; } .colon{ color:#7d8590; }
+  .s-step{ color:#e0af68; } .s-pass{ color:#9ece6a; } .s-fail{ color:#ff6b6b; }
+  .str{ color:#9ece6a; } .num{ color:#bb9af7; }
+  .pad{ height:5px; }
+
+  .exitrow{
+    position:relative; z-index:2; margin-top:24px; display:flex; gap:14px; align-items:stretch;
+  }
+  .exit{
+    flex:1; background:#fff; border:4px solid var(--ink); border-radius:14px; padding:16px 14px;
+    text-align:center; display:flex; flex-direction:column; gap:4px;
+  }
+  .exit .code{ font-family:var(--mono); font-size:40px; font-weight:800; line-height:1; }
+  .exit .lbl{ font-size:18px; font-weight:700; letter-spacing:-.3px; }
+  .exit.c0{ background:#eafbe7; } .exit.c0 .code{ color:#1f9d3a; }
+  .exit.c1 .code{ color:var(--orange); }
+  .exit.c2 .code{ color:#c0392b; }
+  .exit.c3 .code{ color:#8a6d3b; }
+  .exit .sub{ font-size:13px; color:var(--muted); font-weight:600; }
+
+  .cap{
+    position:absolute; right:80px; bottom:34px; z-index:3;
+    font-size:24px; font-weight:800; letter-spacing:-.5px;
+  }
+  .cap b{ color:var(--orange); }
+</style>
+</head>
+<body>
+  <div class="slide">
+    <div class="grid-bg"></div>
+
+    <div class="header">
+      <div class="mark"></div>
+      <div class="htext">
+        <h2>Machine-readable by <span class="o">design</span></h2>
+        <div class="sub"><span class="flag">--agent</span> emits one NDJSON event per line on stdout</div>
+      </div>
+    </div>
+
+    <div class="term">
+      <div class="titlebar">
+        <i class="r"></i><i class="y"></i><i class="g"></i>
+        <span class="t">ci-pipeline · browserbash run --agent</span>
+      </div>
+      <div class="body">
+        <div class="cmdline"><span class="o">$</span> browserbash run <span class="str">"Log in and reach the dashboard"</span> <span class="flagi">--agent</span></div>
+        <div class="json"><span class="brace">{</span><span class="key">"type"</span><span class="colon">:</span><span class="s-step">"step"</span><span class="colon">,</span> <span class="key">"step"</span><span class="colon">:</span><span class="num">1</span><span class="colon">,</span> <span class="key">"status"</span><span class="colon">:</span><span class="s-pass">"passed"</span><span class="colon">,</span> <span class="key">"action"</span><span class="colon">:</span><span class="str">"navigate"</span><span class="colon">,</span> <span class="key">"remark"</span><span class="colon">:</span><span class="str">"opened /login"</span><span class="brace">}</span></div>
+        <div class="json"><span class="brace">{</span><span class="key">"type"</span><span class="colon">:</span><span class="s-step">"step"</span><span class="colon">,</span> <span class="key">"step"</span><span class="colon">:</span><span class="num">2</span><span class="colon">,</span> <span class="key">"status"</span><span class="colon">:</span><span class="s-pass">"passed"</span><span class="colon">,</span> <span class="key">"action"</span><span class="colon">:</span><span class="str">"act"</span><span class="colon">,</span> <span class="key">"remark"</span><span class="colon">:</span><span class="str">"signed in as *****"</span><span class="brace">}</span></div>
+        <div class="json"><span class="brace">{</span><span class="key">"type"</span><span class="colon">:</span><span class="s-step">"step"</span><span class="colon">,</span> <span class="key">"step"</span><span class="colon">:</span><span class="num">3</span><span class="colon">,</span> <span class="key">"status"</span><span class="colon">:</span><span class="s-pass">"passed"</span><span class="colon">,</span> <span class="key">"action"</span><span class="colon">:</span><span class="str">"verify"</span><span class="colon">,</span> <span class="key">"remark"</span><span class="colon">:</span><span class="str">"dashboard visible"</span><span class="brace">}</span></div>
+        <div class="pad"></div>
+        <div class="json"><span class="brace">{</span><span class="key">"type"</span><span class="colon">:</span><span style="color:#bb9af7;font-weight:600;">"run_end"</span><span class="colon">,</span> <span class="key">"status"</span><span class="colon">:</span><span class="s-pass">"passed"</span><span class="colon">,</span> <span class="key">"steps_executed"</span><span class="colon">:</span><span class="num">3</span><span class="colon">,</span> <span class="key">"duration_ms"</span><span class="colon">:</span><span class="num">8421</span><span class="colon">,</span> <span class="key">"provider"</span><span class="colon">:</span><span class="str">"local"</span><span class="brace">}</span></div>
+      </div>
+    </div>
+
+    <div class="exitrow">
+      <div class="exit c0"><div class="code">0</div><div class="lbl">passed</div><div class="sub">all good</div></div>
+      <div class="exit c1"><div class="code">1</div><div class="lbl">failed</div><div class="sub">assertion missed</div></div>
+      <div class="exit c2"><div class="code">2</div><div class="lbl">error</div><div class="sub">crash / bad input</div></div>
+      <div class="exit c3"><div class="code">3</div><div class="lbl">timeout</div><div class="sub">ran too long</div></div>
+    </div>
+
+    <div class="cap">Built for <b>CI &amp; AI agents</b></div>
+  </div>
+</body>
+</html>

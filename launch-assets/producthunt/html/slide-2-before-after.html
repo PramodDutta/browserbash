@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --orange:#ff5c1a; --ink:#1a1a1a; --cream:#fffdf9; --muted:#6b6b6b;
+    --sans:'Inter',-apple-system,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono','SF Mono',Menlo,monospace;
+  }
+  html,body{ width:1270px; height:760px; }
+  .slide{
+    position:relative; width:1270px; height:760px; overflow:hidden;
+    background:var(--cream); font-family:var(--sans); color:var(--ink);
+    padding:54px 72px 48px;
+  }
+  .grid-bg{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(26,26,26,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,26,26,.03) 1px, transparent 1px);
+    background-size:46px 46px;
+  }
+  .header{ display:flex; align-items:center; gap:16px; margin-bottom:30px; z-index:2; position:relative; }
+  .mark{ width:46px; height:46px; background:var(--orange); border:5px solid var(--ink); flex:none; }
+  .htext h2{ font-size:42px; font-weight:900; letter-spacing:-1.5px; line-height:1; }
+  .htext .sub{ font-size:21px; font-weight:600; color:var(--muted); margin-top:6px; }
+  .htext .sub b{ color:var(--orange); }
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:34px; position:relative; z-index:2; align-items:stretch; }
+  .card{
+    background:#fff; border:4px solid var(--ink); border-radius:18px; padding:30px 32px 32px;
+    display:flex; flex-direction:column; min-height:480px;
+  }
+  .card.after{ box-shadow:12px 14px 0 rgba(255,92,26,.30); }
+  .tag{ display:inline-flex; align-items:center; gap:10px; font-weight:800; font-size:24px; margin-bottom:8px; }
+  .dot{ width:18px; height:18px; border:4px solid var(--ink); }
+  .tag.before .dot{ background:#cdcdcd; }
+  .tag.after .dot{ background:var(--orange); }
+  .tag .small{ font-size:18px; font-weight:600; color:var(--muted); }
+  .label-line{ font-size:18px; color:var(--muted); font-weight:600; margin-bottom:18px; }
+  .term{
+    background:var(--ink); border-radius:12px; padding:20px 22px; font-family:var(--mono);
+    font-size:18.5px; line-height:1.7; color:#e9e9e9; flex:1; overflow:hidden;
+  }
+  .term .win{ display:flex; gap:8px; margin-bottom:16px; }
+  .term .win i{ width:13px; height:13px; border-radius:50%; display:inline-block; }
+  .term .win .r{ background:#ff5f56; } .term .win .y{ background:#ffbd2e; } .term .win .g{ background:#27c93f; }
+  .kw{ color:#ff8a5c; } .str{ color:#9ece6a; } .fn{ color:#7aa2f7; } .dim{ color:#7d8590; } .var{ color:#e0af68; }
+  .after .term{ background:var(--ink); }
+  .after .prompt{ color:var(--orange); font-weight:700; }
+  .after .verb{ color:#fff; font-weight:700; }
+  .after .quote{ color:#9ece6a; }
+  .stack-note{ margin-top:18px; font-size:17px; color:var(--muted); font-weight:600; }
+  .stack-note .x{ color:#c23; font-weight:800; }
+  .arrow{
+    position:absolute; left:50%; top:54%; transform:translate(-50%,-50%);
+    width:74px; height:74px; background:var(--orange); border:5px solid var(--ink);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:38px; color:var(--ink); z-index:5; box-shadow:0 6px 0 rgba(26,26,26,.25);
+  }
+  .footer-cap{
+    position:relative; z-index:2; text-align:center; margin-top:26px;
+    font-size:26px; font-weight:800; letter-spacing:-.5px;
+  }
+  .footer-cap b{ color:var(--orange); }
+</style>
+</head>
+<body>
+  <div class="slide">
+    <div class="grid-bg"></div>
+    <div class="header">
+      <div class="mark"></div>
+      <div class="htext">
+        <h2>Stop writing selectors. Start describing.</h2>
+        <div class="sub">The same checkout test, <b>two ways</b></div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="card before">
+        <div class="tag before"><span class="dot"></span> Before <span class="small">· Playwright + selectors</span></div>
+        <div class="label-line">Brittle, breaks on every UI tweak</div>
+        <div class="term">
+          <div class="win"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+<span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/login'</span>);<br>
+<span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'#email'</span>).<span class="fn">fill</span>(<span class="var">user</span>);<br>
+<span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'#pw'</span>).<span class="fn">fill</span>(<span class="var">pass</span>);<br>
+<span class="kw">await</span> page.<span class="fn">getByRole</span>(<span class="str">'button'</span>,<br>&nbsp;&nbsp;{ name: <span class="str">'Sign in'</span> }).<span class="fn">click</span>();<br>
+<span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'.product-card.red'</span>)<br>&nbsp;&nbsp;.<span class="fn">getByText</span>(<span class="str">'Add to cart'</span>).<span class="fn">click</span>();<br>
+<span class="kw">await</span> page.<span class="fn">locator</span>(<span class="str">'[data-test=checkout]'</span>).<span class="fn">click</span>();<br>
+<span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">getByText</span>(<br>&nbsp;&nbsp;<span class="str">'Thank you for your order!'</span>)).<span class="fn">toBeVisible</span>();
+        </div>
+        <div class="stack-note"><span class="x">+</span> page objects, fixtures, waits, retries…</div>
+      </div>
+
+      <div class="card after">
+        <div class="tag after"><span class="dot"></span> After <span class="small">· BrowserBash</span></div>
+        <div class="label-line">One line of plain English</div>
+        <div class="term">
+          <div class="win"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+<span class="prompt">$</span> <span class="verb">browserbash run</span> <span class="quote">"Log in, add the</span><br>
+<span class="quote">&nbsp;&nbsp;red t-shirt to cart, check out,</span><br>
+<span class="quote">&nbsp;&nbsp;verify 'Thank you for your</span><br>
+<span class="quote">&nbsp;&nbsp;order!'"</span><br><br>
+<span class="dim">✓ logged in</span><br>
+<span class="dim">✓ added red t-shirt</span><br>
+<span class="dim">✓ checked out</span><br>
+<span style="color:var(--orange);font-weight:700;">✓ saw 'Thank you for your order!'</span>
+        </div>
+        <div class="stack-note" style="color:var(--ink);">The AI finds the elements for you.</div>
+      </div>
+
+      <div class="arrow">→</div>
+    </div>
+
+    <div class="footer-cap">No selectors. No page objects. <b>No flaky CSS paths.</b></div>
+  </div>
+</body>
+</html>

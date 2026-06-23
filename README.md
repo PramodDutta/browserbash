@@ -1,8 +1,26 @@
-# browserbash-cli
+# BrowserBash
 
-Vendor-independent, natural-language browser automation CLI.
+**Plain-English browser automation. No selectors. Free and open-source.**
 
-Give it a plain-English objective. An AI agent drives a **real browser** and returns structured results. Both layers are swappable:
+[![npm version](https://img.shields.io/npm/v/browserbash-cli)](https://www.npmjs.com/package/browserbash-cli)
+[![npm downloads](https://img.shields.io/npm/dm/browserbash-cli)](https://www.npmjs.com/package/browserbash-cli)
+[![license](https://img.shields.io/npm/l/browserbash-cli)](https://github.com/PramodDutta/browserbash)
+[![Node](https://img.shields.io/node/v/browserbash-cli)](https://nodejs.org)
+
+![BrowserBash demo](site/public/demo.gif)
+
+You write a plain-English objective. An AI agent drives a **real Chrome browser** step by step — no selectors, no scripts. Ollama-first, so it runs on free local models with **no API keys** and nothing ever leaves your machine.
+
+```bash
+npm install -g browserbash-cli
+browserbash run "Open news.ycombinator.com and store the top story title as 'top_story'"
+```
+
+**[Website](https://browserbash.com)** · **[Docs / Learn](https://browserbash.com/learn)** · **[Tutorials](https://browserbash.com/tutorials)** · **[npm](https://www.npmjs.com/package/browserbash-cli)**
+
+---
+
+Both layers are swappable: the **engine** interprets the English, the **provider** runs the browser.
 
 ## Engines (who interprets the English)
 

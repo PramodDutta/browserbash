@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --orange:#ff5c1a; --ink:#1a1a1a; --cream:#fffdf9; --muted:#6b6b6b;
+    --sans:'Inter',-apple-system,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono','SF Mono',Menlo,monospace;
+  }
+  html,body{ width:1270px; height:760px; }
+  .slide{
+    position:relative; width:1270px; height:760px; overflow:hidden;
+    background:var(--cream); font-family:var(--sans); color:var(--ink);
+    padding:44px 80px 40px; display:flex; flex-direction:column;
+  }
+  .grid-bg{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(26,26,26,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,26,26,.03) 1px, transparent 1px);
+    background-size:46px 46px;
+  }
+  .brandrow{ display:flex; align-items:center; gap:14px; margin-bottom:24px; z-index:2; }
+  .mark{ width:46px; height:46px; background:var(--orange); border:5px solid var(--ink); }
+  .brandname{ font-weight:800; font-size:24px; letter-spacing:-.5px; }
+  .brandname b{ color:var(--orange); }
+
+  h2{ z-index:2; font-size:70px; font-weight:900; letter-spacing:-3px; line-height:.98; }
+  h2 .o{ color:var(--orange); }
+  .lead{ z-index:2; font-size:25px; font-weight:600; color:var(--muted); margin-top:18px; max-width:920px; line-height:1.38; }
+  .lead b{ color:var(--ink); }
+
+  .pills{ z-index:2; display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:30px; max-width:960px; }
+  .pill{
+    background:#fff; border:4px solid var(--ink); border-radius:14px; padding:16px 22px;
+    display:flex; align-items:center; gap:16px; font-size:24px; font-weight:800; letter-spacing:-.5px;
+  }
+  .pill .ic{ width:46px; height:46px; flex:none; background:var(--orange); border:4px solid var(--ink); display:flex; align-items:center; justify-content:center; font-size:23px; }
+  .pill .ic.ink{ background:var(--ink); color:var(--cream); }
+  .pill small{ display:block; font-size:15px; font-weight:600; color:var(--muted); margin-top:2px; }
+
+  .providers{ z-index:2; margin-top:auto; padding-top:26px; }
+  .providers .plabel{ font-size:18px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:14px; }
+  .chips{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+  .chip{
+    background:var(--ink); color:var(--cream); border:4px solid var(--ink); border-radius:999px;
+    padding:12px 26px; font-size:22px; font-weight:700;
+  }
+  .chip.first{ background:var(--orange); color:var(--ink); }
+  .chip.ghost{ background:#fff; color:var(--ink); }
+  .chip.ghost small{ color:var(--muted); font-weight:600; font-size:16px; margin-left:6px; }
+
+  .deco{ position:absolute; right:-60px; top:-60px; width:280px; height:280px; background:var(--orange); border:5px solid var(--ink); transform:rotate(45deg); opacity:.08; }
+</style>
+</head>
+<body>
+  <div class="slide">
+    <div class="grid-bg"></div>
+    <div class="deco"></div>
+
+    <div class="brandrow"><div class="mark"></div><div class="brandname">Browser<b>Bash</b></div></div>
+
+    <h2>$0 model bill.<br>Nothing <span class="o">leaves your machine.</span></h2>
+    <div class="lead">Point it at a <b>local Ollama model</b> and run for free — <b>no API keys</b>, no cloud, no per-run cost. Bring your own provider only if you want to.</div>
+
+    <div class="pills">
+      <div class="pill"><span class="ic">🦙</span><div>Ollama-first<small>runs fully offline on your laptop</small></div></div>
+      <div class="pill"><span class="ic ink">$0</span><div>Zero model bill<small>no metered API charges</small></div></div>
+      <div class="pill"><span class="ic">🔑</span><div>No API keys required<small>to get started locally</small></div></div>
+      <div class="pill"><span class="ic ink">🔒</span><div>Stays on-device<small>your pages never get shipped out</small></div></div>
+    </div>
+
+    <div class="providers">
+      <div class="plabel">Want a hosted model instead? Bring your own:</div>
+      <div class="chips">
+        <span class="chip first">Ollama <small style="color:#7a3a18;">· default</small></span>
+        <span class="chip">OpenRouter</span>
+        <span class="chip">Anthropic</span>
+        <span class="chip ghost">…your key, your bill</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

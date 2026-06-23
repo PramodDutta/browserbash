@@ -6,6 +6,7 @@ import { CopyButton } from '@/components/CopyButton';
 import { Reveal } from '@/components/Reveal';
 import { AbTrack } from '@/components/AbTrack';
 import { Terminal, type DemoRecording } from '@/components/Terminal';
+import { DemoVideo } from '@/components/DemoVideo';
 import { SiteFooter } from '@/components/SiteFooter';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -121,6 +122,22 @@ export default async function Page() {
                 </Reveal>
                 <Reveal delay={120}>
                     <Terminal demo={demo} autoplay />
+                </Reveal>
+                <Reveal delay={160}>
+                    <div className="demo-watch">
+                        <div className="demo-watch__head">
+                            <h3 className="demo-watch__title">Prefer to just watch a full run?</h3>
+                            <p className="demo-watch__sub">
+                                One sentence in, a real Chrome driven start to finish, green{' '}
+                                <span className="demo-watch__pass">✓ PASSED</span> out — about twelve seconds.
+                            </p>
+                        </div>
+                        <DemoVideo src="/demo.mp4" poster="/og.png" />
+                        <div className="demo-watch__foot">
+                            <code className="demo-watch__cmd">$ {INSTALL}</code>
+                            <CopyButton text={INSTALL} />
+                        </div>
+                    </div>
                 </Reveal>
             </section>
 
