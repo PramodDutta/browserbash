@@ -37,6 +37,7 @@ export function SiteFooter() {
                     <a href="/faq">FAQ</a>
                     <a href="/changelog">Changelog</a>
                     <a href="https://www.npmjs.com/package/browserbash-cli" target="_blank" rel="noopener noreferrer">npm</a>
+                    <a href="https://www.producthunt.com/products/browserbash" target="_blank" rel="noopener noreferrer">Product Hunt ↗</a>
                     <a href="/feed.xml">RSS</a>
                 </nav>
 

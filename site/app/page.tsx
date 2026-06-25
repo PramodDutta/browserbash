@@ -28,6 +28,25 @@ export default async function Page() {
     // paint, and CSS shows the right one — so the page stays static + CDN-cached.
     return (
         <>
+            <a
+                className="ph-banner"
+                href="https://www.producthunt.com/products/browserbash"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                    display: 'block',
+                    textAlign: 'center',
+                    background: '#ff5c1a',
+                    color: '#1a1a1a',
+                    fontWeight: 500,
+                    padding: '9px 14px',
+                    fontSize: '14px',
+                    textDecoration: 'none',
+                    borderBottom: '2px solid #1a1a1a',
+                }}
+            >
+                🔺 BrowserBash is live on Product Hunt today — try it &amp; leave a comment →
+            </a>
             <nav className="nav container">
                 <a href="#top" className="nav__brand">
                     <Bo size={26} interactive={false} pose="idle" />

@@ -59,7 +59,7 @@ If anything above sounds like it would help your work, here is how you can pitch
 
 First, try it. `npm install -g browserbash-cli`, point it at a site you care about, and watch an agent drive Chrome from a sentence. You need Node 18 or newer and Chrome installed; that is the whole prerequisite list.
 
-Second, leave honest feedback on Product Hunt. You can find our Product Hunt page by searching BrowserBash on Product Hunt today, and I will add the direct link here once it is live. I would genuinely rather have a sharp critical comment that tells me what is missing than a polite upvote. This is version 1.3.1, not a finished story, and the comments shape what I build next.
+Second, leave honest feedback on [our Product Hunt page](https://www.producthunt.com/products/browserbash). I would genuinely rather have a sharp critical comment that tells me what is missing than a polite upvote. This is version 1.3.1, not a finished story, and the comments shape what I build next.
 
 Third, if it earns it, star the repo on [GitHub](https://github.com/PramodDutta/browserbash). Stars are how an open-source project gets found by the next person with the same selector-maintenance headache, and the package itself lives on [npm](https://www.npmjs.com/package/browserbash-cli) if you want to point a teammate straight at it.
 
