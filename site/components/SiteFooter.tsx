@@ -1,4 +1,5 @@
 import { Bo } from '@/components/Bo';
+import { PHBadge } from '@/components/PHBadge';
 
 /**
  * Site-wide footer with full Product / Resources / Company / Legal columns.
@@ -19,6 +20,9 @@ export function SiteFooter() {
                         Plain English in. Real browser out. Free, open-source AI browser automation — no API keys, no credit card.
                     </p>
                     <p className="footer__credit">Built by The Testing Academy · Apache-2.0</p>
+                    <div style={{ marginTop: '14px' }}>
+                        <PHBadge />
+                    </div>
                 </div>
 
                 <nav className="footer__col" aria-label="Product">
