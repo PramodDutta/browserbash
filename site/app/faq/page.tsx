@@ -89,6 +89,14 @@ const faqLd = {
         },
         {
             '@type': 'Question',
+            name: 'How does BrowserBash handle dynamic UIs that change between runs?',
+            acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'It never stores a CSS or XPath selector in your test. You write each step as intent, like "click the submit button", and at run time the agent reads the live DOM and resolves the target against whatever is actually on the page that run. If the layout shifts between runs, there is no hardcoded path to miss. Late-loading elements are handled by Playwright built-in auto-wait (15s) instead of fixed sleeps, and multi-step flows live in committable _test.md files. The honest limit is model quality: tiny local models (8B and under) can fumble ambiguous targets on long flows, while a 70B-class local model or a hosted model handles changing UIs far more reliably.',
+            },
+        },
+        {
+            '@type': 'Question',
             name: 'Can I run it in CI/CD?',
             acceptedAnswer: {
                 '@type': 'Answer',
@@ -237,6 +245,21 @@ export default function FaqPage() {
                             browser &mdash; no selectors, no code. You still get developer-grade controls: Markdown test files
                             with <code>@import</code> composition, variable templating with secret masking, an NDJSON agent
                             mode, CI exit codes, and session recording.
+                        </p>
+                    </div>
+
+                    <div className="faq-item">
+                        <h3>How does BrowserBash handle dynamic UIs that change between runs?</h3>
+                        <p>
+                            It never stores a CSS or XPath selector in your test. You write each step as{' '}
+                            <strong>intent</strong> (&ldquo;click the submit button&rdquo;), and at run time the agent reads
+                            the <strong>live DOM</strong> and resolves the target against whatever is actually on the page
+                            that run. If the layout shifts between runs, there&rsquo;s no hardcoded path to miss.
+                            Late-loading elements are handled by Playwright auto-wait (15s) instead of fixed sleeps, and
+                            multi-step flows live in committable <code>_test.md</code> files. The honest limit is{' '}
+                            <strong>model quality</strong>: tiny local models (8B and under) can fumble ambiguous targets on
+                            long flows, while a 70B-class local model or a hosted model handles changing UIs far more
+                            reliably.
                         </p>
                     </div>
 
