@@ -33,6 +33,20 @@ describe('maskSecrets', () => {
         expect(maskSecrets('nothing here', vars)).toBe('nothing here');
     });
 
+    it('masks case-transformed secrets (DNS lowercasing in error messages)', () => {
+        const v: Record<string, VariableValue> = { pw: { value: 'S3cretVal99', secret: true } };
+        const out = maskSecrets('getaddrinfo ENOTFOUND s3cretval99.invalid', v);
+        expect(out).not.toContain('s3cretval99');
+        expect(out).toContain('*****');
+        expect(maskSecrets('saw S3CRETVAL99 here', v)).toBe('saw ***** here');
+    });
+
+    it('masks secrets containing regex metacharacters literally', () => {
+        const v: Record<string, VariableValue> = { pw: { value: 'a.b+c(d)', secret: true } };
+        expect(maskSecrets('leak a.b+c(d) end', v)).toBe('leak ***** end');
+        expect(maskSecrets('axbyczd unaffected', v)).toBe('axbyczd unaffected');
+    });
+
     it('masks secrets inside record values', () => {
         expect(maskSecretRecord({ token: 'hunter2', user: 'pramod' }, vars)).toEqual({
             token: '*****',

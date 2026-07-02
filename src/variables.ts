@@ -67,12 +67,15 @@ export function substitute(text: string, vars: Record<string, VariableValue>): s
     });
 }
 
-/** Mask secret values in any outbound string (logs, NDJSON remarks). */
+/** Mask secret values in any outbound string (logs, NDJSON remarks).
+ * Case-insensitive: error paths can case-transform secrets (e.g. DNS lowercases
+ * hostnames in getaddrinfo messages), and a case-shifted leak is still a leak. */
 export function maskSecrets(text: string, vars: Record<string, VariableValue>): string {
     let masked = text;
     for (const v of Object.values(vars)) {
         if (v.secret && v.value.length > 0) {
-            masked = masked.split(v.value).join('*****');
+            const escaped = v.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            masked = masked.replace(new RegExp(escaped, 'gi'), '*****');
         }
     }
     return masked;

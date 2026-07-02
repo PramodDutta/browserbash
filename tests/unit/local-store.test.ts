@@ -55,6 +55,14 @@ describe('local-store', () => {
         expect(artifactPath('../../etc/passwd', 'screenshot')).toBeNull();
     });
 
+    it('getRun rejects ids that are not run-id shaped', () => {
+        expect(getRun('../../etc/passwd')).toBeNull();
+        expect(getRun('..%2F..%2Fetc%2Fpasswd')).toBeNull();
+        expect(getRun('')).toBeNull();
+        const id = persistRun({ objective: 'ok', result: result(), provider: 'local', model: 'm', variables: {} });
+        expect(getRun(id!)?.objective).toBe('ok');
+    });
+
     it('newest run sorts first and clear empties the store', () => {
         const a = persistRun({ objective: 'first', result: result(), provider: 'local', model: 'm', variables: {} });
         const b = persistRun({ objective: 'second', result: result(), provider: 'local', model: 'm', variables: {} });

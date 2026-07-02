@@ -127,7 +127,12 @@ export function listRuns(): LocalRun[] {
         .filter((r): r is LocalRun => r !== null);
 }
 
+/** Run ids as minted by persistRun. Every by-id lookup validates against this
+ * before touching the filesystem, so a crafted id can never traverse paths. */
+const RUN_ID_RE = /^[0-9]{13}-[a-z0-9]{1,12}$/;
+
 export function getRun(id: string): LocalRun | null {
+    if (!RUN_ID_RE.test(id)) return null;
     try {
         const raw = fs.readFileSync(path.join(runDir(id), 'meta.json'), 'utf-8');
         return JSON.parse(raw) as LocalRun;
@@ -138,8 +143,7 @@ export function getRun(id: string): LocalRun | null {
 
 /** Absolute path to a stored artifact file, or null if absent. */
 export function artifactPath(id: string, kind: 'screenshot' | 'video' | 'trace'): string | null {
-    // Guard against path traversal in the id segment.
-    if (!/^[0-9]{13}-[a-z0-9]{1,12}$/.test(id)) return null;
+    if (!RUN_ID_RE.test(id)) return null;
     const file = path.join(runDir(id), ARTIFACT_FILES[kind]);
     return fs.existsSync(file) ? file : null;
 }
