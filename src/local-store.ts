@@ -41,6 +41,9 @@ function runDir(id: string): string {
     return path.join(runsDir(), id);
 }
 
+/** Same-millisecond runs need a monotonic tiebreaker so ids stay time-sortable. */
+let runSeq = 0;
+
 /** Persist a finished run. Returns the new run id, or null if writing failed
  * (a local-store hiccup must never fail a passing test). */
 export function persistRun(input: {
@@ -52,7 +55,9 @@ export function persistRun(input: {
 }): string | null {
     try {
         const { objective, result, provider, model, variables } = input;
-        const id = `${Date.now().toString().padStart(13, '0')}-${Math.random().toString(36).slice(2, 8)}`;
+        runSeq = (runSeq + 1) % 46656; // 36^3, three base36 digits
+        const seq = runSeq.toString(36).padStart(3, '0');
+        const id = `${Date.now().toString().padStart(13, '0')}-${seq}${Math.random().toString(36).slice(2, 8)}`;
         const dir = runDir(id);
         fs.mkdirSync(dir, { recursive: true });
 
