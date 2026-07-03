@@ -4,6 +4,7 @@ import { extractFinalState, toStagehandModel } from '../../dist/engine/stagehand
 beforeEach(() => {
     vi.stubEnv('OLLAMA_BASE_URL', undefined);
     vi.stubEnv('OLLAMA_API_KEY', undefined);
+    vi.stubEnv('OLLAMA_REASONING_EFFORT', undefined);
     vi.stubEnv('OPENROUTER_API_KEY', undefined);
     vi.stubEnv('OPENROUTER_BASE_URL', undefined);
 });
@@ -13,12 +14,18 @@ afterEach(() => {
 });
 
 describe('toStagehandModel', () => {
-    it('maps ollama/<m> to the local OpenAI-compatible endpoint', () => {
+    it('maps ollama/<m> to the local OpenAI-compatible endpoint with thinking off', () => {
         expect(toStagehandModel('ollama/qwen3')).toEqual({
             modelName: 'openai/qwen3',
             baseURL: 'http://localhost:11434/v1',
             apiKey: 'ollama',
+            reasoningEffort: 'none',
         });
+    });
+
+    it('honors OLLAMA_REASONING_EFFORT override', () => {
+        vi.stubEnv('OLLAMA_REASONING_EFFORT', 'low');
+        expect(toStagehandModel('ollama/qwen3.5:4b')).toMatchObject({ reasoningEffort: 'low' });
     });
 
     it('maps openrouter/<vendor>/<m> through openrouter.ai with the key', () => {

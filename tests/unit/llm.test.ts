@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { resolveModel } from '../../dist/llm.js';
+import { isKnownThinkingModel, resolveModel, warnIfThinkingModel } from '../../dist/llm.js';
 
 beforeEach(() => {
     // Dead port → instant connection refusal, deterministic "no Ollama".
@@ -45,5 +45,34 @@ describe('resolveModel', () => {
 
     it('throws setup guidance when nothing available', async () => {
         await expect(resolveModel('auto', noop)).rejects.toThrow(/OPENROUTER_API_KEY/);
+    });
+});
+
+describe('thinking-model warning', () => {
+    it('flags known thinking families, passes instruct models', () => {
+        expect(isKnownThinkingModel('ollama/qwen3.5:4b')).toBe(true);
+        expect(isKnownThinkingModel('ollama/deepseek-r1:7b')).toBe(true);
+        expect(isKnownThinkingModel('ollama/qwq:32b')).toBe(true);
+        expect(isKnownThinkingModel('ollama/llama3.2:3b')).toBe(false);
+        expect(isKnownThinkingModel('ollama/qwen2.5:7b-instruct')).toBe(false);
+        expect(isKnownThinkingModel('ollama/gemma3:1b')).toBe(false);
+    });
+
+    it('warns only for ollama-prefixed thinking models', () => {
+        const logs: string[] = [];
+        const log = (m: string): void => { logs.push(m); };
+        warnIfThinkingModel('ollama/qwen3.5:4b', log);
+        expect(logs.some((l) => l.includes('thinking model'))).toBe(true);
+        logs.length = 0;
+        warnIfThinkingModel('ollama/llama3.2:3b', log);
+        warnIfThinkingModel('claude-opus-4-8', log);
+        expect(logs).toHaveLength(0);
+    });
+
+    it('explicit thinking model still resolves but logs the warning', async () => {
+        const logs: string[] = [];
+        const log = (m: string): void => { logs.push(m); };
+        expect(await resolveModel('ollama/qwen3.5:4b', log)).toBe('ollama/qwen3.5:4b');
+        expect(logs.some((l) => l.includes('thinking model'))).toBe(true);
     });
 });

@@ -33,12 +33,38 @@ async function detectOllamaModel(): Promise<string | null> {
     }
 }
 
+/**
+ * Local model families that emit chain-of-thought before answering. On the
+ * agent path (OpenAI Responses API) their thinking cannot be disabled, so
+ * interactive steps routinely blow the per-action budget. Warn, don't block:
+ * read-only objectives still work and the landscape shifts fast.
+ */
+const THINKING_MODEL_PATTERNS = [/qwen3\.5/i, /qwq/i, /(^|\/|-)r1\b/i, /deepseek-r1/i, /magistral/i];
+
+export function isKnownThinkingModel(model: string): boolean {
+    return THINKING_MODEL_PATTERNS.some((re) => re.test(model));
+}
+
+export function warnIfThinkingModel(model: string, log: (msg: string) => void): void {
+    if (model.startsWith('ollama/') && isKnownThinkingModel(model)) {
+        log(
+            `Warning: ${model.slice('ollama/'.length)} is a thinking model. Its chain-of-thought cannot be ` +
+            'disabled on the agent path yet, so clicks and typing may time out. For reliable interactive ' +
+            'runs use a non-thinking tool-capable model (e.g. ollama pull llama3.2:3b) or a hosted model.',
+        );
+    }
+}
+
 export async function resolveModel(model: string, log: (msg: string) => void): Promise<string> {
-    if (model !== 'auto') return model;
+    if (model !== 'auto') {
+        warnIfThinkingModel(model, log);
+        return model;
+    }
 
     const ollamaModel = await detectOllamaModel();
     if (ollamaModel) {
         log(`Model: ollama/${ollamaModel} (local, open source — override with --model or OLLAMA_MODEL)`);
+        warnIfThinkingModel(`ollama/${ollamaModel}`, log);
         return `ollama/${ollamaModel}`;
     }
     if (process.env.ANTHROPIC_API_KEY) {

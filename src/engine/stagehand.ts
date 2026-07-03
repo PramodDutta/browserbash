@@ -28,7 +28,9 @@ export function stagehandSupports(provider: string): boolean {
     return (STAGEHAND_PROVIDERS as readonly string[]).includes(provider);
 }
 
-type StagehandModelConfig = string | { modelName: string; apiKey?: string; baseURL?: string };
+type StagehandModelConfig =
+    | string
+    | { modelName: string; apiKey?: string; baseURL?: string; reasoningEffort?: string };
 
 /**
  * Map model ids to Stagehand's model configuration.
@@ -47,6 +49,11 @@ export function toStagehandModel(model: string): StagehandModelConfig {
             modelName: `openai/${model.slice('ollama/'.length)}`,
             baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/v1',
             apiKey: process.env.OLLAMA_API_KEY ?? 'ollama',
+            // Thinking models (qwen3.5 etc.) burn Stagehand's whole per-action
+            // budget on chain-of-thought before emitting an action, so every
+            // click/type times out. Ollama honors reasoning_effort on its
+            // OpenAI-compatible endpoint and non-thinking models ignore it.
+            reasoningEffort: process.env.OLLAMA_REASONING_EFFORT ?? 'none',
         };
     }
     if (model.startsWith('openrouter/')) {
@@ -171,7 +178,13 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
             'If the objective asks to store or extract values, end your final message with a JSON object mapping each requested name to its value.',
         ].filter(Boolean).join('\n');
 
-        const agent = stagehand.agent();
+        // Local OpenAI-compatible models (Ollama, OpenRouter) must use the DOM
+        // tool loop: the default hybrid mode routes openai/* ids to the CUA
+        // client on the Responses API, which ignores reasoningEffort, so
+        // thinking models burn every act() budget on chain-of-thought.
+        const isOpenAiCompat =
+            options.model.startsWith('ollama/') || options.model.startsWith('openrouter/');
+        const agent = isOpenAiCompat ? stagehand.agent({ mode: 'dom' }) : stagehand.agent();
         const timeoutMs = options.timeoutSec * 1000;
         let timeout: ReturnType<typeof setTimeout> | undefined;
 
