@@ -3,6 +3,7 @@ import type { Page } from 'playwright-core';
 import type { Reporter } from '../output.js';
 import type { RunResult, VariableValue } from '../types.js';
 import { substitute } from '../variables.js';
+import { normalizeUrl, retemplatizeInput, type RecordedAction } from '../cache-store.js';
 import { BROWSER_TOOLS, BrowserToolExecutor } from './tools.js';
 
 const SYSTEM_PROMPT = `You are a browser automation agent. You receive a plain-English objective and drive a real browser to complete it using the provided tools.
@@ -22,7 +23,15 @@ export interface AgentRunOptions {
     timeoutSec: number;
     variables: Record<string, VariableValue>;
     model: string;
+    /** Successful browser actions are recorded here (journal recorder). */
+    actionSink?: RecordedAction[];
+    /** Seed extract values (a heal run inherits what replay collected). */
+    initialFinalState?: Record<string, string>;
+    /** Appended to the objective when healing after a partial replay. */
+    resumeNote?: string;
 }
+
+const RECORDABLE = new Set(['navigate', 'click', 'type_text', 'wait_for', 'extract']);
 
 /**
  * Manual tool-use loop (not the SDK tool runner) so every tool call can be
@@ -32,7 +41,10 @@ export async function runAgent(options: AgentRunOptions): Promise<RunResult> {
     const start = Date.now();
     const client = new Anthropic();
     const executor = new BrowserToolExecutor(options.page);
-    const objective = substitute(options.objective, options.variables);
+    if (options.initialFinalState) Object.assign(executor.finalState, options.initialFinalState);
+    const objective =
+        substitute(options.objective, options.variables) +
+        (options.resumeNote ? `\n\n${options.resumeNote}` : '');
 
     const messages: Anthropic.MessageParam[] = [
         { role: 'user', content: `Objective: ${objective}` },
@@ -92,7 +104,26 @@ export async function runAgent(options: AgentRunOptions): Promise<RunResult> {
             });
 
             try {
+                // Fingerprints must reflect the page BEFORE the action runs.
+                const urlBefore = options.actionSink && RECORDABLE.has(toolUse.name)
+                    ? executor.currentUrl()
+                    : '';
                 const result = await executor.execute(toolUse.name, input);
+                if (options.actionSink && RECORDABLE.has(toolUse.name)) {
+                    const dehydrated: Record<string, unknown> = { ...input };
+                    if (typeof dehydrated.target === 'string') {
+                        dehydrated.target = executor.resolveTarget(dehydrated.target);
+                    }
+                    const { input: templated, carriesVariables } = retemplatizeInput(dehydrated, options.variables);
+                    const { origin, normalized } = normalizeUrl(urlBefore);
+                    options.actionSink.push({
+                        tool: toolUse.name as RecordedAction['tool'],
+                        input: templated,
+                        urlBefore: normalized,
+                        origin,
+                        carriesVariables,
+                    });
+                }
                 options.reporter.step({ type: 'step', step, status: 'passed', action: toolUse.name, remark: result });
                 toolResults.push({ type: 'tool_result', tool_use_id: toolUse.id, content: result });
             } catch (err) {

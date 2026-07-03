@@ -383,6 +383,14 @@ program
         if (!fs.existsSync(exampleTest)) {
             fs.writeFileSync(exampleTest, '# Smoke test\n\n- Open {{base_url}}\n- Verify the page title is visible\n- Store the page heading as \'heading\'\n');
         }
+        // Keep machine-local, environment-specific, and secret-adjacent files
+        // out of version control. The action cache is regenerated per machine
+        // and is not signed, so it is local-only by default (committing it
+        // safely needs the journal HMAC tracked for a later release).
+        const ignoreFile = path.join(dir, '.gitignore');
+        if (!fs.existsSync(ignoreFile)) {
+            fs.writeFileSync(ignoreFile, 'cache/\nruns/\nResult.md\nvariables/*.local.json\n');
+        }
         process.stdout.write(`Initialized ${dir}\nGlobal config lives in ${configDir()}\n`);
     });
 

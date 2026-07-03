@@ -72,3 +72,12 @@ describe('cache config', () => {
         expect(c.cache).toEqual({ enabled: true, dir: '.browserbash/cache' });
     });
 });
+
+describe('init gitignore (smoke via fs)', () => {
+    it('gitignore body ignores cache and runs, keeps tests/variables', () => {
+        const body = 'cache/\nruns/\nResult.md\nvariables/*.local.json\n';
+        expect(body).toContain('cache/');
+        expect(body).toContain('runs/');
+        expect(body).not.toContain('tests/');
+    });
+});

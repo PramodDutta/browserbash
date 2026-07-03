@@ -58,6 +58,8 @@ export interface StepEvent {
     status: 'running' | 'passed' | 'failed';
     action: string;
     remark: string;
+    /** True when the step came from the replay cache, not the model. */
+    cached?: boolean;
 }
 
 /** Action-cache outcome of a run. 'off' = disabled or unusable for this run. */

@@ -122,6 +122,23 @@ export class BrowserToolExecutor {
         }
     }
 
+    /** Current page URL (for the action journal's fingerprints). */
+    currentUrl(): string {
+        return this.page.url();
+    }
+
+    /**
+     * Dehydrate a target for the action journal: refs are session-scoped and
+     * worthless across runs, so ref:<n> becomes the concrete selector it
+     * resolved to. Selectors and text= targets pass through unchanged.
+     */
+    resolveTarget(target: string): string {
+        if (target.startsWith('ref:')) {
+            return this.refs.get(Number(target.slice(4))) ?? target;
+        }
+        return target;
+    }
+
     private locate(target: string): ReturnType<Page['locator']> {
         if (target.startsWith('ref:')) {
             const selector = this.refs.get(Number(target.slice(4)));
