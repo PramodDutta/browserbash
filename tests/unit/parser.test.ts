@@ -39,3 +39,16 @@ describe('parseTestMd', () => {
         expect(() => parseTestMd(p)).toThrow(/no steps/i);
     });
 });
+
+describe('resolveResultPath', () => {
+    it('defaults to Result.md next to the test file', async () => {
+        const { resolveResultPath } = await import('../../dist/testmd/runner.js');
+        expect(resolveResultPath('/tmp/tests/checkout_test.md')).toBe('/tmp/tests/Result.md');
+    });
+
+    it('honors an override path, resolved absolute', async () => {
+        const { resolveResultPath } = await import('../../dist/testmd/runner.js');
+        expect(resolveResultPath('/tmp/tests/checkout_test.md', '/out/r.md')).toBe('/out/r.md');
+        expect(resolveResultPath('/tmp/tests/a_test.md', 'rel/r.md').endsWith('/rel/r.md')).toBe(true);
+    });
+});

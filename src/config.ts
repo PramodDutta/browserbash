@@ -43,6 +43,28 @@ export function projectDir(): string {
     return path.join(process.cwd(), '.browserbash');
 }
 
+/**
+ * Merge a stored partial config over defaults, one level deep. A partial
+ * nested section on disk (e.g. a hand-edited `cache` with only one key)
+ * must not clobber the other keys of that section's defaults.
+ */
+export function mergeConfig<T extends object>(defaults: T, raw: Partial<T>): T {
+    const merged = { ...(defaults as Record<string, unknown>) };
+    for (const [key, value] of Object.entries(raw)) {
+        if (value === undefined) continue;
+        const base = (defaults as unknown as Record<string, unknown>)[key];
+        if (
+            base !== null && typeof base === 'object' && !Array.isArray(base) &&
+            value !== null && typeof value === 'object' && !Array.isArray(value)
+        ) {
+            merged[key] = { ...(base as Record<string, unknown>), ...(value as Record<string, unknown>) };
+        } else {
+            merged[key] = value;
+        }
+    }
+    return merged as T;
+}
+
 export function loadConfig(): BrowserBashConfig {
     const file = configPath();
     if (!fs.existsSync(file)) {
@@ -50,7 +72,7 @@ export function loadConfig(): BrowserBashConfig {
     }
     try {
         const raw = JSON.parse(fs.readFileSync(file, 'utf-8')) as Partial<BrowserBashConfig>;
-        return { ...DEFAULTS, ...raw, credentials: { ...raw.credentials } };
+        return mergeConfig(DEFAULTS, raw);
     } catch {
         return { ...DEFAULTS };
     }

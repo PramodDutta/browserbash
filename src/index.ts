@@ -6,7 +6,7 @@ import { configDir, configPath, loadConfig, projectDir, saveConfig } from './con
 import { getProvider, listProviders } from './providers/index.js';
 import { executeRun } from './runner.js';
 import { runTestMd } from './testmd/runner.js';
-import { clearRuns } from './local-store.js';
+import { clearRuns, runsDir } from './local-store.js';
 import { startDashboard, openBrowser } from './dashboard/server.js';
 import { EXIT_CODES, type EngineId, type RunStatus, type VariableValue } from './types.js';
 import { loadVariables, maskSecrets } from './variables.js';
@@ -75,9 +75,13 @@ async function serveDashboardThenExit(port: number, exitStatus: RunStatus): Prom
     const handle = await startDashboard(port);
     process.stdout.write(`\nLocal dashboard: ${handle.url}  (Ctrl-C to stop)\n`);
     openBrowser(handle.url);
-    process.on('SIGINT', () => {
-        void handle.close().then(() => process.exit(EXIT_CODES[exitStatus]));
-    });
+    // SIGTERM too: a parent process (CI runner, suite orchestrator) stops
+    // children with SIGTERM, and the run's verdict code must survive that.
+    for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+        process.on(signal, () => {
+            void handle.close().then(() => process.exit(EXIT_CODES[exitStatus]));
+        });
+    }
     return new Promise<never>(() => {}); // keep the process alive
 }
 
@@ -111,14 +115,22 @@ async function handleRunError(
     err: unknown,
     agentMode: boolean,
     variables: Record<string, VariableValue> = {},
+    provider?: string,
 ): Promise<never> {
     const message = maskSecrets((err as Error).message ?? String(err), variables);
     if (agentMode) {
-        process.stdout.write(JSON.stringify({ type: 'run_end', status: 'error', summary: message, final_state: {}, duration_ms: 0, steps_executed: 0 }) + '\n');
+        // Keep the error-path run_end shape aligned with the normal one:
+        // NDJSON consumers should not need a special case for the provider field.
+        process.stdout.write(JSON.stringify({ type: 'run_end', status: 'error', summary: message, final_state: {}, duration_ms: 0, steps_executed: 0, provider: provider ?? 'unknown' }) + '\n');
     } else {
         process.stderr.write(`Error: ${message}\n`);
     }
     exitWith('error');
+}
+
+/** Best-effort provider name for error reporting, never throws. */
+function providerForError(flags: CommonFlags, defaultProvider: string): string {
+    return flags.cdpEndpoint ? 'cdp' : flags.provider ?? defaultProvider;
 }
 
 addRunFlags(
@@ -153,7 +165,7 @@ addRunFlags(
         }
         exitWith(result.status);
     } catch (err) {
-        await handleRunError(err, flags.agent ?? false, variables);
+        await handleRunError(err, flags.agent ?? false, variables, providerForError(flags, config.defaultProvider));
     }
 });
 
@@ -161,13 +173,15 @@ const testmd = program.command('testmd').description('Run committable *_test.md 
 addRunFlags(
     testmd
         .command('run <path>')
-        .description('Run a *_test.md file (plain-English steps, @import composition)'),
-).action(async (file: string, flags: CommonFlags) => {
+        .description('Run a *_test.md file (plain-English steps, @import composition)')
+        .option('--result-path <file>', 'write Result.md to this path instead of next to the test file'),
+).action(async (file: string, flags: CommonFlags & { resultPath?: string }) => {
     const config = loadConfig();
     let variables: Record<string, VariableValue> = {};
     try {
         variables = loadVariables(flags.variables, flags.variablesFile);
         const result = await runTestMd(file, {
+            resultPath: flags.resultPath,
             provider: resolveProvider(flags, config.defaultProvider),
             engine: parseEngine(flags.engine ?? config.engine),
             agent: flags.agent ?? false,
@@ -187,7 +201,7 @@ addRunFlags(
         }
         exitWith(result.status);
     } catch (err) {
-        await handleRunError(err, flags.agent ?? false, variables);
+        await handleRunError(err, flags.agent ?? false, variables, providerForError(flags, config.defaultProvider));
     }
 });
 
@@ -200,16 +214,18 @@ program
     .action(async (flags: { port?: string; open?: boolean; clear?: boolean }) => {
         if (flags.clear) {
             const n = clearRuns();
-            process.stdout.write(`Cleared ${n} local run${n === 1 ? '' : 's'} from ~/.browserbash/runs.\n`);
+            process.stdout.write(`Cleared ${n} local run${n === 1 ? '' : 's'} from ${runsDir()}.\n`);
             return;
         }
         const port = parsePositiveInteger(flags.port ?? '4477', 'port');
         const handle = await startDashboard(port);
         process.stdout.write(`Local dashboard: ${handle.url}  (Ctrl-C to stop)\n`);
         if (flags.open !== false) openBrowser(handle.url);
-        process.on('SIGINT', () => {
-            void handle.close().then(() => process.exit(0));
-        });
+        for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+            process.on(signal, () => {
+                void handle.close().then(() => process.exit(0));
+            });
+        }
         await new Promise(() => {}); // keep the process alive
     });
 

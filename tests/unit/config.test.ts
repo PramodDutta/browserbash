@@ -48,3 +48,19 @@ describe('config', () => {
         expect(creds.accessKey).toBe('envkey');
     });
 });
+
+describe('mergeConfig', () => {
+    it('partial nested section keeps sibling defaults', async () => {
+        const { mergeConfig } = await import('../../dist/config.js');
+        const defaults = { a: 1, nested: { x: 1, y: 2 } };
+        const merged = mergeConfig(defaults, { nested: { x: 9 } } as never);
+        expect(merged).toEqual({ a: 1, nested: { x: 9, y: 2 } });
+    });
+
+    it('scalar and array values replace, undefined ignored', async () => {
+        const { mergeConfig } = await import('../../dist/config.js');
+        const defaults = { a: 1, list: [1, 2], nested: { x: 1 } };
+        const merged = mergeConfig(defaults, { a: 5, list: [9], nested: undefined } as never);
+        expect(merged).toEqual({ a: 5, list: [9], nested: { x: 1 } });
+    });
+});
