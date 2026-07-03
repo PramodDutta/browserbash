@@ -15,6 +15,13 @@ export interface CacheConfig {
     dir: string;
 }
 
+export interface RoutingConfig {
+    /** Cheap model for execution turns. Empty = same model everywhere. */
+    executionModel: string;
+    /** Force the strong model for a few turns after a failed action. */
+    escalateOnFailure: boolean;
+}
+
 export interface BrowserBashConfig {
     defaultProvider: string;
     engine: 'stagehand' | 'builtin';
@@ -24,6 +31,7 @@ export interface BrowserBashConfig {
     timeoutSec: number;
     credentials: Record<string, ProviderCredentials>;
     cache: CacheConfig;
+    routing: RoutingConfig;
     /** Dashboard sync (browserbash connect) — absent means never phone home. */
     apiKey?: string;
     apiBase?: string;
@@ -38,6 +46,7 @@ const DEFAULTS: BrowserBashConfig = {
     timeoutSec: 300,
     credentials: {},
     cache: { enabled: true, dir: '.browserbash/cache' },
+    routing: { executionModel: '', escalateOnFailure: true },
 };
 
 export function configDir(): string {

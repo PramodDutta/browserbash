@@ -51,6 +51,7 @@ interface CommonFlags {
     /** commander --no-cache: defaults true, false when the flag is passed. */
     cache?: boolean;
     refreshCache?: boolean;
+    modelExec?: string;
 }
 
 /** Effective cache options for a run: config defaults, overridden by flags. */
@@ -80,7 +81,8 @@ function addRunFlags(cmd: Command): Command {
         .option('--dashboard', 'open the local web dashboard when the run finishes')
         .option('--port <n>', 'port for the local dashboard (with --dashboard)', '4477')
         .option('--no-cache', 'disable the replay-first action cache for this run')
-        .option('--refresh-cache', 'wipe this test\'s cache entry before running');
+        .option('--refresh-cache', 'wipe this test\'s cache entry before running')
+        .option('--model-exec <id>', 'cheap model for execution turns (strong model still plans)');
 }
 
 function exitWith(status: RunStatus): never {
@@ -178,6 +180,7 @@ addRunFlags(
             upload: flags.upload ?? false,
             dashboard: flags.dashboard ?? false,
             cache: cacheOptionsFrom(flags, config),
+            routing: { executionModel: (flags.modelExec as string | undefined) ?? config.routing.executionModel, escalateOnFailure: config.routing.escalateOnFailure },
         });
         if (flags.dashboard) {
             await serveDashboardThenExit(parsePositiveInteger(flags.port ?? '4477', 'port'), result.status);
@@ -215,6 +218,7 @@ addRunFlags(
             upload: flags.upload ?? false,
             dashboard: flags.dashboard ?? false,
             cache: cacheOptionsFrom(flags, config),
+            routing: { executionModel: (flags.modelExec as string | undefined) ?? config.routing.executionModel, escalateOnFailure: config.routing.escalateOnFailure },
         });
         if (flags.dashboard) {
             await serveDashboardThenExit(parsePositiveInteger(flags.port ?? '4477', 'port'), result.status);
@@ -409,7 +413,7 @@ configCmd
     });
 configCmd
     .command('set <key> <value>')
-    .description('Set defaultProvider | engine | model | headless | maxSteps | timeoutSec | cache.enabled | cache.dir')
+    .description('Set defaultProvider | engine | model | headless | maxSteps | timeoutSec | cache.enabled | cache.dir | routing.executionModel | routing.escalateOnFailure')
     .action((key: string, value: string) => {
         const config = loadConfig();
         switch (key) {
@@ -430,6 +434,8 @@ configCmd
             case 'timeoutSec': config.timeoutSec = parsePositiveInteger(value, 'timeoutSec'); break;
             case 'cache.enabled': config.cache.enabled = parseBooleanConfig(value, 'cache.enabled'); break;
             case 'cache.dir': config.cache.dir = value; break;
+            case 'routing.executionModel': config.routing.executionModel = value; break;
+            case 'routing.escalateOnFailure': config.routing.escalateOnFailure = parseBooleanConfig(value, 'routing.escalateOnFailure'); break;
             default:
                 process.stderr.write(`Unknown config key: ${key}\n`);
                 process.exit(2);

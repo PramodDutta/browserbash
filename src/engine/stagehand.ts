@@ -22,6 +22,8 @@ export interface StagehandRunOptions {
     record?: boolean;
     name?: string;
     cache?: RunCacheOptions;
+    /** Cheap execution model for the planner/executor split (empty = off). */
+    executionModel?: string;
 }
 
 /**
@@ -237,7 +239,16 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
             'If the objective asks to store or extract values, end your final message with a JSON object mapping each requested name to its value.',
         ].filter(Boolean).join('\n');
 
-        const agent = isOpenAiCompat ? stagehand.agent({ mode: 'dom' }) : stagehand.agent();
+        // Cheap-execution routing: Stagehand's agent splits planner (model) from
+        // executor (executionModel). Only meaningful when a distinct exec model
+        // is configured and the engine talks to a provider that supports it.
+        const execModel = options.executionModel
+            ? toStagehandModel(options.executionModel)
+            : undefined;
+        const agentConfig: Record<string, unknown> = {};
+        if (isOpenAiCompat) agentConfig.mode = 'dom';
+        if (execModel) agentConfig.executionModel = execModel;
+        const agent = Object.keys(agentConfig).length > 0 ? stagehand.agent(agentConfig) : stagehand.agent();
         const timeoutMs = options.timeoutSec * 1000;
         let timeout: ReturnType<typeof setTimeout> | undefined;
 

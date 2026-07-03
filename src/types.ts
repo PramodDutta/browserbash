@@ -27,6 +27,8 @@ export interface RunOptions {
     timeoutSec: number;
     variables: Record<string, VariableValue>;
     cache?: RunCacheOptions;
+    /** Cheap-model execution routing (executionModel + escalateOnFailure). */
+    routing?: { executionModel: string; escalateOnFailure: boolean };
     name?: string;
     cdpEndpoint?: string;
     startUrl?: string;
@@ -75,6 +77,8 @@ export interface RunEndEvent {
     provider: string;
     test_url?: string;
     cache?: CacheVerdict;
+    tokens_in?: number;
+    tokens_out?: number;
 }
 
 export interface RunResult {
@@ -86,4 +90,6 @@ export interface RunResult {
     testUrl?: string;
     artifacts?: RunArtifacts;
     cache?: CacheVerdict;
+    tokensIn?: number;
+    tokensOut?: number;
 }

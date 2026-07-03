@@ -4,6 +4,14 @@ import type { Reporter } from '../output.js';
 import type { RunResult, VariableValue } from '../types.js';
 import { substitute } from '../variables.js';
 import { normalizeUrl, retemplatizeInput, type RecordedAction } from '../cache-store.js';
+import {
+    addUsage,
+    ESCALATION_TURNS,
+    pickModel,
+    thinkingConfigFor,
+    type RoutingConfig,
+    type TokenUsage,
+} from './routing.js';
 import { BROWSER_TOOLS, BrowserToolExecutor } from './tools.js';
 
 const SYSTEM_PROMPT = `You are a browser automation agent. You receive a plain-English objective and drive a real browser to complete it using the provided tools.
@@ -23,6 +31,8 @@ export interface AgentRunOptions {
     timeoutSec: number;
     variables: Record<string, VariableValue>;
     model: string;
+    /** Optional cheap-execution routing. Absent = strong model every turn. */
+    routing?: RoutingConfig;
     /** Successful browser actions are recorded here (journal recorder). */
     actionSink?: RecordedAction[];
     /** Seed extract values (a heal run inherits what replay collected). */
@@ -51,23 +61,32 @@ export async function runAgent(options: AgentRunOptions): Promise<RunResult> {
     ];
 
     const deadline = start + options.timeoutSec * 1000;
+    const routing: RoutingConfig = options.routing ?? { executionModel: '', escalateOnFailure: true };
     let step = 0;
+    let turn = 0;
+    let escalatedTurnsLeft = 0;
+    let usage: TokenUsage = { input: 0, output: 0 };
     let doneStatus: 'passed' | 'failed' | null = null;
     let summary = '';
 
     while (step < options.maxSteps) {
         if (Date.now() > deadline) {
-            return finish('timeout', `Timed out after ${options.timeoutSec}s at step ${step}`, executor, start, step);
+            return finish('timeout', `Timed out after ${options.timeoutSec}s at step ${step}`, executor, start, step, usage);
         }
 
+        turn += 1;
+        const model = pickModel(options.model, routing, turn, escalatedTurnsLeft);
+        if (escalatedTurnsLeft > 0) escalatedTurnsLeft -= 1;
+        const thinking = thinkingConfigFor(model);
         const response = await client.messages.create({
-            model: options.model,
+            model,
             max_tokens: 16000,
-            thinking: { type: 'adaptive' },
+            ...(thinking ? { thinking } : {}),
             system: SYSTEM_PROMPT,
             tools: BROWSER_TOOLS,
             messages,
         });
+        usage = addUsage(usage, response.usage);
 
         const toolUses = response.content.filter(
             (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use',
@@ -130,16 +149,19 @@ export async function runAgent(options: AgentRunOptions): Promise<RunResult> {
                 const message = (err as Error).message.split('\n')[0];
                 options.reporter.step({ type: 'step', step, status: 'failed', action: toolUse.name, remark: message });
                 toolResults.push({ type: 'tool_result', tool_use_id: toolUse.id, content: `Error: ${message}`, is_error: true });
+                // A failed action re-opens the escalation window: the next few
+                // turns run on the strong model to recover from the mistake.
+                if (routing.escalateOnFailure) escalatedTurnsLeft = ESCALATION_TURNS;
             }
         }
 
         if (doneStatus !== null) {
-            return finish(doneStatus, summary, executor, start, step);
+            return finish(doneStatus, summary, executor, start, step, usage);
         }
         messages.push({ role: 'user', content: toolResults });
     }
 
-    return finish('failed', `Reached max steps (${options.maxSteps}) without completing the objective`, executor, start, step);
+    return finish('failed', `Reached max steps (${options.maxSteps}) without completing the objective`, executor, start, step, usage);
 }
 
 function finish(
@@ -148,6 +170,7 @@ function finish(
     executor: BrowserToolExecutor,
     start: number,
     steps: number,
+    usage?: TokenUsage,
 ): RunResult {
     return {
         status,
@@ -155,6 +178,7 @@ function finish(
         finalState: executor.finalState,
         stepsExecuted: steps,
         durationMs: Date.now() - start,
+        ...(usage ? { tokensIn: usage.input, tokensOut: usage.output } : {}),
     };
 }
 

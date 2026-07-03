@@ -43,7 +43,8 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
             'or point ANTHROPIC_BASE_URL at an Anthropic-compatible gateway (e.g. LiteLLM) and pass a claude model id.',
         );
     }
-    const resolved = { ...options, model };
+    const routing = options.routing ?? config.routing;
+    const resolved = { ...options, model, routing };
 
     const result = engine === 'stagehand'
         ? await runWithStagehand(resolved, reporter, model)
@@ -59,6 +60,8 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
         provider: options.provider,
         test_url: result.testUrl,
         ...(result.cache ? { cache: result.cache } : {}),
+        ...(result.tokensIn !== undefined ? { tokens_in: result.tokensIn } : {}),
+        ...(result.tokensOut !== undefined ? { tokens_out: result.tokensOut } : {}),
     });
 
     // Always keep a private local copy for `browserbash dashboard` (on-disk,
@@ -90,6 +93,7 @@ async function runWithStagehand(options: RunOptions, reporter: Reporter, default
         record: options.record,
         name: options.name,
         cache: options.cache,
+        ...(options.routing?.executionModel ? { executionModel: options.routing.executionModel } : {}),
     });
 }
 
@@ -176,6 +180,7 @@ async function runWithBuiltin(options: RunOptions, reporter: Reporter, defaultMo
             timeoutSec: options.timeoutSec,
             variables: options.variables,
             model: options.model ?? defaultModel,
+            ...(options.routing ? { routing: options.routing } : {}),
             ...(cacheEnabled ? { actionSink } : {}),
             ...(healSeedState ? { initialFinalState: healSeedState } : {}),
             ...(resumeNote ? { resumeNote } : {}),
