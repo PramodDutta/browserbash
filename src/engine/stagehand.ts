@@ -89,11 +89,20 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
     const start = Date.now();
     const objective = substitute(options.objective, options.variables);
 
+    // Local OpenAI-compatible models (Ollama, OpenRouter) need two deviations
+    // from Stagehand defaults, both applied together: the dom agent mode (the
+    // hybrid default routes openai/* ids to the CUA client on the Responses
+    // API), and excludeTools for screenshot (experimental, hence the
+    // experimental/disableAPI constructor flags).
+    const isOpenAiCompat =
+        options.model.startsWith('ollama/') || options.model.startsWith('openrouter/');
+
     const stagehand = new Stagehand({
         env: options.provider === 'browserbase' ? 'BROWSERBASE' : 'LOCAL',
         model: toStagehandModel(options.model),
         verbose: 0,
         disablePino: true,
+        ...(isOpenAiCompat ? { experimental: true, disableAPI: true } : {}),
         ...(options.provider === 'browserbase'
             ? {
                   apiKey: process.env.BROWSERBASE_API_KEY,
@@ -178,18 +187,20 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
             'If the objective asks to store or extract values, end your final message with a JSON object mapping each requested name to its value.',
         ].filter(Boolean).join('\n');
 
-        // Local OpenAI-compatible models (Ollama, OpenRouter) must use the DOM
-        // tool loop: the default hybrid mode routes openai/* ids to the CUA
-        // client on the Responses API, which ignores reasoningEffort, so
-        // thinking models burn every act() budget on chain-of-thought.
-        const isOpenAiCompat =
-            options.model.startsWith('ollama/') || options.model.startsWith('openrouter/');
         const agent = isOpenAiCompat ? stagehand.agent({ mode: 'dom' }) : stagehand.agent();
         const timeoutMs = options.timeoutSec * 1000;
         let timeout: ReturnType<typeof setTimeout> | undefined;
 
         const result = await Promise.race([
-            agent.execute({ instruction, maxSteps: options.maxSteps }),
+            agent.execute({
+                instruction,
+                maxSteps: options.maxSteps,
+                // The dom toolset still includes screenshot, whose tool result is
+                // an image part. Text-only local models reject that with a 400
+                // (Ollama: "model does not support multimodal requests"), killing
+                // the run whenever the model happens to call it.
+                ...(isOpenAiCompat ? { excludeTools: ['screenshot'] } : {}),
+            }),
             new Promise<never>((_, reject) => {
                 timeout = setTimeout(() => reject(new Error('__timeout__')), timeoutMs);
             }),
