@@ -77,3 +77,21 @@ describe('extractFinalState', () => {
         )).toEqual({ author: 'Albert Einstein' });
     });
 });
+
+describe('cache helpers', () => {
+    it('rewrites {{var}} placeholders to %var%', async () => {
+        const { toStagehandPlaceholders } = await import('../../dist/engine/stagehand.js');
+        expect(toStagehandPlaceholders('type {{name}} then {{ email }} into {{form-field}}'))
+            .toBe('type %name% then %email% into %form-field%');
+        expect(toStagehandPlaceholders('no vars here')).toBe('no vars here');
+    });
+
+    it('cacheSlug: stable, readable, keyed on templated objective', async () => {
+        const { cacheSlug } = await import('../../dist/engine/stagehand.js');
+        const a = cacheSlug('Checkout Flow!', 'go to {{base}} and buy');
+        expect(a).toMatch(/^checkout-flow-[0-9a-f]{8}$/);
+        expect(cacheSlug('Checkout Flow!', 'go to {{base}} and buy')).toBe(a);
+        expect(cacheSlug('Checkout Flow!', 'DIFFERENT objective')).not.toBe(a);
+        expect(cacheSlug(undefined, 'x')).toMatch(/^run-[0-9a-f]{8}$/);
+    });
+});

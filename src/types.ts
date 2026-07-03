@@ -9,6 +9,14 @@ export const EXIT_CODES: Record<RunStatus, number> = {
 
 export type EngineId = 'stagehand' | 'builtin';
 
+export interface RunCacheOptions {
+    enabled: boolean;
+    /** Wipe this test's cache entry before the run. */
+    refresh: boolean;
+    /** Cache root, resolved against the working directory. */
+    dir: string;
+}
+
 export interface RunOptions {
     objective: string;
     provider: string;
@@ -18,6 +26,7 @@ export interface RunOptions {
     maxSteps: number;
     timeoutSec: number;
     variables: Record<string, VariableValue>;
+    cache?: RunCacheOptions;
     name?: string;
     cdpEndpoint?: string;
     startUrl?: string;
@@ -51,6 +60,9 @@ export interface StepEvent {
     remark: string;
 }
 
+/** Action-cache outcome of a run. 'off' = disabled or unusable for this run. */
+export type CacheVerdict = 'hit' | 'miss' | 'off';
+
 export interface RunEndEvent {
     type: 'run_end';
     status: RunStatus;
@@ -60,6 +72,7 @@ export interface RunEndEvent {
     steps_executed: number;
     provider: string;
     test_url?: string;
+    cache?: CacheVerdict;
 }
 
 export interface RunResult {
@@ -70,4 +83,5 @@ export interface RunResult {
     durationMs: number;
     testUrl?: string;
     artifacts?: RunArtifacts;
+    cache?: CacheVerdict;
 }

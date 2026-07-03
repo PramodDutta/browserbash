@@ -2,13 +2,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Command } from 'commander';
-import { configDir, configPath, loadConfig, projectDir, saveConfig } from './config.js';
+import { configDir, configPath, loadConfig, projectDir, saveConfig, type BrowserBashConfig } from './config.js';
 import { getProvider, listProviders } from './providers/index.js';
 import { executeRun } from './runner.js';
 import { runTestMd } from './testmd/runner.js';
 import { clearRuns, runsDir } from './local-store.js';
 import { startDashboard, openBrowser } from './dashboard/server.js';
-import { EXIT_CODES, type EngineId, type RunStatus, type VariableValue } from './types.js';
+import { EXIT_CODES, type EngineId, type RunCacheOptions, type RunStatus, type VariableValue } from './types.js';
 import { loadVariables, maskSecrets } from './variables.js';
 
 // Downstream consumers (grep -q, head, jq) may close the pipe early.
@@ -44,6 +44,18 @@ interface CommonFlags {
     upload?: boolean;
     dashboard?: boolean;
     port?: string;
+    /** commander --no-cache: defaults true, false when the flag is passed. */
+    cache?: boolean;
+    refreshCache?: boolean;
+}
+
+/** Effective cache options for a run: config defaults, overridden by flags. */
+function cacheOptionsFrom(flags: CommonFlags, config: BrowserBashConfig): RunCacheOptions {
+    return {
+        enabled: flags.cache !== false && config.cache.enabled,
+        refresh: flags.refreshCache ?? false,
+        dir: config.cache.dir,
+    };
 }
 
 function addRunFlags(cmd: Command): Command {
@@ -62,7 +74,9 @@ function addRunFlags(cmd: Command): Command {
         .option('--record', 'capture a session recording (screenshot + video on any engine; trace adds on builtin; needs ffmpeg)')
         .option('--upload', 'push this run to your cloud dashboard (needs: browserbash connect)')
         .option('--dashboard', 'open the local web dashboard when the run finishes')
-        .option('--port <n>', 'port for the local dashboard (with --dashboard)', '4477');
+        .option('--port <n>', 'port for the local dashboard (with --dashboard)', '4477')
+        .option('--no-cache', 'disable the replay-first action cache for this run')
+        .option('--refresh-cache', 'wipe this test\'s cache entry before running');
 }
 
 function exitWith(status: RunStatus): never {
@@ -159,6 +173,7 @@ addRunFlags(
             name: flags.name,
             upload: flags.upload ?? false,
             dashboard: flags.dashboard ?? false,
+            cache: cacheOptionsFrom(flags, config),
         });
         if (flags.dashboard) {
             await serveDashboardThenExit(parsePositiveInteger(flags.port ?? '4477', 'port'), result.status);
@@ -195,6 +210,7 @@ addRunFlags(
             record: flags.record ?? false,
             upload: flags.upload ?? false,
             dashboard: flags.dashboard ?? false,
+            cache: cacheOptionsFrom(flags, config),
         });
         if (flags.dashboard) {
             await serveDashboardThenExit(parsePositiveInteger(flags.port ?? '4477', 'port'), result.status);
@@ -323,7 +339,7 @@ configCmd
     });
 configCmd
     .command('set <key> <value>')
-    .description('Set defaultProvider | engine | model | headless | maxSteps | timeoutSec')
+    .description('Set defaultProvider | engine | model | headless | maxSteps | timeoutSec | cache.enabled | cache.dir')
     .action((key: string, value: string) => {
         const config = loadConfig();
         switch (key) {
@@ -342,6 +358,8 @@ configCmd
             case 'headless': config.headless = parseBooleanConfig(value, 'headless'); break;
             case 'maxSteps': config.maxSteps = parsePositiveInteger(value, 'maxSteps'); break;
             case 'timeoutSec': config.timeoutSec = parsePositiveInteger(value, 'timeoutSec'); break;
+            case 'cache.enabled': config.cache.enabled = parseBooleanConfig(value, 'cache.enabled'); break;
+            case 'cache.dir': config.cache.dir = value; break;
             default:
                 process.stderr.write(`Unknown config key: ${key}\n`);
                 process.exit(2);

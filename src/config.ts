@@ -8,6 +8,13 @@ export interface ProviderCredentials {
     [key: string]: string | undefined;
 }
 
+export interface CacheConfig {
+    /** Replay-first action cache (Stagehand cacheDir). Warm runs skip the model. */
+    enabled: boolean;
+    /** Cache root, resolved against the working directory. */
+    dir: string;
+}
+
 export interface BrowserBashConfig {
     defaultProvider: string;
     engine: 'stagehand' | 'builtin';
@@ -16,6 +23,7 @@ export interface BrowserBashConfig {
     maxSteps: number;
     timeoutSec: number;
     credentials: Record<string, ProviderCredentials>;
+    cache: CacheConfig;
     /** Dashboard sync (browserbash connect) — absent means never phone home. */
     apiKey?: string;
     apiBase?: string;
@@ -29,6 +37,7 @@ const DEFAULTS: BrowserBashConfig = {
     maxSteps: 30,
     timeoutSec: 300,
     credentials: {},
+    cache: { enabled: true, dir: '.browserbash/cache' },
 };
 
 export function configDir(): string {

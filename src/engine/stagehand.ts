@@ -1,9 +1,10 @@
-import { mkdtempSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { Stagehand } from '@browserbasehq/stagehand';
 import type { Reporter } from '../output.js';
-import type { RunArtifacts, RunResult, VariableValue } from '../types.js';
+import type { CacheVerdict, RunArtifacts, RunCacheOptions, RunResult, VariableValue } from '../types.js';
 import { substitute } from '../variables.js';
 import { startScreencast, type CdpSession, type ScreencastRecorder } from './screencast.js';
 
@@ -19,6 +20,33 @@ export interface StagehandRunOptions {
     cdpEndpoint?: string;
     startUrl?: string;
     record?: boolean;
+    name?: string;
+    cache?: RunCacheOptions;
+}
+
+/**
+ * Rewrite BrowserBash {{name}} placeholders to Stagehand's %name% syntax so
+ * the objective can be passed with a variables map instead of substituted
+ * values. Keeps secret values out of cache keys and cache files, and lets
+ * one cache entry serve every variable value.
+ */
+export function toStagehandPlaceholders(text: string): string {
+    return text.replace(/\{\{\s*([\w.-]+)\s*\}\}/g, '%$1%');
+}
+
+/**
+ * Per-test cache directory name: readable slug from the test name plus a
+ * short hash of the TEMPLATED objective (pre-substitution, so secrets never
+ * influence the key and edits to the test invalidate it).
+ */
+export function cacheSlug(name: string | undefined, templatedObjective: string): string {
+    const base = (name ?? 'run')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 40) || 'run';
+    const hash = createHash('sha256').update(templatedObjective).digest('hex').slice(0, 8);
+    return `${base}-${hash}`;
 }
 
 /** Providers the Stagehand engine can drive directly. */
@@ -87,7 +115,6 @@ export function toStagehandModel(model: string): StagehandModelConfig {
  */
 export async function runStagehandAgent(options: StagehandRunOptions): Promise<RunResult> {
     const start = Date.now();
-    const objective = substitute(options.objective, options.variables);
 
     // Local OpenAI-compatible models (Ollama, OpenRouter) need two deviations
     // from Stagehand defaults, both applied together: the dom agent mode (the
@@ -97,11 +124,34 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
     const isOpenAiCompat =
         options.model.startsWith('ollama/') || options.model.startsWith('openrouter/');
 
+    // Cache gate. Stagehand's variables passthrough (the thing that keeps
+    // secret values out of cache keys and files) is not supported on the CUA
+    // agent used for hosted models, so a hosted-model run WITH variables must
+    // not cache: its instruction would carry substituted secrets to disk.
+    const hasVariables = Object.keys(options.variables).length > 0;
+    const cacheUsable = (options.cache?.enabled ?? false) && (isOpenAiCompat || !hasVariables);
+    if (options.cache?.enabled && !cacheUsable) {
+        options.reporter.info('Cache off for this run: hosted-model agents cannot take variables without writing substituted values into the cache.');
+    }
+    const passVariables = cacheUsable && hasVariables;
+    const objective = passVariables
+        ? toStagehandPlaceholders(options.objective)
+        : substitute(options.objective, options.variables);
+
+    const cacheDir = cacheUsable
+        ? resolve(options.cache!.dir, 'stagehand', cacheSlug(options.name, options.objective))
+        : undefined;
+    if (cacheDir && options.cache!.refresh) {
+        rmSync(cacheDir, { recursive: true, force: true });
+        options.reporter.info('Cache entry wiped (--refresh-cache)');
+    }
+
     const stagehand = new Stagehand({
         env: options.provider === 'browserbase' ? 'BROWSERBASE' : 'LOCAL',
         model: toStagehandModel(options.model),
         verbose: 0,
         disablePino: true,
+        ...(cacheDir ? { cacheDir } : {}),
         ...(isOpenAiCompat ? { experimental: true, disableAPI: true } : {}),
         ...(options.provider === 'browserbase'
             ? {
@@ -200,6 +250,15 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
                 // (Ollama: "model does not support multimodal requests"), killing
                 // the run whenever the model happens to call it.
                 ...(isOpenAiCompat ? { excludeTools: ['screenshot'] } : {}),
+                // Values arrive via the variables channel, never inlined into
+                // the instruction, so the cache and any logs stay secret-free.
+                ...(passVariables
+                    ? {
+                          variables: Object.fromEntries(
+                              Object.entries(options.variables).map(([k, v]) => [k, v.value]),
+                          ),
+                      }
+                    : {}),
             }),
             new Promise<never>((_, reject) => {
                 timeout = setTimeout(() => reject(new Error('__timeout__')), timeoutMs);
@@ -207,6 +266,15 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
         ]).finally(() => {
             if (timeout) clearTimeout(timeout);
         });
+
+        // Replay detection: a cache hit executes recorded steps without the
+        // model, so usage is absent or zero while actions still happened.
+        const usage = (result as { usage?: { input_tokens?: number } }).usage;
+        const cacheVerdict: CacheVerdict = !cacheUsable
+            ? 'off'
+            : result.actions.length > 0 && (!usage || (usage.input_tokens ?? 0) === 0)
+              ? 'hit'
+              : 'miss';
 
         let step = 0;
         for (const action of result.actions) {
@@ -228,6 +296,7 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
             stepsExecuted: result.actions.length,
             durationMs: Date.now() - start,
             artifacts: options.record ? artifacts : undefined,
+            cache: cacheVerdict,
         };
     } catch (err) {
         await capture();
@@ -239,6 +308,7 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
                 stepsExecuted: 0,
                 durationMs: Date.now() - start,
                 artifacts: options.record ? artifacts : undefined,
+                cache: cacheUsable ? 'miss' : 'off',
             };
         }
         throw err;

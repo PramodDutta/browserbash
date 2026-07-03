@@ -48,6 +48,7 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
         steps_executed: result.stepsExecuted,
         provider: options.provider,
         test_url: result.testUrl,
+        ...(result.cache ? { cache: result.cache } : {}),
     });
 
     // Always keep a private local copy for `browserbash dashboard` (on-disk,
@@ -77,6 +78,8 @@ async function runWithStagehand(options: RunOptions, reporter: Reporter, default
         cdpEndpoint: options.cdpEndpoint,
         startUrl: options.startUrl,
         record: options.record,
+        name: options.name,
+        cache: options.cache,
     });
 }
 

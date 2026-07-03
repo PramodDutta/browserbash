@@ -64,3 +64,11 @@ describe('mergeConfig', () => {
         expect(merged).toEqual({ a: 5, list: [9], nested: { x: 1 } });
     });
 });
+
+describe('cache config', () => {
+    it('defaults on with project-local dir', async () => {
+        const { loadConfig } = await import('../../dist/config.js');
+        const c = loadConfig();
+        expect(c.cache).toEqual({ enabled: true, dir: '.browserbash/cache' });
+    });
+});
