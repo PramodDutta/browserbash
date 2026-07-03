@@ -243,6 +243,7 @@ program
     .option('--variables <json>', 'inline variables JSON for every test')
     .option('--variables-file <path>', 'variables JSON file for every test')
     .option('--no-cache', 'disable the replay cache for every test')
+    .option('--no-memory', 'do not read or write run history for ordering')
     .action(async (target: string | undefined, flags: Record<string, string | boolean | undefined>) => {
         const config = loadConfig();
         // Spawn hygiene: children inherit ONLY safe flags. Never --dashboard
@@ -277,6 +278,7 @@ program
             variablesJson,
             cliBin: CLI_ENTRY,
             resultsDir: path.join(eventsDir, 'browserbash-results'),
+            memoryDir: flags.memory === false ? undefined : projectDir(),
             log: (msg) => { if (flags.agent !== true) process.stderr.write(msg + '\n'); },
         });
 

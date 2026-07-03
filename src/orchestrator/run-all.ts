@@ -11,6 +11,14 @@ import {
     toJUnitXml,
     type TestOutcome,
 } from './scheduler.js';
+import {
+    flakyReport,
+    loadMemory,
+    memoryPath,
+    orderTests,
+    recordOutcome,
+    saveMemory,
+} from '../memory-store.js';
 
 export interface RunAllOptions {
     target: string;
@@ -28,6 +36,10 @@ export interface RunAllOptions {
     variablesJson?: string;
     cliBin: string;
     resultsDir: string;
+    /** Memory root for run history (ordering + flaky report). Undefined = off. */
+    memoryDir?: string;
+    /** ISO timestamp source for history writes (Date-free in tests). */
+    nowIso?: () => string;
     /** Injectable for tests. */
     now?: () => number;
     log?: (msg: string) => void;
@@ -107,16 +119,21 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
     const log = opts.log ?? (() => {});
     const started = now();
 
-    const files = discoverTests(opts.target);
-    if (files.length === 0) {
+    const discovered = discoverTests(opts.target);
+    if (discovered.length === 0) {
         return { outcomes: [], passed: 0, failed: 0, infra: 0, timeout: 0, flaky: 0, exitCode: 2, durationMs: 0 };
     }
+
+    // Run history informs ordering: previously-failed first, then slowest first.
+    const memFile = opts.memoryDir ? memoryPath(opts.memoryDir) : undefined;
+    const memory = memFile ? loadMemory(memFile) : undefined;
+    const files = memory ? orderTests(discovered, memory) : discovered;
 
     const { concurrency, reason } = computeConcurrency({
         requested: opts.concurrency,
         memoryBudgetMb: opts.memoryBudgetMb,
     });
-    log(`Discovered ${files.length} tests. Concurrency: ${reason}.`);
+    log(`Discovered ${files.length} tests${memory ? ' (ordered by run history)' : ''}. Concurrency: ${reason}.`);
 
     fs.mkdirSync(opts.resultsDir, { recursive: true });
     fs.mkdirSync(path.dirname(path.resolve(opts.eventsPath)), { recursive: true });
@@ -196,6 +213,28 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
         fs.mkdirSync(path.dirname(path.resolve(opts.junitPath)), { recursive: true });
         fs.writeFileSync(opts.junitPath, toJUnitXml(outcomes));
     }
+
+    // Single-writer: the orchestrator folds every outcome into history once,
+    // here, after the suite. Children never touch the file.
+    if (memFile && memory) {
+        const nowIso = opts.nowIso ?? (() => new Date().toISOString());
+        let next = memory;
+        for (const o of outcomes) {
+            next = recordOutcome(next, {
+                testPath: o.file,
+                verdict: o.verdict,
+                durationMs: o.durationMs,
+                flaky: o.flaky,
+                nowIso: nowIso(),
+            });
+        }
+        saveMemory(memFile, next);
+        const flaky = flakyReport(next);
+        if (flaky.length > 0) {
+            log(`Flaky tests (passed on retry historically): ${flaky.map((f) => path.basename(f.path)).join(', ')}`);
+        }
+    }
+
     writeSummary(opts.resultsDir, outcomes, now() - started);
 
     return { outcomes, ...t, exitCode, durationMs: now() - started };
