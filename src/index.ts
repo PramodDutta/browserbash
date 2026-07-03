@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import { configDir, configPath, loadConfig, projectDir, saveConfig, type BrowserBashConfig } from './config.js';
 import { getProvider, listProviders } from './providers/index.js';
 import { executeRun } from './runner.js';
 import { runTestMd } from './testmd/runner.js';
+import { runAll } from './orchestrator/run-all.js';
 import { clearRuns, runsDir } from './local-store.js';
 import { startDashboard, openBrowser } from './dashboard/server.js';
+
+const CLI_ENTRY = fileURLToPath(import.meta.url);
 import { EXIT_CODES, type EngineId, type RunCacheOptions, type RunStatus, type VariableValue } from './types.js';
 import { loadVariables, maskSecrets } from './variables.js';
 
@@ -220,6 +224,70 @@ addRunFlags(
         await handleRunError(err, flags.agent ?? false, variables, providerForError(flags, config.defaultProvider));
     }
 });
+
+program
+    .command('run-all [target]')
+    .description('Run a folder of *_test.md files in parallel with memory-aware scheduling')
+    .option('-c, --concurrency <n>', 'max parallel runs (default: auto from CPU + memory)')
+    .option('--memory-budget <mb>', 'estimated memory per run for the concurrency formula', '700')
+    .option('--retries <n>', 'retry a test this many times on infra errors only', '1')
+    .option('--max-failures <n>', 'stop launching new tests after N failures (0 = run all)', '0')
+    .option('--stagger <ms>', 'delay between launches to soften burst load', '250')
+    .option('--junit <path>', 'write a JUnit XML report')
+    .option('--events <path>', 'write the merged NDJSON event stream', 'browserbash-events.ndjson')
+    .option('--agent', 'also stream merged NDJSON on stdout')
+    .option('-p, --provider <id>', 'browser provider for every test')
+    .option('-e, --engine <id>', 'engine for every test')
+    .option('--model <id>', 'model for every test')
+    .option('--timeout <s>', 'per-test timeout in seconds')
+    .option('--variables <json>', 'inline variables JSON for every test')
+    .option('--variables-file <path>', 'variables JSON file for every test')
+    .option('--no-cache', 'disable the replay cache for every test')
+    .action(async (target: string | undefined, flags: Record<string, string | boolean | undefined>) => {
+        const config = loadConfig();
+        // Spawn hygiene: children inherit ONLY safe flags. Never --dashboard
+        // (it parks the child forever) and never secrets on argv.
+        const childFlags: string[] = [];
+        if (flags.provider) childFlags.push('--provider', String(flags.provider));
+        if (flags.engine) childFlags.push('--engine', String(flags.engine));
+        if (flags.model) childFlags.push('--model', String(flags.model));
+        if (flags.timeout) childFlags.push('--timeout', String(flags.timeout));
+        if (flags.cache === false) childFlags.push('--no-cache');
+
+        let variablesJson: string | undefined;
+        const variables = loadVariables(flags.variables as string | undefined, flags.variablesFile as string | undefined);
+        if (Object.keys(variables).length > 0) {
+            variablesJson = JSON.stringify(
+                Object.fromEntries(Object.entries(variables).map(([k, v]) => [k, v.secret ? { value: v.value, secret: true } : v.value])),
+            );
+        }
+
+        const eventsDir = path.dirname(path.resolve(String(flags.events ?? 'browserbash-events.ndjson')));
+        const result = await runAll({
+            target: target ?? path.join(projectDir(), 'tests'),
+            concurrency: flags.concurrency ? parsePositiveInteger(String(flags.concurrency), 'concurrency') : undefined,
+            memoryBudgetMb: parsePositiveInteger(String(flags.memoryBudget ?? '700'), 'memory-budget'),
+            retries: Number(flags.retries ?? '1'),
+            maxFailures: Number(flags.maxFailures ?? '0'),
+            junitPath: flags.junit ? String(flags.junit) : undefined,
+            eventsPath: String(flags.events ?? 'browserbash-events.ndjson'),
+            agent: flags.agent === true,
+            staggerMs: Number(flags.stagger ?? '250'),
+            childFlags,
+            variablesJson,
+            cliBin: CLI_ENTRY,
+            resultsDir: path.join(eventsDir, 'browserbash-results'),
+            log: (msg) => { if (flags.agent !== true) process.stderr.write(msg + '\n'); },
+        });
+
+        if (flags.agent !== true) {
+            process.stderr.write(
+                `\nSuite: ${result.passed} passed, ${result.failed} failed, ${result.timeout} timed out, ` +
+                `${result.infra} infra errors, ${result.flaky} flaky in ${(result.durationMs / 1000).toFixed(1)}s\n`,
+            );
+        }
+        process.exit(result.exitCode);
+    });
 
 program
     .command('dashboard')
