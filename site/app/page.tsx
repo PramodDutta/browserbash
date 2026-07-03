@@ -301,6 +301,35 @@ export default async function Page() {
                 </Reveal>
             </section>
 
+            <section className="section container" id="roadmap">
+                <Reveal>
+                    <p className="section-tag">roadmap</p>
+                    <h2>What we are building next</h2>
+                    <p className="section__sub">
+                        The next wave of BrowserBash, planned in the open and shipped to the same free CLI.
+                        Statuses are honest: coming soon means it is being built now, planned means it is
+                        specced and queued behind it.
+                    </p>
+                </Reveal>
+                <div className="features">
+                    {[
+                        ['Replay-first caching (coming soon)', 'Green runs record their resolved actions. The next run replays them with zero model calls, and the agent steps back in only when the page actually changed. Steady-state suites run at script speed and script cost.'],
+                        ['Parallel suite runner (coming soon)', 'One command to run a whole folder of *_test.md files with 15 to 20 workers. Scheduling is memory-aware: it watches real RAM per run instead of guessing by CPU count, so big suites finish fast without freezing your machine.'],
+                        ['Run history and flaky detection (planned)', 'Every run feeds a local history of durations, pass rates and heals. The suite runner uses it to order tests, predict memory, and call out flaky tests separately in the report.'],
+                        ['Cheap-model routing (planned)', 'A strong model plans, a cheap or local model executes each step, and a failed step escalates back automatically. Cuts token spend on the runs that still need a model at all.'],
+                        ['Cost per test report (planned)', 'Token and dollar cost surfaced per test and per suite in Result.md and NDJSON, so you can see exactly what a green build costs before you scale it.'],
+                        ['Just shipped: hardening', 'Case-insensitive secret masking so transformed secrets can never leak into logs, path-traversal guards on every run lookup, and stable run ordering under parallel load.'],
+                    ].map(([title, body], i) => (
+                        <Reveal key={title} delay={(i % 3) * 100}>
+                            <div className="pixel-card feature">
+                                <h3>{title}</h3>
+                                <p>{body}</p>
+                            </div>
+                        </Reveal>
+                    ))}
+                </div>
+            </section>
+
             <section className="section container" id="start">
                 <Reveal>
                     <p className="section-tag">quick start</p>
