@@ -133,7 +133,7 @@ export default async function Page() {
                             <h3 className="demo-watch__title">Prefer to just watch a full run?</h3>
                             <p className="demo-watch__sub">
                                 One sentence in, a real Chrome driven start to finish, green{' '}
-                                <span className="demo-watch__pass">✓ PASSED</span> out — about twelve seconds.
+                                <span className="demo-watch__pass">✓ PASSED</span> out, about fifteen seconds.
                             </p>
                         </div>
                         <DemoVideo src="/demo.mp4" poster="/og.png" />
