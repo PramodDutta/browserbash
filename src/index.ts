@@ -24,6 +24,31 @@ for (const stream of [process.stdout, process.stderr]) {
     });
 }
 
+// The AI SDK inside Stagehand logs a per-call "system messages in the prompt
+// ... prompt injection" warning to stderr (Stagehand's own prompt layout, not
+// something a CLI user can act on), which spams every run. It reaches stderr
+// via two routes: the structured warning logger (AI_SDK_LOG_WARNINGS honors a
+// filter) and a raw console.warn in the SDK's prompt validation that bypasses
+// the logger. Filter exactly that message on both routes, keep everything
+// else. BROWSERBASH_AISDK_WARNINGS=all restores full logging for debugging.
+const NOISY_AISDK_WARNING = 'System messages in the prompt or messages fields';
+if (process.env.BROWSERBASH_AISDK_WARNINGS !== 'all') {
+    (globalThis as Record<string, unknown>).AI_SDK_LOG_WARNINGS = (
+        warnings: Array<{ message?: string }>,
+    ): void => {
+        for (const warning of warnings) {
+            const message = String(warning?.message ?? warning ?? '');
+            if (message.includes(NOISY_AISDK_WARNING)) continue;
+            process.stderr.write(`AI SDK Warning: ${message}\n`);
+        }
+    };
+    const originalWarn = console.warn.bind(console);
+    console.warn = (...args: unknown[]): void => {
+        if (typeof args[0] === 'string' && args[0].includes(NOISY_AISDK_WARNING)) return;
+        originalWarn(...args);
+    };
+}
+
 /** Read the package version at runtime so --version never drifts from package.json. */
 function packageVersion(): string {
     try {
