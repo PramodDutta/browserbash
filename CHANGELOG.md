@@ -10,6 +10,7 @@ Caching, parallel suites, run history, and cheap-model routing. All local-first 
 - **Run history.** `.browserbash/memory/history.json` orders the next `run-all` (previously-failed first, then slowest first) and flags flaky tests. `--no-memory` opts out.
 - **Cheap-model routing.** `--model-exec <id>` / `routing.executionModel`: plan on the strong model, execute on a cheap one, escalate back after a failed step. `run_end` now reports `tokens_in` / `tokens_out` on the builtin engine.
 - **`testmd run --result-path <file>`** to place `Result.md` outside the test directory (used by `run-all` to avoid clobbering under parallelism).
+- **Playwright traces on the builtin engine.** `--record` now captures a native `trace.zip` (openable at trace.playwright.dev) plus a final screenshot on the builtin engine, alongside the existing screenshot + video on stagehand.
 
 ### Fixed
 - **Local models now work for interactive steps.** Ollama/OpenRouter models run on Stagehand's DOM agent mode with `reasoningEffort: none` and the screenshot tool excluded, so clicks and typing no longer time out or 400 on text-only models. A warning is printed when a known thinking model (qwen3.5, qwq, r1 family) is selected.
@@ -21,7 +22,7 @@ Caching, parallel suites, run history, and cheap-model routing. All local-first 
 
 ### Changed
 - Upgraded `@browserbasehq/stagehand` to 3.6.0 and `playwright-core` to 1.61.1; pulls `form-data` 4.0.6 (fixes advisory GHSA-hmw2-7cc7-3qxx).
-- Corrected copy that advertised Playwright traces on the builtin engine (not produced today). `--record` captures a screenshot and session video.
+- `--record` copy now accurately reflects both paths: screenshot + video on stagehand, or a Playwright trace on the builtin engine.
 - Added a `prepack` build so `npm pack` never ships a stale `dist/`.
 
 ## 1.3.1 and earlier
