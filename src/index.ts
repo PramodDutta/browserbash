@@ -160,6 +160,24 @@ function parseEngine(value: string | undefined): EngineId | undefined {
     throw new Error('engine must be stagehand or builtin');
 }
 
+/**
+ * Shapes that resolve at run time: 'auto', any provider-prefixed id
+ * (ollama/..., openrouter/..., openai/..., anthropic/...), or a bare hosted id
+ * the engines recognize (claude-*, gpt-*, o1/o3/o4-*, gemini-*). Anything else
+ * (typically a bare Ollama model like 'llama3.2:3b') would only fail at run
+ * time with an opaque engine error, so reject it at `config set` with the fix.
+ */
+function validateModelConfig(value: string, name: string): string {
+    if (value === 'auto' || value.includes('/')) return value;
+    if (/^(claude|gpt|gemini)/.test(value) || /^o\d/.test(value)) return value;
+    throw new Error(
+        `${name} '${value}' has no provider prefix and is not a recognized hosted model id, so runs would fail at startup.\n` +
+        `  Local Ollama model?  use: ollama/${value}\n` +
+        `  OpenRouter model?    use: openrouter/<vendor>/<model>\n` +
+        '  Also valid: auto, openai/gpt-4.1, claude-opus-4-8, gemini-2.5-pro',
+    );
+}
+
 function resolveProvider(flags: CommonFlags, defaultProvider: string): string {
     const provider = flags.cdpEndpoint ? 'cdp' : flags.provider ?? defaultProvider;
     getProvider(provider);
@@ -463,13 +481,14 @@ configCmd
                 }
                 config.engine = value;
                 break;
-            case 'model': config.model = value; break;
+            case 'model': config.model = validateModelConfig(value, 'model'); break;
             case 'headless': config.headless = parseBooleanConfig(value, 'headless'); break;
             case 'maxSteps': config.maxSteps = parsePositiveInteger(value, 'maxSteps'); break;
             case 'timeoutSec': config.timeoutSec = parsePositiveInteger(value, 'timeoutSec'); break;
             case 'cache.enabled': config.cache.enabled = parseBooleanConfig(value, 'cache.enabled'); break;
             case 'cache.dir': config.cache.dir = value; break;
-            case 'routing.executionModel': config.routing.executionModel = value; break;
+            // '' turns routing off (the default), so it skips model validation.
+            case 'routing.executionModel': config.routing.executionModel = value === '' ? '' : validateModelConfig(value, 'routing.executionModel'); break;
             case 'routing.escalateOnFailure': config.routing.escalateOnFailure = parseBooleanConfig(value, 'routing.escalateOnFailure'); break;
             default:
                 process.stderr.write(`Unknown config key: ${key}\n`);

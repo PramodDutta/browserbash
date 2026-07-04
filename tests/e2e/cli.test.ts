@@ -104,4 +104,33 @@ describe('browserbash CLI', () => {
         expect(badSteps.code).toBe(2);
         expect(badSteps.stderr).toContain('maxSteps must be a positive integer');
     });
+
+    it('config set model rejects bare local ids with an ollama/ hint', async () => {
+        const home = mkdtempSync(join(tmpdir(), 'bbh-'));
+        const env = { ...cleanEnv, BROWSERBASH_HOME: home };
+
+        const bare = (await run('node', [CLI, 'config', 'set', 'model', 'llama3.2:3b'], { env })
+            .catch((e: ExecError) => e)) as ExecError;
+        expect(bare.code).toBe(2);
+        expect(bare.stderr).toContain('ollama/llama3.2:3b');
+
+        const prefixed = await run('node', [CLI, 'config', 'set', 'model', 'ollama/llama3.2:3b'], { env });
+        expect(prefixed.stdout).toContain('Set model = ollama/llama3.2:3b');
+
+        const hosted = await run('node', [CLI, 'config', 'set', 'model', 'claude-opus-4-8'], { env });
+        expect(hosted.stdout).toContain('Set model = claude-opus-4-8');
+    });
+
+    it('config set routing.executionModel validates ids but allows "" (off)', async () => {
+        const home = mkdtempSync(join(tmpdir(), 'bbh-'));
+        const env = { ...cleanEnv, BROWSERBASH_HOME: home };
+
+        const bare = (await run('node', [CLI, 'config', 'set', 'routing.executionModel', 'qwen3'], { env })
+            .catch((e: ExecError) => e)) as ExecError;
+        expect(bare.code).toBe(2);
+        expect(bare.stderr).toContain('ollama/qwen3');
+
+        const off = await run('node', [CLI, 'config', 'set', 'routing.executionModel', ''], { env });
+        expect(off.stdout).toContain('Set routing.executionModel = ');
+    });
 });
