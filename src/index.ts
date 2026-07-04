@@ -24,12 +24,22 @@ for (const stream of [process.stdout, process.stderr]) {
     });
 }
 
+/** Read the package version at runtime so --version never drifts from package.json. */
+function packageVersion(): string {
+    try {
+        const pkg = JSON.parse(fs.readFileSync(path.join(path.dirname(CLI_ENTRY), '..', 'package.json'), 'utf-8')) as { version?: string };
+        return pkg.version ?? '0.0.0';
+    } catch {
+        return '0.0.0';
+    }
+}
+
 const program = new Command();
 
 program
     .name('browserbash')
     .description('Vendor-independent natural-language browser automation CLI')
-    .version('1.3.1');
+    .version(packageVersion());
 
 interface CommonFlags {
     provider?: string;
@@ -76,7 +86,7 @@ function addRunFlags(cmd: Command): Command {
         .option('--cdp-endpoint <url>', 'CDP endpoint (implies/required by --provider cdp)')
         .option('--url <url>', 'start URL to open before the agent begins')
         .option('--model <id>', 'Anthropic model id override')
-        .option('--record', 'capture a session recording (screenshot + video on any engine; trace adds on builtin; needs ffmpeg)')
+        .option('--record', 'capture a session recording (screenshot + video; needs ffmpeg, bundled)')
         .option('--upload', 'push this run to your cloud dashboard (needs: browserbash connect)')
         .option('--dashboard', 'open the local web dashboard when the run finishes')
         .option('--port <n>', 'port for the local dashboard (with --dashboard)', '4477')

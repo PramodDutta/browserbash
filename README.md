@@ -108,10 +108,10 @@ browserbash run "..." --engine builtin
 browserbash run "<objective>" --agent --headless --timeout 120
 ```
 
-- Progress events: `{"type":"step","step":1,"status":"passed","action":"navigate","remark":"..."}`
-- Terminal event: `{"type":"run_end","status":"passed|failed|error|timeout","summary":"...","final_state":{...},"duration_ms":...,"test_url":"..."}`
+- Progress events: `{"type":"step","step":1,"status":"passed","action":"navigate","remark":"...","cached":false}`
+- Terminal event: `{"type":"run_end","status":"passed|failed|error|timeout","summary":"...","final_state":{...},"duration_ms":...,"provider":"local","cache":"hit|miss|off","tokens_in":...,"tokens_out":...,"test_url":"..."}`
 
-Exit codes: `0` passed · `1` failed · `2` error · `3` timeout.
+Exit codes: `0` passed · `1` failed · `2` error · `3` timeout. `cached`, `cache`, `tokens_in`/`tokens_out` are additive fields (present when relevant), so existing consumers are unaffected.
 
 Full agent integration guide: [docs/agents.md](docs/agents.md).
 
@@ -127,7 +127,7 @@ browserbash run "..." --record --dashboard   # run, then open the dashboard on t
 browserbash dashboard --clear         # wipe the local store
 ```
 
-Left panel lists your runs; the main pane shows the verdict, extracted values and the recording — a screenshot **and a session video** on any engine (video needs `ffmpeg`, bundled), plus a Playwright trace on the builtin engine. Nothing leaves your machine.
+Left panel lists your runs; the main pane shows the verdict, extracted values and the recording — a screenshot **and a session video** with `--record` (video needs `ffmpeg`, bundled). Nothing leaves your machine.
 
 **Cloud dashboard — optional, opt-in per run:** a hosted dashboard at [browserbash.com/dashboard](https://browserbash.com/dashboard) with run history across machines and shareable per-run pages.
 
@@ -137,6 +137,44 @@ browserbash run "..." --record --upload   # push THIS run (verdict + recording) 
 ```
 
 Without `--upload` nothing is sent to the cloud. BrowserBash is free and open source; cloud runs are kept 15 days.
+
+## Replay cache (warm runs skip the model)
+
+A green run records the actions it took. The next identical run **replays them with zero model calls**, and the agent only steps back in when the page actually changed. Steady-state suites run at close to script speed and cost.
+
+```bash
+browserbash testmd run ./checkout_test.md            # run 1: records the journal
+browserbash testmd run ./checkout_test.md            # run 2: replays, no model
+browserbash testmd run ./checkout_test.md --no-cache      # ignore the cache for this run
+browserbash testmd run ./checkout_test.md --refresh-cache # wipe this test's entry, re-record
+```
+
+`run_end.cache` reports `hit` / `miss` / `off`. On by default; `config set cache.enabled false` to disable, `cache.dir` to relocate (default `.browserbash/cache`, gitignored by `init`). Secrets never enter the cache: values arrive through the variables channel (Stagehand) or are re-templatized to `{{name}}` tokens (builtin), and any cached action that types a secret is origin-pinned — replaying it on a different origin fails closed.
+
+## Parallel suites (`run-all`)
+
+Run a whole folder of `*_test.md` files at once with memory-aware scheduling:
+
+```bash
+browserbash run-all .browserbash/tests --concurrency 8 --junit out/junit.xml
+```
+
+- Concurrency is auto-derived from CPU **and** free memory (`min(requested, cpus, floor((mem - 2GB) / budget))`), so big suites do not thrash the machine. Override with `--concurrency`, tune the estimate with `--memory-budget <mb>`.
+- Each test runs as an isolated child process with its own `Result.md`; a failure never leaks state to the next test.
+- `--retries <n>` retries infra errors only (not real failures), `--max-failures <n>` stops early, `--stagger <ms>` softens burst load.
+- Outputs: a merged NDJSON stream (`--events`, add `--agent` to also stream on stdout), JUnit XML (`--junit`), and a `RunAll-Result.md` with a flaky column.
+- Run history in `.browserbash/memory/history.json` orders the next run (previously-failed first, then slowest first) and flags flaky tests. `--no-memory` opts out.
+- Exit code: `0` all passed · `1` any failed · `2` infra error · `3` suite timeout.
+
+## Cheap-model routing
+
+Plan on a strong model, execute on a cheap one, escalate back automatically after a failed step:
+
+```bash
+browserbash run "..." --model claude-opus-4-8 --model-exec claude-haiku-4-5
+```
+
+`run_end` reports `tokens_in` / `tokens_out` (builtin engine) so you can see what a run costs. Set persistently with `config set routing.executionModel <id>`.
 
 ## Test files (`*_test.md`)
 
@@ -213,6 +251,13 @@ src/
 │   ├── cdp.ts          # attach to any CDP endpoint (incl. Playwright MCP browsers)
 │   ├── lambdatest.ts   # LambdaTest/TestMu grid + setTestStatus reporting
 │   └── browserstack.ts # BrowserStack Automate grid + setSessionStatus reporting
+│   ├── replay.ts       # builtin replay-first cache: replay recorded actions, origin-pinned
+│   └── routing.ts      # per-model thinking config + cheap-exec model routing
+├── orchestrator/       # run-all: memory-aware scheduler + child-process suite runner
+│   ├── scheduler.ts    # concurrency formula, admission watermark, JUnit
+│   └── run-all.ts      # spawn children, aggregate NDJSON, verdicts, retries
+├── cache-store.ts      # builtin action-journal cache (re-templatized, origin-pinned)
+├── memory-store.ts     # run history: ordering + flaky report
 ├── testmd/             # *_test.md parser (@import, ordered steps) + Result.md writer
 ├── config.ts           # ~/.browserbash/config.json + credential resolution
 ├── variables.ts        # {{var}} substitution, secrets masking

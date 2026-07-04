@@ -33,7 +33,7 @@ export interface RunOptions {
     cdpEndpoint?: string;
     startUrl?: string;
     model?: string;
-    /** Capture a session recording (screenshot always; video + trace on builtin). */
+    /** Capture a session recording (final screenshot + session video via ffmpeg). */
     record?: boolean;
     /** Push this run to the cloud dashboard (requires `browserbash connect`). */
     upload?: boolean;
