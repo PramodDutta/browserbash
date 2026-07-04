@@ -1,6 +1,7 @@
 import { loadConfig } from './config.js';
 import { runAgent } from './engine/agent.js';
 import { replayJournal, ReplayMiss, ReplaySecurityError } from './engine/replay.js';
+import { startTrace, type TraceHandle } from './engine/trace.js';
 import { runStagehandAgent, stagehandSupports } from './engine/stagehand.js';
 import { resolveModel } from './llm.js';
 import { Reporter } from './output.js';
@@ -16,7 +17,7 @@ import {
     type ActionJournal,
     type RecordedAction,
 } from './cache-store.js';
-import type { CacheVerdict, RunOptions, RunResult } from './types.js';
+import type { CacheVerdict, RunArtifacts, RunOptions, RunResult } from './types.js';
 
 /**
  * Engine selection:
@@ -121,6 +122,23 @@ async function runWithBuiltin(options: RunOptions, reporter: Reporter, defaultMo
     }
     const journal = file ? loadJournal(file) : null;
 
+    // Native Playwright trace + final screenshot on --record (best-effort).
+    let trace: TraceHandle | undefined;
+    if (options.record) {
+        trace = await startTrace(session.page);
+        if (trace) reporter.info('Recording Playwright trace (--record)');
+    }
+    const artifacts: RunArtifacts = {};
+    const capture = async (): Promise<RunArtifacts | undefined> => {
+        if (!trace) return undefined;
+        const t = trace;
+        trace = undefined;
+        const out = await t.stop();
+        if (out.trace) { artifacts.trace = out.trace; reporter.info('Captured Playwright trace (--record)'); }
+        if (out.screenshot) artifacts.screenshot = out.screenshot;
+        return Object.keys(artifacts).length > 0 ? artifacts : undefined;
+    };
+
     const start = Date.now();
     try {
         if (options.startUrl) {
@@ -149,6 +167,7 @@ async function runWithBuiltin(options: RunOptions, reporter: Reporter, defaultMo
                     cache: 'hit',
                 };
                 result.testUrl = session.testUrl;
+                result.artifacts = await capture();
                 if (session.reportStatus) {
                     await session.reportStatus('passed', result.summary);
                 }
@@ -187,6 +206,7 @@ async function runWithBuiltin(options: RunOptions, reporter: Reporter, defaultMo
         });
         result.cache = cacheVerdict;
         result.testUrl = session.testUrl;
+        result.artifacts = await capture();
 
         if (file) {
             if (result.status === 'passed') {

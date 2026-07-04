@@ -127,7 +127,7 @@ browserbash run "..." --record --dashboard   # run, then open the dashboard on t
 browserbash dashboard --clear         # wipe the local store
 ```
 
-Left panel lists your runs; the main pane shows the verdict, extracted values and the recording — a screenshot **and a session video** with `--record` (video needs `ffmpeg`, bundled). Nothing leaves your machine.
+Left panel lists your runs; the main pane shows the verdict, extracted values and the recording — with `--record` you get a screenshot plus a session video (stagehand engine, video needs `ffmpeg`, bundled) or a native Playwright trace you can open at trace.playwright.dev (builtin engine). Nothing leaves your machine.
 
 **Cloud dashboard — optional, opt-in per run:** a hosted dashboard at [browserbash.com/dashboard](https://browserbash.com/dashboard) with run history across machines and shareable per-run pages.
 

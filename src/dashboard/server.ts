@@ -156,7 +156,7 @@ function renderDetail(r) {
   if (r.artifacts?.video) rec.push(\`<div class="card"><span class="lbl">video</span><video controls src="/art/\${r.id}/video"></video></div>\`);
   if (r.artifacts?.screenshot) rec.push(\`<div class="card"><span class="lbl">final screenshot</span><a href="/art/\${r.id}/screenshot" target="_blank"><img src="/art/\${r.id}/screenshot" alt="screenshot"></a></div>\`);
   if (r.artifacts?.trace) rec.push(\`<div class="card"><span class="lbl">playwright trace</span><p style="font-size:12px;color:var(--soft);margin:0 0 10px">Open at trace.playwright.dev for a step-by-step timeline.</p><a class="dl" href="/art/\${r.id}/trace" download>Download trace.zip</a></div>\`);
-  if (!rec.length) rec.push(\`<div class="card"><span class="lbl">recording</span><p style="font-size:12px;color:var(--soft);margin:0">No recording. Re-run with <code>--record</code> to capture a screenshot and session video.</p></div>\`);
+  if (!rec.length) rec.push(\`<div class="card"><span class="lbl">recording</span><p style="font-size:12px;color:var(--soft);margin:0">No recording. Re-run with <code>--record</code> to capture a screenshot and session video (stagehand) or a Playwright trace (builtin engine).</p></div>\`);
   m.innerHTML = \`
     <span class="badge b-\${esc(r.status)}">\${esc(r.status)}</span>
     <h1>\${esc(r.objective).slice(0,90)}</h1>

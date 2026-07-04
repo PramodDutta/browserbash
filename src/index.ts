@@ -86,7 +86,7 @@ function addRunFlags(cmd: Command): Command {
         .option('--cdp-endpoint <url>', 'CDP endpoint (implies/required by --provider cdp)')
         .option('--url <url>', 'start URL to open before the agent begins')
         .option('--model <id>', 'Anthropic model id override')
-        .option('--record', 'capture a session recording (screenshot + video; needs ffmpeg, bundled)')
+        .option('--record', 'capture a recording: screenshot + video (stagehand) or a Playwright trace (builtin engine)')
         .option('--upload', 'push this run to your cloud dashboard (needs: browserbash connect)')
         .option('--dashboard', 'open the local web dashboard when the run finishes')
         .option('--port <n>', 'port for the local dashboard (with --dashboard)', '4477')
