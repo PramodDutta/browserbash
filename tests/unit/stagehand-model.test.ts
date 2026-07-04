@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { extractFinalState, toStagehandModel } from '../../dist/engine/stagehand.js';
+import { extractFinalState, toStagehandModel, unwrapCloseEcho } from '../../dist/engine/stagehand.js';
 
 beforeEach(() => {
     vi.stubEnv('OLLAMA_BASE_URL', undefined);
@@ -75,6 +75,42 @@ describe('extractFinalState', () => {
             'The assistant extracted the first quote author (Albert Einstein) and returned it. The required JSON with \'author\' was provided.',
             'Open https://quotes.toscrape.com and store the first quote author as \'author\'',
         )).toEqual({ author: 'Albert Einstein' });
+    });
+
+    it('drops close-echo keys but keeps real values alongside them', () => {
+        expect(extractFinalState('{"reasoning":"did the thing","taskComplete":true,"h1":"Example Domain"}')).toEqual({
+            h1: 'Example Domain',
+        });
+    });
+
+    it('close echo with no stored values never leaks reasoning/taskComplete keys', () => {
+        const state = extractFinalState('{"reasoning":"All good.","taskComplete":true}', "store the title as 'title'");
+        expect(state.reasoning).toBeUndefined();
+        expect(state.taskComplete).toBeUndefined();
+    });
+});
+
+describe('unwrapCloseEcho', () => {
+    it('unwraps a pure close-echo message and honors taskComplete', () => {
+        const r = unwrapCloseEcho('{\n  "reasoning": "Extracted the heading successfully.",\n  "taskComplete": true\n}');
+        expect(r.success).toBe(true);
+        expect(r.message).toBe('Extracted the heading successfully.');
+    });
+
+    it('keeps leading prose and appends reasoning', () => {
+        const r = unwrapCloseEcho('All done.\n{"reasoning":"Stored h1.","taskComplete":true}');
+        expect(r.success).toBe(true);
+        expect(r.message).toBe('All done. Stored h1.');
+    });
+
+    it('propagates taskComplete=false', () => {
+        expect(unwrapCloseEcho('{"reasoning":"Could not log in.","taskComplete":false}').success).toBe(false);
+    });
+
+    it('leaves normal messages untouched', () => {
+        const r = unwrapCloseEcho('Stored the values. {"h1":"Example Domain"}');
+        expect(r.success).toBeUndefined();
+        expect(r.message).toBe('Stored the values. {"h1":"Example Domain"}');
     });
 });
 

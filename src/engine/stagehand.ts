@@ -300,9 +300,10 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
         }
 
         await capture();
+        const unwrapped = unwrapCloseEcho(result.message);
         return {
-            status: result.success ? 'passed' : 'failed',
-            summary: result.message,
+            status: result.success || unwrapped.success === true ? 'passed' : 'failed',
+            summary: unwrapped.message,
             finalState: extractFinalState(result.message, objective),
             stepsExecuted: result.actions.length,
             durationMs: Date.now() - start,
@@ -328,15 +329,42 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
     }
 }
 
+/**
+ * Small local models often emit the close tool's arguments ({reasoning,
+ * taskComplete}) as their final text instead of calling the tool, which
+ * leaves success=false and a raw JSON blob as the run summary. Unwrap that
+ * shape: surface the reasoning as the summary and honor taskComplete.
+ */
+export function unwrapCloseEcho(message: string): { message: string; success?: boolean } {
+    const match = message.match(/\{[\s\S]*\}(?=[^{}]*$)/);
+    if (!match) return { message };
+    try {
+        const parsed = JSON.parse(match[0]) as Record<string, unknown>;
+        if (typeof parsed.taskComplete !== 'boolean') return { message };
+        const reasoning = typeof parsed.reasoning === 'string' ? parsed.reasoning : '';
+        const rest = message.replace(match[0], '').trim();
+        return {
+            message: [rest, reasoning].filter(Boolean).join(' ').trim() || message,
+            success: parsed.taskComplete,
+        };
+    } catch {
+        return { message };
+    }
+}
+
+/** Close-tool argument names; never user store-as keys. */
+const CLOSE_ECHO_KEYS = new Set(['reasoning', 'taskComplete', 'success']);
+
 /** Pull the trailing JSON object (store-as values) out of the agent's final message. */
 export function extractFinalState(message: string, objective = ''): Record<string, string> {
     const match = message.match(/\{[\s\S]*\}(?=[^{}]*$)/);
     if (match) {
         try {
         const parsed = JSON.parse(match[0]) as Record<string, unknown>;
+        const isCloseEcho = typeof parsed.taskComplete === 'boolean';
         const state = Object.fromEntries(
             Object.entries(parsed)
-                .filter(([, v]) => typeof v !== 'object')
+                .filter(([k, v]) => typeof v !== 'object' && !(isCloseEcho && CLOSE_ECHO_KEYS.has(k)))
                 .map(([k, v]) => [k, String(v)])
                 .filter(([, v]) => !isPlaceholder(v)),
         );
