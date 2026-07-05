@@ -37,6 +37,32 @@ export function toStagehandPlaceholders(text: string): string {
 }
 
 /**
+ * Split variables for the Stagehand agent. Non-secret values are inlined into
+ * the instruction: Stagehand only resolves %name% inside act/type arguments,
+ * not in navigation URLs, so a %base_url% goto never resolves. Secrets stay
+ * as %name% placeholders backed by the variables map, keeping their values
+ * out of the instruction, the cache, and any log.
+ */
+export function splitObjectiveVariables(
+    objective: string,
+    vars: Record<string, VariableValue>,
+): { instruction: string; secrets: Record<string, string> } {
+    const secrets: Record<string, string> = {};
+    const instruction = objective.replace(/\{\{\s*([\w.-]+)\s*\}\}/g, (_, key: string) => {
+        const found = vars[key];
+        if (found === undefined) {
+            throw new Error(`Unknown variable {{${key}}} — define it in variables or pass --variables`);
+        }
+        if (found.secret) {
+            secrets[key] = found.value;
+            return `%${key}%`;
+        }
+        return found.value;
+    });
+    return { instruction, secrets };
+}
+
+/**
  * Per-test cache directory name: readable slug from the test name plus a
  * short hash of the TEMPLATED objective (pre-substitution, so secrets never
  * influence the key and edits to the test invalidate it).
@@ -126,19 +152,27 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
     const isOpenAiCompat =
         options.model.startsWith('ollama/') || options.model.startsWith('openrouter/');
 
-    // Cache gate. Stagehand's variables passthrough (the thing that keeps
-    // secret values out of cache keys and files) is not supported on the CUA
-    // agent used for hosted models, so a hosted-model run WITH variables must
-    // not cache: its instruction would carry substituted secrets to disk.
-    const hasVariables = Object.keys(options.variables).length > 0;
-    const cacheUsable = (options.cache?.enabled ?? false) && (isOpenAiCompat || !hasVariables);
+    // Secrets gate. Stagehand's variables passthrough (the thing that keeps
+    // secret values out of cache files and prompts) is not supported on the
+    // CUA agent used for hosted models, so a hosted-model run WITH secrets
+    // must not cache: its instruction would carry substituted secrets to
+    // disk. Non-secret variables are always inlined (see
+    // splitObjectiveVariables) and never block caching.
+    const hasSecrets = Object.values(options.variables).some((v) => v.secret);
+    const cacheUsable = (options.cache?.enabled ?? false) && (isOpenAiCompat || !hasSecrets);
     if (options.cache?.enabled && !cacheUsable) {
-        options.reporter.info('Cache off for this run: hosted-model agents cannot take variables without writing substituted values into the cache.');
+        options.reporter.info('Cache off for this run: hosted-model agents cannot take secret variables without writing their values into the cache.');
     }
-    const passVariables = cacheUsable && hasVariables;
-    const objective = passVariables
-        ? toStagehandPlaceholders(options.objective)
-        : substitute(options.objective, options.variables);
+    const passSecrets = hasSecrets && isOpenAiCompat;
+    let objective: string;
+    let secretVars: Record<string, string> = {};
+    if (passSecrets) {
+        const split = splitObjectiveVariables(options.objective, options.variables);
+        objective = split.instruction;
+        secretVars = split.secrets;
+    } else {
+        objective = substitute(options.objective, options.variables);
+    }
 
     const cacheDir = cacheUsable
         ? resolve(options.cache!.dir, 'stagehand', cacheSlug(options.name, options.objective))
@@ -261,15 +295,10 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
                 // (Ollama: "model does not support multimodal requests"), killing
                 // the run whenever the model happens to call it.
                 ...(isOpenAiCompat ? { excludeTools: ['screenshot'] } : {}),
-                // Values arrive via the variables channel, never inlined into
-                // the instruction, so the cache and any logs stay secret-free.
-                ...(passVariables
-                    ? {
-                          variables: Object.fromEntries(
-                              Object.entries(options.variables).map(([k, v]) => [k, v.value]),
-                          ),
-                      }
-                    : {}),
+                // Secret values arrive via the variables channel, never
+                // inlined into the instruction, so the cache and any logs
+                // stay secret-free. Non-secret values are already inlined.
+                ...(passSecrets ? { variables: secretVars } : {}),
             }),
             new Promise<never>((_, reject) => {
                 timeout = setTimeout(() => reject(new Error('__timeout__')), timeoutMs);

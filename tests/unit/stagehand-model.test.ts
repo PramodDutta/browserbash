@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { extractFinalState, toStagehandModel, unwrapCloseEcho } from '../../dist/engine/stagehand.js';
+import { extractFinalState, splitObjectiveVariables, toStagehandModel, unwrapCloseEcho } from '../../dist/engine/stagehand.js';
 
 beforeEach(() => {
     vi.stubEnv('OLLAMA_BASE_URL', undefined);
@@ -111,6 +111,33 @@ describe('unwrapCloseEcho', () => {
         const r = unwrapCloseEcho('Stored the values. {"h1":"Example Domain"}');
         expect(r.success).toBeUndefined();
         expect(r.message).toBe('Stored the values. {"h1":"Example Domain"}');
+    });
+});
+
+describe('splitObjectiveVariables', () => {
+    const vars = {
+        base_url: { value: 'https://the-internet.herokuapp.com' },
+        username: { value: 'tomsmith' },
+        password: { value: 'SuperSecretPassword!', secret: true },
+    };
+
+    it('inlines non-secrets and keeps secrets as %name% with a map', () => {
+        const { instruction, secrets } = splitObjectiveVariables(
+            'Open {{base_url}}/login, log in as {{username}} with {{password}}',
+            vars,
+        );
+        expect(instruction).toBe('Open https://the-internet.herokuapp.com/login, log in as tomsmith with %password%');
+        expect(secrets).toEqual({ password: 'SuperSecretPassword!' });
+    });
+
+    it('throws on unknown variables', () => {
+        expect(() => splitObjectiveVariables('Open {{nope}}', {})).toThrow(/Unknown variable/);
+    });
+
+    it('returns text unchanged with no placeholders', () => {
+        const { instruction, secrets } = splitObjectiveVariables('Open https://example.com', vars);
+        expect(instruction).toBe('Open https://example.com');
+        expect(secrets).toEqual({});
     });
 });
 
