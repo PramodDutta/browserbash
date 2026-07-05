@@ -149,7 +149,7 @@ browserbash testmd run ./checkout_test.md --no-cache      # ignore the cache for
 browserbash testmd run ./checkout_test.md --refresh-cache # wipe this test's entry, re-record
 ```
 
-`run_end.cache` reports `hit` / `miss` / `off`. On by default; `config set cache.enabled false` to disable, `cache.dir` to relocate (default `.browserbash/cache`, gitignored by `init`). Secrets never enter the cache: values arrive through the variables channel (Stagehand) or are re-templatized to `{{name}}` tokens (builtin), and any cached action that types a secret is origin-pinned — replaying it on a different origin fails closed.
+`run_end.cache` reports `hit` / `miss` / `off`. On by default; `config set cache.enabled false` to disable, `cache.dir` to relocate (default `.browserbash/cache`, gitignored by `init`). Secrets never enter the cache: values arrive through the variables channel (Stagehand) or are re-templatized to `{{name}}` tokens (builtin), and any cached action that types a secret is origin-pinned — replaying it on a different origin fails closed. Builtin journals are also HMAC-signed with a per-machine key (`~/.browserbash/cache.key`); an edited or foreign journal is ignored and simply re-recorded. CI fleets that want to share committed caches can set the same `BROWSERBASH_CACHE_KEY` (64 hex chars) on every runner.
 
 ## Parallel suites (`run-all`)
 

@@ -120,7 +120,7 @@ async function runWithBuiltin(options: RunOptions, reporter: Reporter, defaultMo
         deleteJournal(file);
         reporter.info('Cache entry wiped (--refresh-cache)');
     }
-    const journal = file ? loadJournal(file) : null;
+    const journal = file ? loadJournal(file, (msg) => reporter.info(msg)) : null;
 
     // Native Playwright trace + final screenshot on --record (best-effort).
     let trace: TraceHandle | undefined;

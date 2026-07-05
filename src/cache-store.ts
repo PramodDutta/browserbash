@@ -1,6 +1,7 @@
-import { createHash } from 'node:crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { configDir } from './config.js';
 import type { VariableValue } from './types.js';
 
 /**
@@ -19,10 +20,12 @@ import type { VariableValue } from './types.js';
  *   substitution. This stops app redirects, environment drift, and partial
  *   tampering (e.g. editing only a navigate URL) from steering a substituted
  *   secret onto an unexpected origin.
- * - Not yet covered: a fully rewritten journal (attacker edits the navigate
- *   AND every recorded origin to match) would pass the pin. Signing journals
- *   with a per-machine/CI HMAC is the tracked follow-up before committing
- *   caches is recommended.
+ * - Every journal is signed with HMAC-SHA256 under a per-machine key
+ *   (~/.browserbash/cache.key, created 0600 on first use; override with
+ *   BROWSERBASH_CACHE_KEY=<64 hex chars> to share one key across CI runners).
+ *   A journal whose signature is missing or wrong is ignored and the run
+ *   proceeds as a cache miss, so a hand-edited or foreign-machine journal
+ *   (including one pulled from git) can never drive the browser.
  */
 
 export const JOURNAL_SCHEMA_VERSION = 1;
@@ -47,6 +50,56 @@ export interface ActionJournal {
     startUrl?: string;
     actions: RecordedAction[];
     stats: { hits: number; heals: number };
+    /** HMAC-SHA256 over the canonical payload; set by saveJournal. */
+    sig?: string;
+}
+
+/**
+ * Per-machine signing key, created on first use with owner-only permissions.
+ * BROWSERBASH_CACHE_KEY (64 hex chars) overrides it so CI runners can share
+ * one key and reuse committed caches deliberately.
+ */
+function signingKey(): Buffer {
+    const env = process.env.BROWSERBASH_CACHE_KEY;
+    if (env && /^[0-9a-f]{64}$/i.test(env)) return Buffer.from(env, 'hex');
+    const file = path.join(configDir(), 'cache.key');
+    try {
+        const hex = fs.readFileSync(file, 'utf-8').trim();
+        if (/^[0-9a-f]{64}$/i.test(hex)) return Buffer.from(hex, 'hex');
+    } catch {
+        // fall through and create one
+    }
+    const key = randomBytes(32);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, key.toString('hex') + '\n', { mode: 0o600 });
+    return key;
+}
+
+/**
+ * Canonical byte string covered by the signature. Field order is fixed here;
+ * stats are excluded because hit counters change on every replay and have no
+ * bearing on what the replay does.
+ */
+function signaturePayload(j: ActionJournal): string {
+    return JSON.stringify({
+        v: j.v,
+        engine: j.engine,
+        recordedModel: j.recordedModel,
+        variableKeys: j.variableKeys,
+        startUrl: j.startUrl ?? '',
+        actions: j.actions,
+    });
+}
+
+export function signJournal(j: ActionJournal): string {
+    return createHmac('sha256', signingKey()).update(signaturePayload(j)).digest('hex');
+}
+
+function signatureValid(j: ActionJournal): boolean {
+    if (typeof j.sig !== 'string' || !/^[0-9a-f]{64}$/.test(j.sig)) return false;
+    const expected = Buffer.from(signJournal(j), 'hex');
+    const actual = Buffer.from(j.sig, 'hex');
+    return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
 /** Cache key: templated objective + sorted variable KEYS + startUrl. */
@@ -65,20 +118,26 @@ export function journalPath(cacheDir: string, key: string): string {
     return path.resolve(cacheDir, 'builtin', `${key}.json`);
 }
 
-export function loadJournal(file: string): ActionJournal | null {
+export function loadJournal(file: string, onWarn?: (msg: string) => void): ActionJournal | null {
+    let raw: ActionJournal;
     try {
-        const raw = JSON.parse(fs.readFileSync(file, 'utf-8')) as ActionJournal;
-        if (raw.v !== JOURNAL_SCHEMA_VERSION || raw.engine !== 'builtin' || !Array.isArray(raw.actions)) return null;
-        return raw;
+        raw = JSON.parse(fs.readFileSync(file, 'utf-8')) as ActionJournal;
     } catch {
         return null;
     }
+    if (raw.v !== JOURNAL_SCHEMA_VERSION || raw.engine !== 'builtin' || !Array.isArray(raw.actions)) return null;
+    if (!signatureValid(raw)) {
+        onWarn?.('Cache entry ignored: integrity check failed (unsigned, edited, or signed on another machine). Running fresh; a green run re-records it.');
+        return null;
+    }
+    return raw;
 }
 
 export function saveJournal(file: string, journal: ActionJournal): void {
     fs.mkdirSync(path.dirname(file), { recursive: true });
+    const signed: ActionJournal = { ...journal, sig: signJournal(journal) };
     const tmp = `${file}.tmp`;
-    fs.writeFileSync(tmp, JSON.stringify(journal, null, 2) + '\n', 'utf-8');
+    fs.writeFileSync(tmp, JSON.stringify(signed, null, 2) + '\n', 'utf-8');
     fs.renameSync(tmp, file);
 }
 

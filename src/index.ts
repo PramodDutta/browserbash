@@ -514,9 +514,9 @@ program
             fs.writeFileSync(exampleTest, '# Smoke test\n\n- Open {{base_url}}\n- Verify the page title is visible\n- Store the page heading as \'heading\'\n');
         }
         // Keep machine-local, environment-specific, and secret-adjacent files
-        // out of version control. The action cache is regenerated per machine
-        // and is not signed, so it is local-only by default (committing it
-        // safely needs the journal HMAC tracked for a later release).
+        // out of version control. Journals are HMAC-signed per machine, so a
+        // committed cache is ignored elsewhere anyway unless a team shares
+        // BROWSERBASH_CACHE_KEY deliberately; default stays local-only.
         const ignoreFile = path.join(dir, '.gitignore');
         if (!fs.existsSync(ignoreFile)) {
             fs.writeFileSync(ignoreFile, 'cache/\nruns/\nResult.md\nvariables/*.local.json\n');

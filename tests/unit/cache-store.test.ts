@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterAll, beforeEach, afterEach, vi } from 'vitest';
 import {
     journalKey,
     journalPath,
@@ -16,6 +16,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import type { VariableValue } from '../../dist/types.js';
+
+// Keep the per-machine signing key out of the real home directory.
+const ORIG_HOME = process.env.BROWSERBASH_HOME;
+process.env.BROWSERBASH_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-home-'));
+afterAll(() => {
+    if (ORIG_HOME === undefined) delete process.env.BROWSERBASH_HOME;
+    else process.env.BROWSERBASH_HOME = ORIG_HOME;
+});
 
 const vars: Record<string, VariableValue> = {
     name: { value: 'PramodSecret77', secret: true },
@@ -79,6 +87,85 @@ describe('journal persistence', () => {
         deleteJournal(file);
         expect(loadJournal(file)).toBeNull();
         fs.rmSync(dir, { recursive: true, force: true });
+    });
+});
+
+describe('journal signing', () => {
+    let dir: string;
+    let file: string;
+    const j: ActionJournal = {
+        v: 1, engine: 'builtin', recordedModel: 'm', variableKeys: ['name'],
+        actions: [{ tool: 'navigate', input: { url: 'http://app.example/login' }, urlBefore: 'null/', origin: 'null', carriesVariables: false }],
+        stats: { hits: 0, heals: 0 },
+    };
+
+    beforeEach(() => {
+        dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-sig-'));
+        file = journalPath(dir, 'sig1');
+    });
+    afterEach(() => {
+        fs.rmSync(dir, { recursive: true, force: true });
+        delete process.env.BROWSERBASH_CACHE_KEY;
+    });
+
+    it('signs on save and verifies on load', () => {
+        saveJournal(file, j);
+        const raw = JSON.parse(fs.readFileSync(file, 'utf-8'));
+        expect(raw.sig).toMatch(/^[0-9a-f]{64}$/);
+        expect(loadJournal(file)?.actions).toHaveLength(1);
+    });
+
+    it('rejects a tampered action and warns', () => {
+        saveJournal(file, j);
+        const raw = JSON.parse(fs.readFileSync(file, 'utf-8'));
+        raw.actions[0].input.url = 'http://evil.example/login';
+        fs.writeFileSync(file, JSON.stringify(raw));
+        const warn = vi.fn();
+        expect(loadJournal(file, warn)).toBeNull();
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('integrity check failed'));
+    });
+
+    it('rejects a stripped signature', () => {
+        saveJournal(file, j);
+        const raw = JSON.parse(fs.readFileSync(file, 'utf-8'));
+        delete raw.sig;
+        fs.writeFileSync(file, JSON.stringify(raw));
+        expect(loadJournal(file)).toBeNull();
+    });
+
+    it('rejects journals signed on another machine (different key)', () => {
+        saveJournal(file, j);
+        const otherHome = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-home2-'));
+        const prev = process.env.BROWSERBASH_HOME;
+        process.env.BROWSERBASH_HOME = otherHome;
+        try {
+            expect(loadJournal(file)).toBeNull();
+        } finally {
+            process.env.BROWSERBASH_HOME = prev;
+            fs.rmSync(otherHome, { recursive: true, force: true });
+        }
+        expect(loadJournal(file)?.actions).toHaveLength(1);
+    });
+
+    it('BROWSERBASH_CACHE_KEY shares one key across machines', () => {
+        process.env.BROWSERBASH_CACHE_KEY = 'ab'.repeat(32);
+        saveJournal(file, j);
+        const otherHome = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-home3-'));
+        const prev = process.env.BROWSERBASH_HOME;
+        process.env.BROWSERBASH_HOME = otherHome;
+        try {
+            expect(loadJournal(file)?.actions).toHaveLength(1);
+        } finally {
+            process.env.BROWSERBASH_HOME = prev;
+            fs.rmSync(otherHome, { recursive: true, force: true });
+        }
+    });
+
+    it('creates the key file owner-only', () => {
+        saveJournal(file, j);
+        const keyFile = path.join(process.env.BROWSERBASH_HOME!, 'cache.key');
+        const mode = fs.statSync(keyFile).mode & 0o777;
+        expect(mode).toBe(0o600);
     });
 });
 
