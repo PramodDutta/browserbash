@@ -11,6 +11,7 @@ Caching, parallel suites, run history, and cheap-model routing. All local-first 
 - **Cheap-model routing.** `--model-exec <id>` / `routing.executionModel`: plan on the strong model, execute on a cheap one, escalate back after a failed step. `run_end` now reports `tokens_in` / `tokens_out` on the builtin engine.
 - **`testmd run --result-path <file>`** to place `Result.md` outside the test directory (used by `run-all` to avoid clobbering under parallelism).
 - **Playwright traces on the builtin engine.** `--record` now captures a native `trace.zip` (openable at trace.playwright.dev) plus a final screenshot on the builtin engine, alongside the existing screenshot + video on stagehand.
+- **Per-test memory watchdog in `run-all`.** `--memory-cap <mb>` (default 2x `--memory-budget`, `0` disables) hard-kills any test whose whole process tree exceeds the cap, reporting an infra error plus a `test_kill` event instead of letting one ballooning page take down the host.
 - **Signed action journals.** Builtin replay journals carry an HMAC-SHA256 signature under a per-machine key (`~/.browserbash/cache.key`, created `0600` on first use). An unsigned, edited, or foreign-machine journal is ignored (cache miss, warning printed) instead of driving the browser. Set the same `BROWSERBASH_CACHE_KEY` (64 hex chars) across CI runners to share committed caches deliberately.
 
 ### Fixed

@@ -159,7 +159,7 @@ Run a whole folder of `*_test.md` files at once with memory-aware scheduling:
 browserbash run-all .browserbash/tests --concurrency 8 --junit out/junit.xml
 ```
 
-- Concurrency is auto-derived from CPU **and** free memory (`min(requested, cpus, floor((mem - 2GB) / budget))`), so big suites do not thrash the machine. Override with `--concurrency`, tune the estimate with `--memory-budget <mb>`.
+- Concurrency is auto-derived from CPU **and** free memory (`min(requested, cpus, floor((mem - 2GB) / budget))`), so big suites do not thrash the machine. Override with `--concurrency`, tune the estimate with `--memory-budget <mb>`. A hard watchdog also kills any test whose whole process tree (Node + Chromium) exceeds `--memory-cap <mb>` (default 2x the budget, `0` disables); the test is reported as an infra error with a `test_kill` event, and retried per `--retries`.
 - Each test runs as an isolated child process with its own `Result.md`; a failure never leaks state to the next test.
 - `--retries <n>` retries infra errors only (not real failures), `--max-failures <n>` stops early, `--stagger <ms>` softens burst load.
 - Outputs: a merged NDJSON stream (`--events`, add `--agent` to also stream on stdout), JUnit XML (`--junit`), and a `RunAll-Result.md` with a flaky column.

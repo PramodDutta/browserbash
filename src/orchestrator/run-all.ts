@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import { execFile, spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -7,7 +7,9 @@ import {
     classifyChild,
     computeConcurrency,
     discoverTests,
+    parsePsTable,
     runPool,
+    sumTreeRssBytes,
     toJUnitXml,
     type TestOutcome,
 } from './scheduler.js';
@@ -24,6 +26,8 @@ export interface RunAllOptions {
     target: string;
     concurrency?: number;
     memoryBudgetMb: number;
+    /** Hard RSS cap (MB) per test's process tree; 0 disables the watchdog. */
+    memoryCapMb: number;
     retries: number;
     maxFailures: number; // 0 = run all
     junitPath?: string;
@@ -57,6 +61,27 @@ export interface SuiteResult {
 }
 
 const CHILD_TERMINATED = -1;
+const RSS_POLL_MS = 1500;
+const KILL_ESCALATE_MS = 4000;
+
+/** One ps snapshot -> RSS bytes of the child's whole process tree (null off-platform). */
+function treeRssBytes(rootPid: number): Promise<number | null> {
+    return new Promise((resolve) => {
+        execFile('ps', ['-axo', 'pid=,ppid=,rss='], { maxBuffer: 8 * 1024 * 1024 }, (err, stdout) => {
+            if (err) return resolve(null);
+            resolve(sumTreeRssBytes(rootPid, parsePsTable(stdout)));
+        });
+    });
+}
+
+interface ChildResult {
+    exitCode: number | null;
+    sawRunEnd: boolean;
+    runEndStatus?: string;
+    summary: string;
+    /** Set when the memory watchdog killed the child's tree. */
+    memKill?: { rssMb: number; capMb: number };
+}
 
 /** Spawn one child CLI for a test file and resolve its verdict from the NDJSON + exit code. */
 function runChild(
@@ -65,7 +90,7 @@ function runChild(
     variablesFile: string | undefined,
     emit: (event: Record<string, unknown>) => void,
     children: Set<ChildProcess>,
-): Promise<{ exitCode: number | null; sawRunEnd: boolean; runEndStatus?: string; summary: string }> {
+): Promise<ChildResult> {
     const resultPath = path.join(opts.resultsDir, `${path.basename(file).replace(/_test\.md$/, '')}.md`);
     const args = [
         opts.cliBin, 'testmd', 'run', file,
@@ -100,16 +125,42 @@ function runChild(
     // Drain stderr so the child never blocks on a full pipe.
     child.stderr.resume();
 
+    // Hard RSS watchdog over the child's whole process tree (Node + Chromium).
+    // The admission gate plans by budget; this backstops the plan when one
+    // test balloons past it, so a single heavy page cannot take out the host.
+    let memKill: ChildResult['memKill'];
+    let watchdog: ReturnType<typeof setInterval> | undefined;
+    let escalate: ReturnType<typeof setTimeout> | undefined;
+    if (opts.memoryCapMb > 0 && child.pid) {
+        const capBytes = opts.memoryCapMb * 1024 ** 2;
+        let checking = false;
+        watchdog = setInterval(async () => {
+            if (checking || memKill) return;
+            checking = true;
+            const rss = await treeRssBytes(child.pid!);
+            checking = false;
+            if (rss === null || rss <= capBytes || memKill) return;
+            memKill = { rssMb: Math.round(rss / 1024 ** 2), capMb: opts.memoryCapMb };
+            emit({ type: 'test_kill', test: path.basename(file), reason: 'memory', rss_mb: memKill.rssMb, cap_mb: memKill.capMb });
+            child.kill('SIGTERM');
+            escalate = setTimeout(() => child.kill('SIGKILL'), KILL_ESCALATE_MS);
+        }, RSS_POLL_MS);
+    }
+
     return new Promise((resolve) => {
-        child.on('close', (code) => {
+        const cleanup = (): void => {
+            if (watchdog) clearInterval(watchdog);
+            if (escalate) clearTimeout(escalate);
             children.delete(child);
             rl.close();
-            resolve({ exitCode: code, sawRunEnd, runEndStatus, summary });
+        };
+        child.on('close', (code) => {
+            cleanup();
+            resolve({ exitCode: code, sawRunEnd, runEndStatus, summary, memKill });
         });
         child.on('error', () => {
-            children.delete(child);
-            rl.close();
-            resolve({ exitCode: CHILD_TERMINATED, sawRunEnd: false, summary: 'spawn error' });
+            cleanup();
+            resolve({ exitCode: CHILD_TERMINATED, sawRunEnd: false, summary: 'spawn error', memKill });
         });
     });
 }
@@ -182,8 +233,13 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
         while (attempt < maxAttempts) {
             attempt++;
             const res = await runChild(file, opts, variablesFile, emit, children);
-            verdict = classifyChild(res.exitCode, res.sawRunEnd, res.runEndStatus);
-            summary = res.summary;
+            if (res.memKill) {
+                verdict = 'infra';
+                summary = `killed: process tree RSS ${res.memKill.rssMb}MB exceeded --memory-cap ${res.memKill.capMb}MB`;
+            } else {
+                verdict = classifyChild(res.exitCode, res.sawRunEnd, res.runEndStatus);
+                summary = res.summary;
+            }
             exitCode = res.exitCode;
             // Only infra errors are worth a retry; a real fail/timeout is a result.
             if (verdict !== 'infra' || stopping) break;

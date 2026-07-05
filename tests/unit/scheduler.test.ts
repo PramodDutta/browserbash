@@ -6,10 +6,37 @@ import {
     computeConcurrency,
     classifyChild,
     discoverTests,
+    parsePsTable,
     runPool,
+    sumTreeRssBytes,
     toJUnitXml,
     type TestOutcome,
 } from '../../dist/orchestrator/scheduler.js';
+
+describe('process-tree RSS', () => {
+    const table = parsePsTable([
+        '  100     1   5000',
+        '  200   100  10000',   // child of 100
+        '  201   200  20000',   // grandchild (Chromium)
+        '  300     1  99999',   // unrelated
+        'garbage line',
+    ].join('\n'));
+
+    it('parses pid/ppid/rss rows and skips noise', () => {
+        expect(table).toHaveLength(4);
+        expect(table[1]).toEqual({ pid: 200, ppid: 100, rssKb: 10000 });
+    });
+
+    it('sums the root and every descendant, ignores strangers', () => {
+        expect(sumTreeRssBytes(100, table)).toBe((5000 + 10000 + 20000) * 1024);
+        expect(sumTreeRssBytes(200, table)).toBe((10000 + 20000) * 1024);
+        expect(sumTreeRssBytes(300, table)).toBe(99999 * 1024);
+    });
+
+    it('returns 0 for an unknown pid with no children', () => {
+        expect(sumTreeRssBytes(4242, table)).toBe(0);
+    });
+});
 
 describe('computeConcurrency', () => {
     const GB = 1024 ** 3;

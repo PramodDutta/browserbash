@@ -48,6 +48,49 @@ export function computeConcurrency(inp: ConcurrencyInputs): { concurrency: numbe
     return { concurrency, reason: `${parts.join(', ')} -> ${concurrency}` };
 }
 
+/**
+ * Process-tree RSS, for the per-child hard memory cap. A test child is a Node
+ * CLI that spawns a Chromium tree; the browser is where the memory goes, so
+ * the cap must cover descendants, not just the direct child.
+ */
+export interface PsRow {
+    pid: number;
+    ppid: number;
+    rssKb: number;
+}
+
+/** Parse `ps -axo pid=,ppid=,rss=` output (whitespace-separated, RSS in KB). */
+export function parsePsTable(raw: string): PsRow[] {
+    const rows: PsRow[] = [];
+    for (const line of raw.split('\n')) {
+        const m = line.trim().match(/^(\d+)\s+(\d+)\s+(\d+)$/);
+        if (!m) continue;
+        rows.push({ pid: Number(m[1]), ppid: Number(m[2]), rssKb: Number(m[3]) });
+    }
+    return rows;
+}
+
+/** Sum RSS (bytes) of a pid and all its descendants from one ps snapshot. */
+export function sumTreeRssBytes(rootPid: number, rows: PsRow[]): number {
+    const byParent = new Map<number, PsRow[]>();
+    for (const r of rows) {
+        const list = byParent.get(r.ppid) ?? [];
+        list.push(r);
+        byParent.set(r.ppid, list);
+    }
+    const self = rows.find((r) => r.pid === rootPid);
+    let total = self ? self.rssKb : 0;
+    const queue = [rootPid];
+    while (queue.length > 0) {
+        const pid = queue.pop()!;
+        for (const child of byParent.get(pid) ?? []) {
+            total += child.rssKb;
+            queue.push(child.pid);
+        }
+    }
+    return total * 1024;
+}
+
 /** Discover *_test.md under a directory (recursive) or accept a single file. */
 export function discoverTests(target: string): string[] {
     const abs = path.resolve(target);

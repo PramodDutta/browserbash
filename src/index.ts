@@ -148,6 +148,14 @@ function parsePositiveInteger(value: number | string | undefined, name: string):
     return parsed;
 }
 
+function parseNonNegativeInteger(value: string, name: string): number {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed < 0) {
+        throw new Error(`${name} must be a non-negative integer`);
+    }
+    return parsed;
+}
+
 function parseBooleanConfig(value: string, name: string): boolean {
     if (value === 'true') return true;
     if (value === 'false') return false;
@@ -287,6 +295,7 @@ program
     .description('Run a folder of *_test.md files in parallel with memory-aware scheduling')
     .option('-c, --concurrency <n>', 'max parallel runs (default: auto from CPU + memory)')
     .option('--memory-budget <mb>', 'estimated memory per run for the concurrency formula', '700')
+    .option('--memory-cap <mb>', 'hard RSS cap per test (whole process tree); 0 disables (default: 2x --memory-budget)')
     .option('--retries <n>', 'retry a test this many times on infra errors only', '1')
     .option('--max-failures <n>', 'stop launching new tests after N failures (0 = run all)', '0')
     .option('--stagger <ms>', 'delay between launches to soften burst load', '250')
@@ -325,6 +334,10 @@ program
             target: target ?? path.join(projectDir(), 'tests'),
             concurrency: flags.concurrency ? parsePositiveInteger(String(flags.concurrency), 'concurrency') : undefined,
             memoryBudgetMb: parsePositiveInteger(String(flags.memoryBudget ?? '700'), 'memory-budget'),
+            // '0' must survive as "watchdog off", so no positive-int parse here.
+            memoryCapMb: flags.memoryCap !== undefined
+                ? parseNonNegativeInteger(String(flags.memoryCap), 'memory-cap')
+                : 2 * parsePositiveInteger(String(flags.memoryBudget ?? '700'), 'memory-budget'),
             retries: Number(flags.retries ?? '1'),
             maxFailures: Number(flags.maxFailures ?? '0'),
             junitPath: flags.junit ? String(flags.junit) : undefined,
