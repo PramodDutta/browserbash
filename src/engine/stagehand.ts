@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { Stagehand } from '@browserbasehq/stagehand';
@@ -24,6 +24,49 @@ export interface StagehandRunOptions {
     cache?: RunCacheOptions;
     /** Cheap execution model for the planner/executor split (empty = off). */
     executionModel?: string;
+    /** Saved login session (Playwright storageState JSON path) to inject. */
+    authStatePath?: string;
+    viewport?: { width: number; height: number };
+}
+
+interface StorageStateShape {
+    cookies?: Array<Record<string, unknown>>;
+    origins?: Array<{ origin: string; localStorage?: Array<{ name: string; value: string }> }>;
+}
+
+/**
+ * Inject a saved storageState into a live Stagehand context. Stagehand's
+ * launch options have no storageState field, so replicate what Playwright
+ * does internally: addCookies for the cookie jar, and an init script that
+ * seeds localStorage for matching origins before any page script runs.
+ */
+async function injectAuthState(
+    context: {
+        addCookies(cookies: Array<Record<string, unknown>>): Promise<void>;
+        addInitScript(script: { content: string }): Promise<void>;
+    },
+    statePath: string,
+    log: (msg: string) => void,
+): Promise<void> {
+    const state = JSON.parse(readFileSync(statePath, 'utf-8')) as StorageStateShape;
+    if (state.cookies && state.cookies.length > 0) {
+        await context.addCookies(state.cookies);
+    }
+    const origins = (state.origins ?? []).filter((o) => (o.localStorage ?? []).length > 0);
+    if (origins.length > 0) {
+        const seed = JSON.stringify(
+            Object.fromEntries(origins.map((o) => [o.origin, o.localStorage ?? []])),
+        );
+        await context.addInitScript({
+            content:
+                `(() => { const seed = ${seed};` +
+                ' const entries = seed[location.origin]; if (!entries) return;' +
+                ' for (const { name, value } of entries) {' +
+                '  try { if (localStorage.getItem(name) === null) localStorage.setItem(name, value); } catch {}' +
+                ' } })();',
+        });
+    }
+    log(`Auth session injected (${state.cookies?.length ?? 0} cookies, ${origins.length} localStorage origins)`);
 }
 
 /**
@@ -197,6 +240,7 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
             : {
                   localBrowserLaunchOptions: {
                       headless: options.headless,
+                      ...(options.viewport ? { viewport: options.viewport } : {}),
                       ...(options.provider === 'cdp' && options.cdpEndpoint
                           ? { cdpUrl: options.cdpEndpoint }
                           : {}),
@@ -213,6 +257,14 @@ export async function runStagehandAgent(options: StagehandRunOptions): Promise<R
 
     await stagehand.init();
     options.reporter.info('Engine: stagehand (MIT, stagehand.dev)');
+
+    if (options.authStatePath) {
+        await injectAuthState(
+            stagehand.context as unknown as Parameters<typeof injectAuthState>[0],
+            options.authStatePath,
+            (msg) => options.reporter.info(msg),
+        );
+    }
 
     const artifacts: RunArtifacts = {};
     const artifactDir = options.record ? mkdtempSync(join(tmpdir(), 'bb-rec-')) : '';

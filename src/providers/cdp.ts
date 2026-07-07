@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import type { BrowserProvider, ProviderConnectOptions, ProviderSession } from './types.js';
+import { playwrightContextOptions, type BrowserProvider, type ProviderConnectOptions, type ProviderSession } from './types.js';
 
 /**
  * CDP provider — attaches to any already-running Chrome DevTools Protocol
@@ -15,8 +15,13 @@ export const cdpProvider: BrowserProvider = {
             throw new Error('cdp provider requires --cdp-endpoint <url>');
         }
         const browser = await chromium.connectOverCDP(options.cdpEndpoint);
-        const context = browser.contexts()[0] ?? (await browser.newContext());
-        const page = context.pages()[0] ?? (await context.newPage());
+        // Auth/viewport require a FRESH context (storageState cannot be
+        // applied to an existing one), so only reuse when nothing was asked.
+        const wantsFresh = Boolean(options.context?.storageStatePath || options.context?.viewport);
+        const context = wantsFresh
+            ? await browser.newContext(playwrightContextOptions(options.context))
+            : browser.contexts()[0] ?? (await browser.newContext());
+        const page = (wantsFresh ? undefined : context.pages()[0]) ?? (await context.newPage());
         return {
             browser,
             page,

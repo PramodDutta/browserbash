@@ -1,6 +1,6 @@
 import { chromium } from 'playwright-core';
 import { resolveCredentials } from '../config.js';
-import type { BrowserProvider, ProviderConnectOptions, ProviderSession } from './types.js';
+import { playwrightContextOptions, type BrowserProvider, type ProviderConnectOptions, type ProviderSession } from './types.js';
 
 /**
  * LambdaTest / TestMu AI cloud grid provider.
@@ -34,7 +34,7 @@ export const lambdatestProvider: BrowserProvider = {
 
         const wsEndpoint = `wss://cdp.lambdatest.com/playwright?capabilities=${encodeURIComponent(JSON.stringify(capabilities))}`;
         const browser = await chromium.connect(wsEndpoint);
-        const context = await browser.newContext();
+        const context = await browser.newContext(playwrightContextOptions(options.context));
         const page = await context.newPage();
 
         return {

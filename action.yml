@@ -1,0 +1,113 @@
+name: 'BrowserBash Suite'
+description: 'Run plain-English browser tests (*_test.md) with the BrowserBash AI agent and post the verdict on the PR'
+author: 'The Testing Academy'
+branding:
+  icon: 'check-square'
+  color: 'orange'
+
+inputs:
+  tests:
+    description: 'Directory (or single file) of *_test.md tests'
+    required: false
+    default: '.browserbash/tests'
+  provider:
+    description: 'Browser provider: local | cdp | browserbase | lambdatest | browserstack'
+    required: false
+    default: 'local'
+  model:
+    description: 'Model id (empty = auto resolution; set ANTHROPIC_API_KEY or provider keys in env)'
+    required: false
+    default: ''
+  timeout:
+    description: 'Per-test timeout in seconds'
+    required: false
+    default: '300'
+  concurrency:
+    description: 'Max parallel tests (empty = auto from CPU + memory)'
+    required: false
+    default: ''
+  shard:
+    description: 'Deterministic suite slice for matrix jobs, e.g. 1/4'
+    required: false
+    default: ''
+  budget-usd:
+    description: 'Stop launching new tests once estimated spend reaches this'
+    required: false
+    default: ''
+  version:
+    description: 'browserbash-cli version to install'
+    required: false
+    default: 'latest'
+  comment:
+    description: 'Post/refresh a PR comment with the verdict table (needs pull_request event)'
+    required: false
+    default: 'true'
+
+outputs:
+  exit-code:
+    description: 'Suite exit code: 0 passed, 1 failed, 2 infra/budget, 3 timeout'
+    value: ${{ steps.run.outputs.exit-code }}
+  junit:
+    description: 'Path to the JUnit XML report'
+    value: browserbash-out/junit.xml
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install browserbash-cli
+      shell: bash
+      run: npm install -g browserbash-cli@${{ inputs.version }}
+
+    - name: Run suite
+      id: run
+      shell: bash
+      run: |
+        set +e
+        ARGS=(run-all "${{ inputs.tests }}" --junit browserbash-out/junit.xml --events browserbash-out/events.ndjson)
+        [ -n "${{ inputs.provider }}" ] && ARGS+=(--provider "${{ inputs.provider }}")
+        [ -n "${{ inputs.model }}" ] && ARGS+=(--model "${{ inputs.model }}")
+        [ -n "${{ inputs.timeout }}" ] && ARGS+=(--timeout "${{ inputs.timeout }}")
+        [ -n "${{ inputs.concurrency }}" ] && ARGS+=(--concurrency "${{ inputs.concurrency }}")
+        [ -n "${{ inputs.shard }}" ] && ARGS+=(--shard "${{ inputs.shard }}")
+        [ -n "${{ inputs['budget-usd'] }}" ] && ARGS+=(--budget-usd "${{ inputs['budget-usd'] }}")
+        browserbash "${ARGS[@]}"
+        CODE=$?
+        echo "exit-code=$CODE" >> "$GITHUB_OUTPUT"
+        exit $CODE
+
+    - name: Upload artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: browserbash-results${{ inputs.shard != '' && format('-shard-{0}', inputs.shard) || '' }}
+        path: |
+          browserbash-out/
+        if-no-files-found: ignore
+
+    - name: PR comment
+      if: always() && inputs.comment == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = 'browserbash-out/browserbash-results/RunAll-Result.md';
+          let body = '## BrowserBash suite\n\n';
+          try {
+            body += fs.readFileSync(path, 'utf-8');
+          } catch {
+            body += 'Suite did not produce a result file (infra error before any test ran).';
+          }
+          body += '\n\n<sub>Posted by the BrowserBash Action - plain-English browser tests, exit code is the verdict.</sub>';
+          const marker = '<!-- browserbash-action -->';
+          body = marker + '\n' + body;
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          const existing = comments.find((c) => c.body && c.body.startsWith(marker));
+          if (existing) {
+            await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body });
+          } else {
+            await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body });
+          }
