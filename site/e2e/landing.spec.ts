@@ -31,9 +31,9 @@ test.describe('landing page', () => {
         // Sign up + Log in are clearly visible in the nav.
         await expect(page.locator('.nav__signup')).toHaveAttribute('href', '/sign-up');
         await expect(page.locator('.nav__login')).toHaveAttribute('href', '/sign-in');
-        // No waitlist form and no pricing link remain.
+        // No waitlist form remains; pricing is a normal nav destination now.
         await expect(page.locator('.wl, .counter')).toHaveCount(0);
-        await expect(page.locator('a[href="/pricing"]')).toHaveCount(0);
+        await expect(page.locator('.nav__links a[href="/pricing"]')).toHaveCount(1);
     });
 
     test('sign-up and sign-in pages render', async ({ page }) => {
@@ -59,10 +59,11 @@ test.describe('landing page', () => {
 
     test('dashboard is never exposed to anonymous visitors', async ({ page }) => {
         const res = await page.goto('/dashboard');
-        // Without Clerk keys: 404. With keys: redirected to the Clerk sign-in page.
+        // Without Clerk keys: 404. With keys: proxy.ts redirects logged-out
+        // visitors to the sign-in page (local /sign-in or a Clerk domain).
         const status = res?.status() ?? 0;
-        const onClerkSignIn = /accounts\.dev|clerk/.test(page.url());
-        expect(status === 404 || onClerkSignIn).toBe(true);
+        const onSignIn = /\/sign-in|accounts\.dev|clerk/.test(page.url());
+        expect(status === 404 || onSignIn).toBe(true);
         await expect(page.locator('.dash__runs')).toHaveCount(0);
     });
 
