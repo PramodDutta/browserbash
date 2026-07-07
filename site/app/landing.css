@@ -51,9 +51,24 @@
 }
 
 @media (max-width: 900px) {
-    .nav__links { display: none; }
-    .nav { gap: 14px; }
+    /* Keep every destination reachable on small screens: the nav wraps and
+       the links become a swipeable row instead of disappearing. */
+    .nav { flex-wrap: wrap; gap: 10px 14px; }
+    .nav__links {
+        order: 3;
+        width: 100%;
+        margin-left: 0;
+        gap: 18px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 2px 0 8px;
+        border-bottom: 1px solid var(--line);
+    }
+    .nav__links::-webkit-scrollbar { display: none; }
+    .nav__links a { font-size: 14px; }
     .nav__auth { margin-left: auto; }
+    .nav__login, .nav__signup { font-size: 11px; padding: 8px 10px; white-space: nowrap; }
 }
 
 /* --- 3-step quick start --- */
@@ -271,8 +286,13 @@ html.ab-b .hero__copy--b { display: block; }
 }
 
 @media (max-width: 880px) {
-    .hero { grid-template-columns: 1fr; }
-    .hero-scene { height: 340px; }
+    .hero { grid-template-columns: 1fr; padding-top: 36px; padding-bottom: 56px; gap: 28px; }
+    .hero-scene { height: 320px; }
+    .hero h1 { font-size: clamp(34px, 9vw, 44px); }
+    .hero__sub { font-size: 16px; }
+    .hero__install { max-width: 100%; flex-wrap: wrap; font-size: 13.5px; }
+    .hero__install code { word-break: break-word; }
+    .section { padding-top: 56px; }
 }
 
 /* --- hero CTA --- */
@@ -474,8 +494,12 @@ html.ab-b .hero__copy--b { display: block; }
     align-items: center;
     gap: 20px;
     padding: 18px 22px;
+    flex-wrap: wrap;
     background: linear-gradient(0deg, rgba(255, 92, 26, 0.06), rgba(255, 92, 26, 0.06)), #fffefc;
 }
+
+.freestack div { min-width: 0; flex: 1 1 240px; }
+.freestack code { word-break: break-word; }
 
 .freestack div {
     display: flex;
