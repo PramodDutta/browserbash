@@ -7,7 +7,7 @@ import '../marketing.css';
 export const metadata: Metadata = {
     title: 'Features — BrowserBash',
     description:
-        'Plain-English browser automation: write Markdown tests, run on real browsers and free local models, record sessions, and ship in CI — open source and zero API keys.',
+        'The open-source validation layer for AI agents: MCP server, deterministic assertions, API steps, saved logins, monitoring, budgets, sharding, Playwright import and a flow recorder. Free local models, zero API keys.',
     alternates: { canonical: '/features' },
     openGraph: {
         title: 'Features — BrowserBash',
@@ -89,6 +89,89 @@ export default function FeaturesPage() {
                         <p>
                             BrowserBash is free and open source under Apache-2.0. Install with{' '}
                             <code>npm install -g browserbash-cli</code>, read the source, and audit exactly what it does.
+                        </p>
+                    </article>
+                </div>
+
+                <h2 style={{ textAlign: 'center' }}>Built as a validation layer for AI agents</h2>
+                <div className="feature-grid">
+                    <article className="pixel-card feature-card">
+                        <span className="fc-ico" aria-hidden="true">🔌</span>
+                        <h3>MCP server</h3>
+                        <p>
+                            <code>browserbash mcp</code> plugs into Claude Code, Cursor, Codex or any MCP host with one
+                            line and exposes three tools: run an objective, run a test file, run a suite. Your coding
+                            agent validates its own work in a real browser.
+                        </p>
+                    </article>
+                    <article className="pixel-card feature-card">
+                        <span className="fc-ico" aria-hidden="true">✅</span>
+                        <h3>Deterministic assertions</h3>
+                        <p>
+                            <code>Verify</code> steps compile to real Playwright checks — URL, title, visible text,
+                            element counts, stored values. A pass means the condition held; a fail ships
+                            expected-vs-actual evidence. No model judgment.
+                        </p>
+                    </article>
+                    <article className="pixel-card feature-card">
+                        <span className="fc-ico" aria-hidden="true">🧪</span>
+                        <h3>API steps (testmd v2)</h3>
+                        <p>
+                            Seed data over plain HTTP, then verify through the UI: <code>POST /api/seed</code>,{' '}
+                            <code>Expect status 201, store $.id as &apos;order_id&apos;</code>. Arrange-act-assert in one
+                            readable Markdown file, per-step execution on one browser session.
+                        </p>
+                    </article>
+                    <article className="pixel-card feature-card">
+                        <span className="fc-ico" aria-hidden="true">🔐</span>
+                        <h3>Saved logins</h3>
+                        <p>
+                            <code>browserbash auth save staging</code> captures a login session once;{' '}
+                            <code>--auth staging</code> reuses it in every run, suite and monitor. No more re-login per
+                            test or rate-limit walls in CI.
+                        </p>
+                    </article>
+                    <article className="pixel-card feature-card">
+                        <span className="fc-ico" aria-hidden="true">📟</span>
+                        <h3>Monitoring &amp; alerts</h3>
+                        <p>
+                            <code>browserbash monitor --every 10m --notify &lt;webhook&gt;</code> turns any test into a
+                            production check. Alerts fire on pass/fail state changes only — Slack formatting detected
+                            automatically.
+                        </p>
+                    </article>
+                    <article className="pixel-card feature-card">
+                        <span className="fc-ico" aria-hidden="true">💸</span>
+                        <h3>Budgets &amp; cost</h3>
+                        <p>
+                            Every run reports an estimated <code>cost_usd</code>; suites take{' '}
+                            <code>--budget-usd</code> and hard-stop when spend crosses it — remaining tests reported as
+                            skipped, never a surprise bill.
+                        </p>
+                    </article>
+                    <article className="pixel-card feature-card">
+                        <span className="fc-ico" aria-hidden="true">🧩</span>
+                        <h3>Import your Playwright suite</h3>
+                        <p>
+                            <code>browserbash import ./e2e</code> converts specs to plain-English tests deterministically
+                            and writes everything it could not translate to an honest import report for your review.
+                        </p>
+                    </article>
+                    <article className="pixel-card feature-card">
+                        <span className="fc-ico" aria-hidden="true">⏺️</span>
+                        <h3>Record a flow once</h3>
+                        <p>
+                            <code>browserbash record &lt;url&gt;</code> opens a real browser; click through the journey and
+                            get a committable test file. Password values never leave the page.
+                        </p>
+                    </article>
+                    <article className="pixel-card feature-card">
+                        <span className="fc-ico" aria-hidden="true">🧮</span>
+                        <h3>Shard &amp; matrix</h3>
+                        <p>
+                            <code>--shard 2/4</code> splits a suite deterministically across CI machines;{' '}
+                            <code>--matrix-viewport</code> runs every test per viewport with labeled results in JUnit and
+                            NDJSON.
                         </p>
                     </article>
                 </div>

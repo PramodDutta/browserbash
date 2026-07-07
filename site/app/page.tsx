@@ -39,12 +39,12 @@ export default async function Page() {
                 </a>
                 <div className="nav__links">
                     <a href="#demo">Demo</a>
+                    <a href="#agents">For AI agents</a>
                     <a href="/features">Features</a>
                     <a href="/pricing">Pricing</a>
                     <a href="/case-study">Case study</a>
                     <a href="/learn">Learn</a>
                     <a href="/blog">Blog</a>
-                    <a href="/math.html">Cost</a>
                 </div>
                 <div className="nav__auth">
                     {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
@@ -63,16 +63,16 @@ export default async function Page() {
                 <AbTrack />
                 {/* Variant A (control) — visible by default, what crawlers index */}
                 <div className="hero__copy hero__copy--a">
-                    <p className="section-tag">free · open source · apache-2.0</p>
+                    <p className="section-tag">open source · apache-2.0 · the validation layer for AI agents</p>
                     <h1>
                         Plain English in.<br />
-                        <span className="hero__accent">Real browser</span> out.
+                        <span className="hero__accent">Real browser proof</span> out.
                     </h1>
                     <p className="hero__sub">
-                        BrowserBash is a <strong>free, open-source</strong> natural-language browser automation
-                        CLI — an AI agent drives a real browser from a plain-English objective. Runs on{' '}
-                        <strong>free local models (Ollama) or free OpenRouter models — zero API keys, no credit card</strong>.
-                        Bring an Anthropic or OpenRouter key only if you want to.
+                        BrowserBash is the <strong>free, open-source validation layer for AI agents</strong>:
+                        plain-English tests, a real Chrome, and a verdict that is an exit code, not a vibe.
+                        Your coding agent plugs in over <strong>MCP with one line</strong>, and it all runs on{' '}
+                        <strong>free local models (Ollama), zero API keys</strong>.
                     </p>
                     <div className="hero__install pixel-card">
                         <code>$ {INSTALL}</code>
@@ -96,9 +96,9 @@ export default async function Page() {
                     </h1>
                     <p className="hero__sub">
                         BrowserBash turns one plain-English sentence into a real browser test —{' '}
-                        <strong>no selectors, no code, no flaky locators</strong>. It runs on{' '}
-                        <strong>free local (Ollama) or free OpenRouter models</strong>, so there are zero
-                        API keys and no credit card. Open source, Apache-2.0.
+                        <strong>no selectors, no code, no flaky locators</strong> — and hands your AI agent
+                        a machine-readable verdict over <strong>MCP or NDJSON</strong>. Free local models
+                        (Ollama), zero API keys, no credit card. Open source, Apache-2.0.
                     </p>
                     <div className="hero__install pixel-card">
                         <code>$ {INSTALL}</code>
@@ -143,6 +143,41 @@ export default async function Page() {
                         </div>
                     </div>
                 </Reveal>
+            </section>
+
+            <section className="section container" id="agents">
+                <Reveal>
+                    <p className="section-tag">for AI agents</p>
+                    <h2>Your coding agent builds it. BrowserBash proves it works.</h2>
+                    <p className="section__sub">
+                        Claude Code, Cursor, Codex or any MCP host plugs BrowserBash in with one line and gets
+                        three tools: run an objective, run a test file, run a whole suite. Every call returns a
+                        structured verdict, so &quot;did my change break the checkout?&quot; becomes a tool call, not a guess.
+                    </p>
+                </Reveal>
+                <Reveal delay={100}>
+                    <div className="hero__install pixel-card" style={{ maxWidth: 640, margin: '0 auto 28px' }}>
+                        <code>$ claude mcp add browserbash -- browserbash mcp</code>
+                        <CopyButton text="claude mcp add browserbash -- browserbash mcp" />
+                    </div>
+                </Reveal>
+                <div className="features">
+                    {[
+                        ['MCP server built in', 'browserbash mcp serves run_objective, run_test_file and run_suite on stdio. No extra install, no cloud relay, nothing leaves your machine.'],
+                        ['Verdicts, not vibes', 'status, summary, extracted values, deterministic assertion results and cost land in one JSON object. Exit codes 0/1/2/3 for shell agents.'],
+                        ['Deterministic assertions', 'Verify steps compile to real Playwright checks with no model in the loop — expected vs actual evidence on every failure, agent-judged checks clearly flagged.'],
+                        ['NDJSON for everything else', 'Not on MCP? --agent streams one JSON event per line with a stable, additive schema. Same contract since v1.0.'],
+                        ['Budgets your platform team will sign off', 'cost_usd per run, --budget-usd per suite: spend stops the suite, skipped tests are reported, nothing runs away overnight.'],
+                        ['Warm runs cost nothing', 'The replay cache re-runs green tests with zero model calls, so agents can validate after every edit without burning tokens.'],
+                    ].map(([title, body], i) => (
+                        <Reveal key={title} delay={(i % 3) * 100}>
+                            <div className="pixel-card feature">
+                                <h3>{title}</h3>
+                                <p>{body}</p>
+                            </div>
+                        </Reveal>
+                    ))}
+                </div>
             </section>
 
             <section className="section container" id="try">
@@ -219,11 +254,11 @@ export default async function Page() {
                 <div className="features">
                     {[
                         ['Open source first', 'Apache-2.0 CLI on an MIT engine. The default path costs nothing and phones no one.'],
-                        ['--agent NDJSON mode', 'One JSON event per line on stdout. Exit codes 0/1/2/3 are the verdict — no prose parsing.'],
-                        ['Markdown tests', 'Committable *_test.md files with @import composition. Result.md written after every run.'],
-                        ['5 providers, one flag', 'Same objective runs on local Chrome or a cloud grid with --provider. Adding a vendor is one file.'],
-                        ['Secrets stay secret', 'Variables marked secret are masked as ***** in every log line, remark and summary.'],
-                        ['CI-ready verdicts', 'GitHub Actions recipe included. The process exit code is the test result.'],
+                        ['Markdown tests, now with real assertions', 'Committable *_test.md files with @import, API steps for data seeding, and Verify steps that run as deterministic Playwright checks.'],
+                        ['Log in once, reuse everywhere', 'browserbash auth save captures a login session; --auth replays it in every test. No more re-login per test, no rate-limit walls in CI.'],
+                        ['Record and import', 'Click through a flow once and get a plain-English test. Or point browserbash import at your Playwright suite and review the generated twins.'],
+                        ['Parallel, sharded, budgeted', 'run-all schedules by real memory, splits across CI machines with --shard, runs viewport matrices, and hard-stops at --budget-usd.'],
+                        ['Monitor what you test', 'The same test doubles as a production check: browserbash monitor --every 10m alerts your Slack only when pass flips to fail.'],
                     ].map(([title, body], i) => (
                         <Reveal key={title} delay={(i % 3) * 100}>
                             <div className="pixel-card feature">
@@ -303,22 +338,24 @@ export default async function Page() {
 
             <section className="section container" id="roadmap">
                 <Reveal>
-                    <p className="section-tag">roadmap</p>
-                    <h2>What we are building next</h2>
+                    <p className="section-tag">new in 1.5.0</p>
+                    <h2>The validation-layer release, just shipped</h2>
                     <p className="section__sub">
-                        The next wave of BrowserBash, planned in the open and shipped to the same free CLI.
-                        Statuses are honest: coming soon means it is being built now, planned means it is
-                        specced and queued behind it.
+                        Everything below is live in the free CLI today: npm install -g browserbash-cli.
+                        Built in the open, shipped to everyone, no paid gate on anything that runs on your machine.
                     </p>
                 </Reveal>
                 <div className="features">
                     {[
-                        ['Replay-first caching (coming soon)', 'Green runs record their resolved actions. The next run replays them with zero model calls, and the agent steps back in only when the page actually changed. Steady-state suites run at script speed and script cost.'],
-                        ['Parallel suite runner (coming soon)', 'One command to run a whole folder of *_test.md files with 15 to 20 workers. Scheduling is memory-aware: it watches real RAM per run instead of guessing by CPU count, so big suites finish fast without freezing your machine.'],
-                        ['Run history and flaky detection (planned)', 'Every run feeds a local history of durations, pass rates and heals. The suite runner uses it to order tests, predict memory, and call out flaky tests separately in the report.'],
-                        ['Cheap-model routing (planned)', 'A strong model plans, a cheap or local model executes each step, and a failed step escalates back automatically. Cuts token spend on the runs that still need a model at all.'],
-                        ['Cost per test report (planned)', 'Token and dollar cost surfaced per test and per suite in Result.md and NDJSON, so you can see exactly what a green build costs before you scale it.'],
-                        ['Just shipped: hardening', 'Case-insensitive secret masking so transformed secrets can never leak into logs, path-traversal guards on every run lookup, and stable run ordering under parallel load.'],
+                        ['MCP server', 'browserbash mcp plugs the whole CLI into Claude Code, Cursor, Codex and any MCP host as three validation tools. One line, zero dependencies.'],
+                        ['testmd v2: per-step execution', 'version: 2 files run step by step on one browser session: API steps seed data over plain HTTP, Verify steps assert deterministically, English steps drive the agent.'],
+                        ['Deterministic Verify assertions', 'Nine grammar forms compile to real Playwright checks. A pass means the condition held; a fail ships expected-vs-actual evidence in run_end.assertions.'],
+                        ['Saved logins (auth save / --auth)', 'Log in once in a visible browser, reuse the session across every run, suite and monitor. Stored 0600, origin-checked, secrets never printed.'],
+                        ['Monitor mode + webhooks', 'browserbash monitor runs a test on an interval and alerts Slack or any webhook only on pass/fail changes. Warm cache makes it nearly token-free.'],
+                        ['Budgets and cost visibility', 'cost_usd on every run, --budget-usd / --budget-tokens on suites: crossing the budget stops new launches, reports the rest as skipped and exits 2.'],
+                        ['Sharding + viewport matrix', '--shard 2/4 splits a suite deterministically across CI machines; --matrix-viewport runs every test per viewport with labeled results.'],
+                        ['Playwright import', 'browserbash import converts your existing specs to plain-English tests heuristically and writes an honest IMPORT-REPORT.md for whatever it could not translate.'],
+                        ['Flow recorder', 'browserbash record captures a click-through in a real browser and writes the test file. Password values never leave the page.'],
                     ].map(([title, body], i) => (
                         <Reveal key={title} delay={(i % 3) * 100}>
                             <div className="pixel-card feature">
