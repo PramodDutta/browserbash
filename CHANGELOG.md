@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.5.0
+
+The validation-layer release: BrowserBash becomes directly consumable by AI agents, and verdicts stop being model judgment.
+
+### Added
+- **MCP server.** `browserbash mcp` serves the CLI over the Model Context Protocol on stdio, zero new dependencies. Tools: `run_objective`, `run_test_file`, `run_suite`; each returns the structured `run_end` verdict. One-line install into Claude Code: `claude mcp add browserbash -- browserbash mcp` (same idea for Cursor, Windsurf, Codex, Zed). Tool calls spawn the CLI as child processes, so run events never interleave with protocol frames.
+- **testmd v2: per-step execution.** Opt in with `version: 2` frontmatter. Steps execute in order against ONE browser session: deterministic API steps (`POST {{base_url}}/api/seed with body {...}`, `Expect status 201, store $.id as 'order_id'`) run as plain HTTP with no model, `Verify` steps run as real Playwright checks, and consecutive plain-English steps run as grouped agent blocks. Arrange-act-assert is now expressible. v1 files are untouched. v2 currently drives the builtin engine (Anthropic API or an `ANTHROPIC_BASE_URL` gateway).
+- **Deterministic assertions.** Nine `Verify ...` forms (URL contains, title is/contains, text visible, role visible, element count, stored value equals) compile to real checks: a pass means the condition held, never "the agent felt it was fine". `run_end` gains an additive `assertions` block with per-assertion evidence (expected vs actual); `Result.md` gets an assertion table. Verify lines outside the grammar still run, agent-judged and flagged `judged: true`.
+- **Saved login sessions.** `browserbash auth save <name> --url <login-page>` opens a browser, you log in once, Enter saves the session (Playwright storageState, mode 0600). Reuse with `--auth <name>` on run/testmd/run-all/monitor or `auth:` frontmatter. Builtin engine injects full storageState; stagehand gets cookies plus a localStorage init script. A profile whose saved origins do not cover the target start URL prints a warning.
+- **Monitor mode.** `browserbash monitor <test|objective> --every 10m --notify <webhook>`: run on an interval, keep local history, and alert ONLY on pass<->fail state changes. Slack incoming-webhook URLs get Slack formatting automatically; anything else receives the raw JSON payload. Warm replay-cache runs make an always-on monitor nearly token-free.
+- **Cost governance.** `run_end` now carries `cost_usd` (estimated from a bundled per-model price table, overridable at `~/.browserbash/pricing.json`; unknown models get NO estimate rather than a wrong one). `run-all --budget-usd` / `--budget-tokens` stop launching new tests once the suite crosses the budget: remaining tests are reported `skipped`, the suite exits 2, and spend lands in JUnit `<properties>` and `RunAll-Result.md`.
+- **Sharding + viewport matrix.** `run-all --shard 2/4` runs a deterministic slice (computed on sorted discovery order, so parallel CI machines agree without coordination). `--matrix-viewport 1280x720,390x844` runs every test once per viewport, with per-cell labels in events, JUnit and results. A standalone `--viewport WxH` flag also works on single runs, both engines.
+- **Playwright import.** `browserbash import <specs-or-dir>` converts Playwright specs to plain-English `*_test.md` heuristically (no model, reproducible): goto/click/fill/press/check/selectOption, getBy* locators, common expects (toHaveURL/Title, toBeVisible, toHaveText). `process.env.X` becomes `{{X}}` variables (secret-looking names pre-marked secret). Everything untranslatable lands in `IMPORT-REPORT.md` instead of being dropped or invented.
+- **Recorder.** `browserbash record <url>` opens a visible browser; click through the flow once and Ctrl-C writes a plain-English test. Password fields never leave the page: the capture script sends only a secret marker, and the generated step reads `Type {{password}} into ...`.
+- **GitHub Action.** `action.yml` at the repo root: installs the CLI, runs the suite, uploads JUnit/NDJSON/results artifacts, supports `shard:` matrix jobs and `budget-usd:`, and posts a self-updating PR comment with the verdict table. See `docs/github-action.md`.
+- **Webhooks on suites.** `run-all --notify <url>` POSTs the suite verdict (tally, duration, spend) when the suite ends.
+
+### Changed
+- `run-all` verdicts gain a `skipped` state (budget stops); suite summary lines and `RunAll-Result.md` include skipped counts and estimated spend.
+- NDJSON schema: additive fields only (`run_end.cost_usd`, `run_end.assertions`, `test_skipped` and `suite_end.cost_usd/tokens/budget_stopped` events, `cell` labels on matrix runs). Existing consumers are unaffected.
+
 ## 1.4.0
 
 Caching, parallel suites, run history, and cheap-model routing. All local-first and on by default where safe.

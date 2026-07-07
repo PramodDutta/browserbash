@@ -115,6 +115,17 @@ Exit codes: `0` passed · `1` failed · `2` error · `3` timeout. `cached`, `cac
 
 Full agent integration guide: [docs/agents.md](docs/agents.md).
 
+## MCP server (agents consume BrowserBash natively)
+
+BrowserBash is a **validation layer for AI agents**: your coding agent builds a feature, BrowserBash proves it works in a real browser. One line plugs it into any MCP host:
+
+```bash
+claude mcp add browserbash -- browserbash mcp     # Claude Code
+# Cursor / Windsurf / Zed / Codex: command "browserbash", args ["mcp"]
+```
+
+Tools exposed: `run_objective` (one plain-English objective), `run_test_file` (a *_test.md), `run_suite` (a folder, parallel). Each returns the structured verdict JSON: `status`, `summary`, `final_state`, `assertions`, `cost_usd`, `duration_ms`. A failed test is a successful validation, so the tool call succeeds and the agent reads the verdict. No extra dependencies, stdio only, nothing leaves your machine.
+
 ## Dashboards
 
 Every run is kept in a private on-disk store (`~/.browserbash/runs`, secrets masked, capped at 200). Two ways to see them:
@@ -164,7 +175,11 @@ browserbash run-all .browserbash/tests --concurrency 8 --junit out/junit.xml
 - `--retries <n>` retries infra errors only (not real failures), `--max-failures <n>` stops early, `--stagger <ms>` softens burst load.
 - Outputs: a merged NDJSON stream (`--events`, add `--agent` to also stream on stdout), JUnit XML (`--junit`), and a `RunAll-Result.md` with a flaky column.
 - Run history in `.browserbash/memory/history.json` orders the next run (previously-failed first, then slowest first) and flags flaky tests. `--no-memory` opts out.
-- Exit code: `0` all passed · `1` any failed · `2` infra error · `3` suite timeout.
+- **Sharding:** `--shard 2/4` runs a deterministic slice, computed on sorted discovery order so parallel CI machines agree without coordination.
+- **Viewport matrix:** `--matrix-viewport 1280x720,390x844` runs every test once per viewport; cells are labeled in events, JUnit and results. Single runs take `--viewport WxH` too.
+- **Budgets:** `--budget-usd 2.50` (or `--budget-tokens`) stops launching new tests once estimated spend crosses the budget; the rest are reported `skipped` and the suite exits `2`. Spend lands in `RunAll-Result.md` and JUnit `<properties>`.
+- **Webhooks:** `--notify <url>` POSTs the suite verdict when it ends (Slack URLs get Slack formatting).
+- Exit code: `0` all passed · `1` any failed · `2` infra error or budget stop · `3` suite timeout.
 
 ## Cheap-model routing
 
@@ -174,7 +189,7 @@ Plan on a strong model, execute on a cheap one, escalate back automatically afte
 browserbash run "..." --model claude-opus-4-8 --model-exec claude-haiku-4-5
 ```
 
-`run_end` reports `tokens_in` / `tokens_out` (builtin engine) so you can see what a run costs. Set persistently with `config set routing.executionModel <id>`.
+`run_end` reports `tokens_in` / `tokens_out` (builtin engine) so you can see what a run costs, plus a `cost_usd` estimate from a bundled per-model price table (override at `~/.browserbash/pricing.json`; unknown models get no estimate rather than a wrong one). Set persistently with `config set routing.executionModel <id>`.
 
 ## Test files (`*_test.md`)
 
@@ -196,6 +211,31 @@ browserbash testmd run ./.browserbash/tests/login_test.md --provider browserstac
 
 Composition via `@import ./helpers/login.md` (steps are spliced in place). After every run a `Result.md` is written next to the test file.
 
+### testmd v2: assertions and API steps that never lie
+
+Add `version: 2` frontmatter and steps execute ONE AT A TIME against a single browser session, with two deterministic step types that never touch a model:
+
+```markdown
+---
+version: 2
+auth: staging
+---
+# Checkout with seeded data
+
+- POST {{base_url}}/api/seed with body {"sku": "tshirt-red"}
+- Expect status 201, store $.order.id as 'order_id'
+- Open {{base_url}}/cart
+- Click the checkout button
+- Verify the URL contains 'checkout'
+- Verify the 'Thank you for your order!' heading is visible
+- Verify stored 'order_id' equals '{{expected_id}}'
+```
+
+- **API steps** (`GET/POST/PUT/DELETE/PATCH url [with body {...}]` + `Expect status N[, store $.path as 'name']`) run as plain HTTP: seed data, then verify through the UI. Stored values feed `{{variables}}` in later steps.
+- **`Verify` steps** compile to real Playwright checks (URL contains, title is/contains, text visible, `'name' button|link|heading` visible, element counts, stored equals). A pass means the condition held; a fail comes with expected vs actual evidence in `run_end.assertions` and the `Result.md` assertion table. Verify lines outside the grammar still run, agent-judged and flagged `judged: true`.
+- Consecutive plain-English steps run as grouped agent blocks on the same page, so login state and navigation carry through.
+- v1 files (no frontmatter) behave exactly as before. v2 currently drives the builtin engine (needs `ANTHROPIC_API_KEY` or an `ANTHROPIC_BASE_URL` gateway).
+
 ## Variables
 
 `{{key}}` placeholders are substituted in objectives and test steps. Load order (highest priority last):
@@ -206,6 +246,42 @@ Composition via `@import ./helpers/login.md` (steps are spliced in place). After
 4. `--variables '<json>'`
 
 Mark sensitive values `{"value": "...", "secret": true}` — they are masked as `*****` in all logs and NDJSON output.
+
+## Saved logins (`browserbash auth`)
+
+Real suites live behind a login. Log in once, reuse the session everywhere:
+
+```bash
+browserbash auth save staging --url https://app.example.com/login   # log in, press Enter
+browserbash run "Open the dashboard and store the balance as 'balance'" --auth staging
+browserbash run-all .browserbash/tests --auth staging               # every test, no re-login
+browserbash auth list && browserbash auth delete staging
+```
+
+Sessions are Playwright storageState files in `~/.browserbash/auth/` (mode 0600, they hold live credentials). Test files can pin their own profile with `auth: staging` frontmatter. A profile whose saved origins do not cover the target URL prints a warning instead of silently doing nothing.
+
+## Author tests without writing them
+
+```bash
+# Record: click through the flow once in a real browser, get a test file
+browserbash record https://app.example.com --out .browserbash/tests/checkout_test.md
+
+# Import: convert an existing Playwright suite to plain English
+browserbash import ./e2e --out-dir .browserbash/imported
+```
+
+`record` captures clicks, typing and navigation (password values never leave the page; the generated step reads `Type {{password}} into ...`). `import` translates common Playwright calls deterministically and writes everything it could NOT translate to `IMPORT-REPORT.md` instead of guessing. Both outputs are starting points to review, not gospel.
+
+## Monitoring (`browserbash monitor`)
+
+The same tests double as production checks:
+
+```bash
+browserbash monitor .browserbash/tests/checkout_test.md --every 10m \
+  --notify https://hooks.slack.com/services/T0/B0/xyz
+```
+
+Alerts fire on pass<->fail STATE CHANGES only, both directions, never on every green run. Slack webhook URLs get Slack formatting; any other URL receives the raw JSON payload. With the replay cache warm, a monitor makes zero model calls until the page actually changes.
 
 ## Configuration
 
@@ -235,30 +311,51 @@ Precedence: **flags > env vars > ~/.browserbash/config.json defaults**.
 
 The process exit code is the test verdict — no output parsing needed.
 
+Or use the official GitHub Action (PR verdict comment, artifacts, sharded matrix jobs, budget stop):
+
+```yaml
+- uses: PramodDutta/browserbash@main
+  with:
+    tests: .browserbash/tests
+    budget-usd: '2.00'
+  env:
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+```
+
+Full guide: [docs/github-action.md](docs/github-action.md).
+
 ## Architecture
 
 ```text
 src/
-├── index.ts            # CLI (commander): run, testmd, login, config, providers, init
-├── runner.ts           # engine routing + provider session + vendor status reporting
+├── index.ts            # CLI (commander): run, testmd, run-all, monitor, auth, record, import, mcp, ...
+├── runner.ts           # engine routing + provider session + replay cache + vendor status reporting
 ├── engine/
 │   ├── stagehand.ts    # default engine: Stagehand agent (stagehand.dev, MIT) — LOCAL / cdpUrl / Browserbase
 │   ├── agent.ts        # builtin engine: Anthropic tool-use loop (manual loop → NDJSON step events)
-│   └── tools.ts        # builtin browser tools: navigate, snapshot, click, type_text, wait_for, extract, done
+│   ├── tools.ts        # builtin browser tools: navigate, snapshot, click, type_text, wait_for, extract, done
+│   ├── assertions.ts   # deterministic Verify grammar + executor (no model in the loop)
+│   ├── replay.ts       # builtin replay-first cache: replay recorded actions, origin-pinned
+│   └── routing.ts      # per-model thinking config + cheap-exec model routing
 ├── providers/          # vendor abstraction — add a new vendor by implementing BrowserProvider
-│   ├── types.ts        # BrowserProvider / ProviderSession interfaces
+│   ├── types.ts        # BrowserProvider / ProviderSession + context options (auth, viewport)
 │   ├── local.ts        # system Chrome
 │   ├── cdp.ts          # attach to any CDP endpoint (incl. Playwright MCP browsers)
 │   ├── lambdatest.ts   # LambdaTest/TestMu grid + setTestStatus reporting
 │   └── browserstack.ts # BrowserStack Automate grid + setSessionStatus reporting
-│   ├── replay.ts       # builtin replay-first cache: replay recorded actions, origin-pinned
-│   └── routing.ts      # per-model thinking config + cheap-exec model routing
 ├── orchestrator/       # run-all: memory-aware scheduler + child-process suite runner
-│   ├── scheduler.ts    # concurrency formula, admission watermark, JUnit
-│   └── run-all.ts      # spawn children, aggregate NDJSON, verdicts, retries
-├── cache-store.ts      # builtin action-journal cache (re-templatized, origin-pinned)
+│   ├── scheduler.ts    # concurrency formula, admission watermark, shard/matrix, JUnit
+│   └── run-all.ts      # spawn children, aggregate NDJSON, verdicts, retries, budgets
+├── mcp/server.ts       # MCP stdio server: run_objective / run_test_file / run_suite
+├── testmd/             # parser (@import, frontmatter), v1 runner, v2 per-step runner + API steps
+├── import/playwright.ts# heuristic Playwright spec -> *_test.md converter
+├── record/             # interactive recorder: capture script + events -> English steps
+├── monitor.ts          # interval checks, state-change alerts
+├── auth-store.ts       # saved storageState profiles (~/.browserbash/auth)
+├── pricing.ts          # cost_usd estimates (overridable price table)
+├── notify.ts           # webhook payloads (Slack autodetect)
+├── cache-store.ts      # builtin action-journal cache (re-templatized, origin-pinned, HMAC-signed)
 ├── memory-store.ts     # run history: ordering + flaky report
-├── testmd/             # *_test.md parser (@import, ordered steps) + Result.md writer
 ├── config.ts           # ~/.browserbash/config.json + credential resolution
 ├── variables.ts        # {{var}} substitution, secrets masking
 └── output.ts           # NDJSON / human reporter

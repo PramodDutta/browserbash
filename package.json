@@ -1,6 +1,6 @@
 {
   "name": "browserbash-cli",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Vendor-independent natural-language browser automation CLI. Run plain-English objectives against local Chrome, LambdaTest/TestMu, BrowserStack, any CDP endpoint, or Playwright MCP.",
   "type": "module",
   "bin": {
