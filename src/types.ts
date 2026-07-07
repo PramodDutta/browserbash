@@ -33,6 +33,10 @@ export interface RunOptions {
     cdpEndpoint?: string;
     startUrl?: string;
     model?: string;
+    /** Saved auth profile name (browserbash auth save) — injects storageState. */
+    auth?: string;
+    /** Browser viewport, e.g. from --viewport 1280x720. */
+    viewport?: { width: number; height: number };
     /** Capture a recording: screenshot + video (stagehand) or a Playwright trace (builtin). */
     record?: boolean;
     /** Push this run to the cloud dashboard (requires `browserbash connect`). */
@@ -67,6 +71,22 @@ export interface StepEvent {
 /** Action-cache outcome of a run. 'off' = disabled or unusable for this run. */
 export type CacheVerdict = 'hit' | 'miss' | 'off';
 
+/** One deterministic `Verify ...` step's outcome (testmd v2). */
+export interface AssertionResult {
+    step: string;
+    passed: boolean;
+    /** True when no deterministic grammar matched and the agent judged it. */
+    judged?: boolean;
+    expected?: string;
+    actual?: string;
+}
+
+export interface AssertionsSummary {
+    passed: number;
+    failed: number;
+    details: AssertionResult[];
+}
+
 export interface RunEndEvent {
     type: 'run_end';
     status: RunStatus;
@@ -79,6 +99,10 @@ export interface RunEndEvent {
     cache?: CacheVerdict;
     tokens_in?: number;
     tokens_out?: number;
+    /** Estimated model spend in USD (absent when the model has no known price). */
+    cost_usd?: number;
+    /** Deterministic assertion outcomes (testmd v2 files with Verify steps). */
+    assertions?: AssertionsSummary;
 }
 
 export interface RunResult {
@@ -92,4 +116,6 @@ export interface RunResult {
     cache?: CacheVerdict;
     tokensIn?: number;
     tokensOut?: number;
+    costUsd?: number;
+    assertions?: AssertionsSummary;
 }

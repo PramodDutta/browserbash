@@ -1,5 +1,17 @@
 # browserbash for AI agents
 
+## The fast path: MCP
+
+If your agent host speaks MCP, skip the shell entirely:
+
+```bash
+claude mcp add browserbash -- browserbash mcp
+```
+
+Tools: `run_objective`, `run_test_file`, `run_suite`. Each returns the structured verdict (`status`, `summary`, `final_state`, `assertions`, `cost_usd`, `duration_ms`). A failed test is a successful validation: the tool call succeeds and you read the verdict. Secrets go in the `variables` argument with `{"value": "...", "secret": true}` and are masked everywhere.
+
+## The shell path: NDJSON
+
 Rules for AI coding tools (Claude Code, Cursor, Copilot) driving browserbash:
 
 1. **Always pass `--agent`.** stdout becomes NDJSON with a stable schema; everything human-readable goes to stderr.
@@ -30,6 +42,8 @@ Terminal event (always last line):
   "test_url": "https://automation.lambdatest.com/build"
 }
 ```
+
+Additive fields you may also see (absent when not relevant, never required): `cache` (`hit|miss|off`), `tokens_in` / `tokens_out`, `cost_usd` (estimate), and `assertions` (`{passed, failed, details:[{step, passed, judged?, expected?, actual?}]}`) on testmd v2 files with `Verify` steps. Prefer `assertions` over prose when deciding whether UI work is actually correct: those checks ran deterministically, without a model.
 
 ## Secrets
 

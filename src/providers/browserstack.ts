@@ -1,6 +1,6 @@
 import { chromium } from 'playwright-core';
 import { resolveCredentials } from '../config.js';
-import type { BrowserProvider, ProviderConnectOptions, ProviderSession } from './types.js';
+import { playwrightContextOptions, type BrowserProvider, type ProviderConnectOptions, type ProviderSession } from './types.js';
 
 /**
  * BrowserStack Automate provider.
@@ -30,7 +30,7 @@ export const browserstackProvider: BrowserProvider = {
 
         const wsEndpoint = `wss://cdp.browserstack.com/playwright?caps=${encodeURIComponent(JSON.stringify(caps))}`;
         const browser = await chromium.connect(wsEndpoint);
-        const context = await browser.newContext();
+        const context = await browser.newContext(playwrightContextOptions(options.context));
         const page = await context.newPage();
 
         return {

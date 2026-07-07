@@ -7,12 +7,16 @@ import {
     classifyChild,
     computeConcurrency,
     discoverTests,
+    expandMatrix,
     parsePsTable,
     runPool,
+    sliceShard,
     sumTreeRssBytes,
     toJUnitXml,
     type TestOutcome,
+    type WorkCell,
 } from './scheduler.js';
+import { sendNotification } from '../notify.js';
 import {
     flakyReport,
     loadMemory,
@@ -42,6 +46,16 @@ export interface RunAllOptions {
     resultsDir: string;
     /** Memory root for run history (ordering + flaky report). Undefined = off. */
     memoryDir?: string;
+    /** Deterministic suite slice for split CI machines (--shard 2/4). */
+    shard?: { index: number; total: number };
+    /** Viewport labels ("1280x720") — each test runs once per viewport. */
+    matrixViewports?: string[];
+    /** Stop launching new tests once estimated spend crosses this (USD). */
+    budgetUsd?: number;
+    /** Stop launching new tests once total tokens cross this. */
+    budgetTokens?: number;
+    /** Webhook to POST the suite verdict to (--notify). */
+    notifyUrl?: string;
     /** ISO timestamp source for history writes (Date-free in tests). */
     nowIso?: () => string;
     /** Injectable for tests. */
@@ -56,6 +70,11 @@ export interface SuiteResult {
     infra: number;
     timeout: number;
     flaky: number;
+    skipped: number;
+    /** Estimated model spend across all children (USD, when reported). */
+    costUsd: number;
+    /** True when the token/USD budget stopped the suite early. */
+    budgetStopped: boolean;
     exitCode: 0 | 1 | 2 | 3;
     durationMs: number;
 }
@@ -83,19 +102,22 @@ interface ChildResult {
     memKill?: { rssMb: number; capMb: number };
 }
 
-/** Spawn one child CLI for a test file and resolve its verdict from the NDJSON + exit code. */
+/** Spawn one child CLI for a work cell and resolve its verdict from the NDJSON + exit code. */
 function runChild(
-    file: string,
+    cell: WorkCell,
     opts: RunAllOptions,
     variablesFile: string | undefined,
     emit: (event: Record<string, unknown>) => void,
     children: Set<ChildProcess>,
 ): Promise<ChildResult> {
-    const resultPath = path.join(opts.resultsDir, `${path.basename(file).replace(/_test\.md$/, '')}.md`);
+    const file = cell.file;
+    const cellSuffix = cell.viewport ? `.${cell.viewport}` : '';
+    const resultPath = path.join(opts.resultsDir, `${path.basename(file).replace(/_test\.md$/, '')}${cellSuffix}.md`);
     const args = [
         opts.cliBin, 'testmd', 'run', file,
         '--agent', '--headless',
         '--result-path', resultPath,
+        ...(cell.viewport ? ['--viewport', cell.viewport] : []),
         ...opts.childFlags,
     ];
     if (variablesFile) args.push('--variables-file', variablesFile);
@@ -112,7 +134,7 @@ function runChild(
         if (!trimmed) return;
         try {
             const event = JSON.parse(trimmed) as Record<string, unknown>;
-            emit({ ...event, test: path.basename(file) });
+            emit({ ...event, test: path.basename(file), ...(cell.viewport ? { cell: cell.viewport } : {}) });
             if (event.type === 'run_end') {
                 sawRunEnd = true;
                 runEndStatus = String(event.status);
@@ -170,29 +192,64 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
     const log = opts.log ?? (() => {});
     const started = now();
 
-    const discovered = discoverTests(opts.target);
+    let discovered = discoverTests(opts.target);
     if (discovered.length === 0) {
-        return { outcomes: [], passed: 0, failed: 0, infra: 0, timeout: 0, flaky: 0, exitCode: 2, durationMs: 0 };
+        return { outcomes: [], passed: 0, failed: 0, infra: 0, timeout: 0, flaky: 0, skipped: 0, costUsd: 0, budgetStopped: false, exitCode: 2, durationMs: 0 };
+    }
+
+    // Shard BEFORE history ordering: discovery is sorted, so every machine
+    // computes the same partition; ordering below is per-machine and may not.
+    if (opts.shard) {
+        const before = discovered.length;
+        discovered = sliceShard(discovered, opts.shard);
+        log(`Shard ${opts.shard.index}/${opts.shard.total}: ${discovered.length} of ${before} tests on this machine.`);
+        if (discovered.length === 0) {
+            return { outcomes: [], passed: 0, failed: 0, infra: 0, timeout: 0, flaky: 0, skipped: 0, costUsd: 0, budgetStopped: false, exitCode: 0, durationMs: 0 };
+        }
     }
 
     // Run history informs ordering: previously-failed first, then slowest first.
     const memFile = opts.memoryDir ? memoryPath(opts.memoryDir) : undefined;
     const memory = memFile ? loadMemory(memFile) : undefined;
     const files = memory ? orderTests(discovered, memory) : discovered;
+    const cells = expandMatrix(files, opts.matrixViewports ?? []);
 
     const { concurrency, reason } = computeConcurrency({
         requested: opts.concurrency,
         memoryBudgetMb: opts.memoryBudgetMb,
     });
-    log(`Discovered ${files.length} tests${memory ? ' (ordered by run history)' : ''}. Concurrency: ${reason}.`);
+    log(
+        `Discovered ${files.length} tests${memory ? ' (ordered by run history)' : ''}` +
+        `${cells.length !== files.length ? `, ${cells.length} matrix cells` : ''}. Concurrency: ${reason}.`,
+    );
 
     fs.mkdirSync(opts.resultsDir, { recursive: true });
     fs.mkdirSync(path.dirname(path.resolve(opts.eventsPath)), { recursive: true });
     const eventsStream = fs.createWriteStream(opts.eventsPath, { flags: 'w' });
+    // Suite-level spend accounting, fed by every child's run_end. The budget
+    // gate reads these BEFORE launching the next cell: it stops new launches,
+    // it never kills work already in flight.
+    let spentUsd = 0;
+    let spentTokens = 0;
+    let budgetStopped = false;
     const emit = (event: Record<string, unknown>): void => {
+        if (event.type === 'run_end') {
+            if (typeof event.cost_usd === 'number') spentUsd += event.cost_usd;
+            if (typeof event.tokens_in === 'number') spentTokens += event.tokens_in;
+            if (typeof event.tokens_out === 'number') spentTokens += event.tokens_out;
+        }
         const line = JSON.stringify(event);
         eventsStream.write(line + '\n');
         if (opts.agent) process.stdout.write(line + '\n');
+    };
+    const overBudget = (): string | null => {
+        if (opts.budgetUsd !== undefined && spentUsd >= opts.budgetUsd) {
+            return `estimated spend $${spentUsd.toFixed(4)} reached --budget-usd ${opts.budgetUsd}`;
+        }
+        if (opts.budgetTokens !== undefined && spentTokens >= opts.budgetTokens) {
+            return `${spentTokens} tokens reached --budget-tokens ${opts.budgetTokens}`;
+        }
+        return null;
     };
 
     // Secrets travel via a mode-0600 temp file, never argv (ps would leak them).
@@ -202,7 +259,14 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
         fs.writeFileSync(variablesFile, opts.variablesJson, { mode: 0o600 });
     }
 
-    emit({ type: 'suite_start', tests: files.length, concurrency, ts: now() });
+    emit({
+        type: 'suite_start',
+        tests: files.length,
+        ...(cells.length !== files.length ? { cells: cells.length } : {}),
+        ...(opts.shard ? { shard: `${opts.shard.index}/${opts.shard.total}` } : {}),
+        concurrency,
+        ts: now(),
+    });
 
     const children = new Set<ChildProcess>();
     let stopping = false;
@@ -216,14 +280,29 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
     const outcomes: TestOutcome[] = [];
     let failureCount = 0;
 
-    const tasks = files.map((file) => async (): Promise<void> => {
+    const tasks = cells.map((cell) => async (): Promise<void> => {
         if (stopping) return;
         if (opts.maxFailures > 0 && failureCount >= opts.maxFailures) return;
+        const file = cell.file;
+
+        // Budget gate: once the suite crossed --budget-usd / --budget-tokens,
+        // remaining cells are reported as skipped instead of silently dropped.
+        const budgetReason = overBudget();
+        if (budgetReason) {
+            budgetStopped = true;
+            outcomes.push({
+                file, verdict: 'skipped', attempts: 0, durationMs: 0,
+                summary: `skipped: ${budgetReason}`, exitCode: null, flaky: false, label: cell.viewport,
+            });
+            emit({ type: 'test_skipped', test: path.basename(file), ...(cell.viewport ? { cell: cell.viewport } : {}), reason: budgetReason, ts: now() });
+            return;
+        }
+
         if (opts.staggerMs > 0 && !firstLaunch) await new Promise((r) => setTimeout(r, opts.staggerMs));
         firstLaunch = false;
 
         const tStart = now();
-        emit({ type: 'test_start', test: path.basename(file), ts: tStart });
+        emit({ type: 'test_start', test: path.basename(file), ...(cell.viewport ? { cell: cell.viewport } : {}), ts: tStart });
 
         let attempt = 0;
         let verdict = classifyChild(null, false);
@@ -232,7 +311,7 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
         const maxAttempts = opts.retries + 1;
         while (attempt < maxAttempts) {
             attempt++;
-            const res = await runChild(file, opts, variablesFile, emit, children);
+            const res = await runChild(cell, opts, variablesFile, emit, children);
             if (res.memKill) {
                 verdict = 'infra';
                 summary = `killed: process tree RSS ${res.memKill.rssMb}MB exceeded --memory-cap ${res.memKill.capMb}MB`;
@@ -249,25 +328,38 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
         if (verdict === 'failed' || verdict === 'timeout' || verdict === 'infra') failureCount++;
 
         const outcome: TestOutcome = {
-            file, verdict, attempts: attempt, durationMs: now() - tStart, summary, exitCode, flaky,
+            file, verdict, attempts: attempt, durationMs: now() - tStart, summary, exitCode, flaky, label: cell.viewport,
         };
         outcomes.push(outcome);
-        emit({ type: 'test_end', test: path.basename(file), verdict, attempts: attempt, flaky, ts: now() });
+        emit({ type: 'test_end', test: path.basename(file), ...(cell.viewport ? { cell: cell.viewport } : {}), verdict, attempts: attempt, flaky, ts: now() });
     });
 
     await runPool(tasks, { concurrency });
 
-    emit({ type: 'suite_end', ...tally(outcomes), duration_ms: now() - started, ts: now() });
+    emit({
+        type: 'suite_end',
+        ...tally(outcomes),
+        ...(spentUsd > 0 ? { cost_usd: Math.round(spentUsd * 1e6) / 1e6 } : {}),
+        ...(spentTokens > 0 ? { tokens: spentTokens } : {}),
+        ...(budgetStopped ? { budget_stopped: true } : {}),
+        duration_ms: now() - started,
+        ts: now(),
+    });
     eventsStream.end();
     if (variablesFile) fs.rmSync(variablesFile, { force: true });
 
     const t = tally(outcomes);
+    // A budget stop is an incomplete suite, not a pass — surface as infra (2).
     const exitCode: SuiteResult['exitCode'] =
-        stopping ? 2 : t.infra > 0 ? 2 : t.timeout > 0 ? 3 : t.failed > 0 ? 1 : 0;
+        stopping ? 2 : budgetStopped ? 2 : t.infra > 0 ? 2 : t.timeout > 0 ? 3 : t.failed > 0 ? 1 : 0;
 
     if (opts.junitPath) {
         fs.mkdirSync(path.dirname(path.resolve(opts.junitPath)), { recursive: true });
-        fs.writeFileSync(opts.junitPath, toJUnitXml(outcomes));
+        const props: Record<string, string> = {};
+        if (spentUsd > 0) props.cost_usd = spentUsd.toFixed(6);
+        if (spentTokens > 0) props.tokens = String(spentTokens);
+        if (opts.shard) props.shard = `${opts.shard.index}/${opts.shard.total}`;
+        fs.writeFileSync(opts.junitPath, toJUnitXml(outcomes, 'browserbash', props));
     }
 
     // Single-writer: the orchestrator folds every outcome into history once,
@@ -275,7 +367,12 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
     if (memFile && memory) {
         const nowIso = opts.nowIso ?? (() => new Date().toISOString());
         let next = memory;
-        for (const o of outcomes) {
+        // Skipped cells never ran — recording them would poison the
+        // failed-first ordering and the flaky stats.
+        const ran = outcomes.filter(
+            (o): o is TestOutcome & { verdict: 'passed' | 'failed' | 'infra' | 'timeout' } => o.verdict !== 'skipped',
+        );
+        for (const o of ran) {
             next = recordOutcome(next, {
                 testPath: o.file,
                 verdict: o.verdict,
@@ -291,25 +388,44 @@ export async function runAll(opts: RunAllOptions): Promise<SuiteResult> {
         }
     }
 
-    writeSummary(opts.resultsDir, outcomes, now() - started);
+    writeSummary(opts.resultsDir, outcomes, now() - started, spentUsd);
 
-    return { outcomes, ...t, exitCode, durationMs: now() - started };
+    const result: SuiteResult = {
+        outcomes, ...t, costUsd: Math.round(spentUsd * 1e6) / 1e6, budgetStopped, exitCode, durationMs: now() - started,
+    };
+
+    if (opts.notifyUrl) {
+        const status = exitCode === 0 ? 'passed' : 'failed';
+        await sendNotification(opts.notifyUrl, {
+            event: 'suite_end',
+            status,
+            title: `browserbash suite (${outcomes.length} cells)`,
+            summary:
+                `${t.passed} passed, ${t.failed} failed, ${t.timeout} timed out, ${t.infra} infra, ` +
+                `${t.skipped} skipped in ${(result.durationMs / 1000).toFixed(1)}s` +
+                (spentUsd > 0 ? ` (~$${spentUsd.toFixed(4)})` : ''),
+            data: { ...t, exit_code: exitCode, duration_ms: result.durationMs, budget_stopped: budgetStopped },
+        }, log);
+    }
+
+    return result;
 }
 
-function tally(outcomes: TestOutcome[]): { passed: number; failed: number; infra: number; timeout: number; flaky: number } {
+function tally(outcomes: TestOutcome[]): { passed: number; failed: number; infra: number; timeout: number; flaky: number; skipped: number } {
     return {
         passed: outcomes.filter((o) => o.verdict === 'passed').length,
         failed: outcomes.filter((o) => o.verdict === 'failed').length,
         infra: outcomes.filter((o) => o.verdict === 'infra').length,
         timeout: outcomes.filter((o) => o.verdict === 'timeout').length,
         flaky: outcomes.filter((o) => o.flaky).length,
+        skipped: outcomes.filter((o) => o.verdict === 'skipped').length,
     };
 }
 
-function writeSummary(dir: string, outcomes: TestOutcome[], durationMs: number): void {
+function writeSummary(dir: string, outcomes: TestOutcome[], durationMs: number, spentUsd = 0): void {
     const t = tally(outcomes);
     const icon = (v: string): string =>
-        v === 'passed' ? 'PASS' : v === 'failed' ? 'FAIL' : v === 'timeout' ? 'TIMEOUT' : 'ERROR';
+        v === 'passed' ? 'PASS' : v === 'failed' ? 'FAIL' : v === 'timeout' ? 'TIMEOUT' : v === 'skipped' ? 'SKIP' : 'ERROR';
     const lines = [
         '# Suite result',
         '',
@@ -318,12 +434,14 @@ function writeSummary(dir: string, outcomes: TestOutcome[], durationMs: number):
         `- Failed: ${t.failed}`,
         `- Timed out: ${t.timeout}`,
         `- Infra errors: ${t.infra}`,
+        `- Skipped: ${t.skipped}`,
         `- Flaky (passed on retry): ${t.flaky}`,
         `- Duration: ${(durationMs / 1000).toFixed(1)}s`,
+        ...(spentUsd > 0 ? [`- Estimated model spend: $${spentUsd.toFixed(4)}`] : []),
         '',
         '## Tests',
         '',
-        ...outcomes.map((o) => `- ${icon(o.verdict)}  ${path.basename(o.file)}${o.flaky ? '  (flaky)' : ''}`),
+        ...outcomes.map((o) => `- ${icon(o.verdict)}  ${path.basename(o.file)}${o.label ? ` [${o.label}]` : ''}${o.flaky ? '  (flaky)' : ''}`),
         '',
     ];
     fs.writeFileSync(path.join(dir, 'RunAll-Result.md'), lines.join('\n'));

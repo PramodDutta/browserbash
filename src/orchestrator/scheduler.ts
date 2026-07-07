@@ -114,7 +114,7 @@ export function discoverTests(target: string): string[] {
     return out.sort();
 }
 
-export type TestVerdict = 'passed' | 'failed' | 'infra' | 'timeout';
+export type TestVerdict = 'passed' | 'failed' | 'infra' | 'timeout' | 'skipped';
 
 export interface TestOutcome {
     file: string;
@@ -125,6 +125,47 @@ export interface TestOutcome {
     exitCode: number | null;
     /** true when a later attempt passed after an earlier non-pass. */
     flaky: boolean;
+    /** Matrix cell label (e.g. "1280x720") when the suite ran a matrix. */
+    label?: string;
+}
+
+/** Parse --shard "2/4" into a 1-based slice descriptor. */
+export function parseShard(spec: string): { index: number; total: number } {
+    const m = spec.match(/^(\d+)\/(\d+)$/);
+    if (!m) throw new Error(`shard must look like 2/4, got '${spec}'`);
+    const index = Number(m[1]);
+    const total = Number(m[2]);
+    if (total < 1 || index < 1 || index > total) {
+        throw new Error(`shard index must be between 1 and ${total}, got ${index}`);
+    }
+    return { index, total };
+}
+
+/**
+ * Deterministic shard slice. MUST be applied to the sorted discovery list
+ * (before per-machine history ordering), so every CI machine agrees on the
+ * partition without coordination.
+ */
+export function sliceShard<T>(items: T[], shard: { index: number; total: number }): T[] {
+    return items.filter((_, i) => i % shard.total === shard.index - 1);
+}
+
+export interface WorkCell {
+    file: string;
+    /** Viewport label like "1280x720"; absent = engine default. */
+    viewport?: string;
+}
+
+/** Cartesian expansion of files x viewports (no viewports = one cell per file). */
+export function expandMatrix(files: string[], viewports: string[]): WorkCell[] {
+    if (viewports.length === 0) return files.map((file) => ({ file }));
+    const cells: WorkCell[] = [];
+    for (const file of files) {
+        for (const viewport of viewports) {
+            cells.push({ file, viewport });
+        }
+    }
+    return cells;
 }
 
 /**
@@ -208,23 +249,40 @@ export async function runPool<T>(
     return results;
 }
 
-/** JUnit XML from outcomes: one testcase per file, failures/errors tagged. */
-export function toJUnitXml(outcomes: TestOutcome[], suiteName = 'browserbash'): string {
+/** JUnit XML from outcomes: one testcase per cell, failures/errors/skips tagged. */
+export function toJUnitXml(
+    outcomes: TestOutcome[],
+    suiteName = 'browserbash',
+    properties: Record<string, string> = {},
+): string {
     const esc = (s: string): string =>
         s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const failures = outcomes.filter((o) => o.verdict === 'failed' || o.verdict === 'timeout').length;
     const errors = outcomes.filter((o) => o.verdict === 'infra').length;
+    const skipped = outcomes.filter((o) => o.verdict === 'skipped').length;
     const time = outcomes.reduce((s, o) => s + o.durationMs, 0) / 1000;
     const cases = outcomes.map((o) => {
-        const name = esc(path.basename(o.file));
+        const name = esc(path.basename(o.file) + (o.label ? ` [${o.label}]` : ''));
         const t = (o.durationMs / 1000).toFixed(3);
         if (o.verdict === 'passed') return `    <testcase name="${name}" time="${t}"/>`;
+        if (o.verdict === 'skipped') {
+            return `    <testcase name="${name}" time="0.000">\n      <skipped message="${esc(o.summary).slice(0, 400)}"/>\n    </testcase>`;
+        }
         const tag = o.verdict === 'infra' ? 'error' : 'failure';
         return `    <testcase name="${name}" time="${t}">\n      <${tag} message="${esc(o.summary).slice(0, 400)}"/>\n    </testcase>`;
     });
+    const propKeys = Object.entries(properties);
+    const propsBlock = propKeys.length > 0
+        ? [
+              '  <properties>',
+              ...propKeys.map(([k, v]) => `    <property name="${esc(k)}" value="${esc(v)}"/>`),
+              '  </properties>',
+          ]
+        : [];
     return [
         '<?xml version="1.0" encoding="UTF-8"?>',
-        `<testsuite name="${esc(suiteName)}" tests="${outcomes.length}" failures="${failures}" errors="${errors}" time="${time.toFixed(3)}">`,
+        `<testsuite name="${esc(suiteName)}" tests="${outcomes.length}" failures="${failures}" errors="${errors}" skipped="${skipped}" time="${time.toFixed(3)}">`,
+        ...propsBlock,
         ...cases,
         '</testsuite>',
         '',

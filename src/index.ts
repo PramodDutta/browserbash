@@ -8,6 +8,7 @@ import { getProvider, listProviders } from './providers/index.js';
 import { executeRun } from './runner.js';
 import { runTestMd } from './testmd/runner.js';
 import { runAll } from './orchestrator/run-all.js';
+import { parseShard } from './orchestrator/scheduler.js';
 import { clearRuns, runsDir } from './local-store.js';
 import { startDashboard, openBrowser } from './dashboard/server.js';
 
@@ -87,6 +88,18 @@ interface CommonFlags {
     cache?: boolean;
     refreshCache?: boolean;
     modelExec?: string;
+    auth?: string;
+    viewport?: string;
+}
+
+/** Parse --viewport 1280x720 into {width, height}. */
+export function parseViewport(value: string | undefined): { width: number; height: number } | undefined {
+    if (value === undefined) return undefined;
+    const match = value.match(/^(\d{2,5})x(\d{2,5})$/);
+    if (!match) {
+        throw new Error(`viewport must look like 1280x720, got '${value}'`);
+    }
+    return { width: Number(match[1]), height: Number(match[2]) };
 }
 
 /** Effective cache options for a run: config defaults, overridden by flags. */
@@ -117,7 +130,9 @@ function addRunFlags(cmd: Command): Command {
         .option('--port <n>', 'port for the local dashboard (with --dashboard)', '4477')
         .option('--no-cache', 'disable the replay-first action cache for this run')
         .option('--refresh-cache', 'wipe this test\'s cache entry before running')
-        .option('--model-exec <id>', 'cheap model for execution turns (strong model still plans)');
+        .option('--model-exec <id>', 'cheap model for execution turns (strong model still plans)')
+        .option('--auth <name>', 'inject a saved login session (browserbash auth save <name>)')
+        .option('--viewport <WxH>', 'browser viewport, e.g. 1280x720 or 390x844');
 }
 
 function exitWith(status: RunStatus): never {
@@ -242,6 +257,8 @@ addRunFlags(
             dashboard: flags.dashboard ?? false,
             cache: cacheOptionsFrom(flags, config),
             routing: { executionModel: (flags.modelExec as string | undefined) ?? config.routing.executionModel, escalateOnFailure: config.routing.escalateOnFailure },
+            auth: flags.auth,
+            viewport: parseViewport(flags.viewport),
         });
         if (flags.dashboard) {
             await serveDashboardThenExit(parsePositiveInteger(flags.port ?? '4477', 'port'), result.status);
@@ -280,6 +297,8 @@ addRunFlags(
             dashboard: flags.dashboard ?? false,
             cache: cacheOptionsFrom(flags, config),
             routing: { executionModel: (flags.modelExec as string | undefined) ?? config.routing.executionModel, escalateOnFailure: config.routing.escalateOnFailure },
+            auth: flags.auth,
+            viewport: parseViewport(flags.viewport),
         });
         if (flags.dashboard) {
             await serveDashboardThenExit(parsePositiveInteger(flags.port ?? '4477', 'port'), result.status);
@@ -310,6 +329,12 @@ program
     .option('--variables-file <path>', 'variables JSON file for every test')
     .option('--no-cache', 'disable the replay cache for every test')
     .option('--no-memory', 'do not read or write run history for ordering')
+    .option('--shard <i/n>', 'run only this deterministic slice of the suite (e.g. 2/4)')
+    .option('--matrix-viewport <list>', 'comma-separated viewports; each test runs once per viewport (e.g. 1280x720,390x844)')
+    .option('--budget-usd <n>', 'stop launching new tests once estimated spend reaches this (exit 2, rest skipped)')
+    .option('--budget-tokens <n>', 'stop launching new tests once total tokens reach this (exit 2, rest skipped)')
+    .option('--notify <url>', 'POST the suite verdict to this webhook (Slack URLs get Slack formatting)')
+    .option('--auth <name>', 'saved login session for every test (browserbash auth save)')
     .action(async (target: string | undefined, flags: Record<string, string | boolean | undefined>) => {
         const config = loadConfig();
         // Spawn hygiene: children inherit ONLY safe flags. Never --dashboard
@@ -320,6 +345,7 @@ program
         if (flags.model) childFlags.push('--model', String(flags.model));
         if (flags.timeout) childFlags.push('--timeout', String(flags.timeout));
         if (flags.cache === false) childFlags.push('--no-cache');
+        if (flags.auth) childFlags.push('--auth', String(flags.auth));
 
         let variablesJson: string | undefined;
         const variables = loadVariables(flags.variables as string | undefined, flags.variablesFile as string | undefined);
@@ -349,17 +375,82 @@ program
             cliBin: CLI_ENTRY,
             resultsDir: path.join(eventsDir, 'browserbash-results'),
             memoryDir: flags.memory === false ? undefined : projectDir(),
+            shard: flags.shard ? parseShard(String(flags.shard)) : undefined,
+            matrixViewports: flags.matrixViewport
+                ? String(flags.matrixViewport).split(',').map((v) => v.trim()).filter(Boolean).map((v) => {
+                      parseViewport(v); // validate shape early, with the friendly error
+                      return v;
+                  })
+                : undefined,
+            budgetUsd: flags.budgetUsd !== undefined ? Number(flags.budgetUsd) : undefined,
+            budgetTokens: flags.budgetTokens !== undefined ? parsePositiveInteger(String(flags.budgetTokens), 'budget-tokens') : undefined,
+            notifyUrl: flags.notify ? String(flags.notify) : undefined,
             log: (msg) => { if (flags.agent !== true) process.stderr.write(msg + '\n'); },
         });
 
         if (flags.agent !== true) {
             process.stderr.write(
                 `\nSuite: ${result.passed} passed, ${result.failed} failed, ${result.timeout} timed out, ` +
-                `${result.infra} infra errors, ${result.flaky} flaky in ${(result.durationMs / 1000).toFixed(1)}s\n`,
+                `${result.infra} infra errors, ${result.skipped} skipped, ${result.flaky} flaky in ${(result.durationMs / 1000).toFixed(1)}s` +
+                (result.costUsd > 0 ? ` (~$${result.costUsd.toFixed(4)} estimated)` : '') +
+                (result.budgetStopped ? ' — stopped by budget' : '') + '\n',
             );
         }
         process.exit(result.exitCode);
     });
+
+addRunFlags(
+    program
+        .command('monitor <target>')
+        .description('Run a *_test.md file (or objective) on an interval; alert on pass<->fail changes')
+        .option('--every <interval>', 'check interval: 30s, 10m, 1h', '10m')
+        .option('--notify <url>', 'webhook POSTed on state changes (Slack URLs get Slack formatting)')
+        .option('--ticks <n>', 'stop after N checks (0 = run until Ctrl-C)', '0'),
+).action(async (target: string, flags: CommonFlags & { every?: string; notify?: string; ticks?: string }) => {
+    const config = loadConfig();
+    const { parseEvery, runMonitor, tickFromResult } = await import('./monitor.js');
+    try {
+        const variables = loadVariables(flags.variables, flags.variablesFile);
+        const isTestFile = target.endsWith('_test.md');
+        const everyMs = parseEvery(flags.every ?? '10m');
+        const common = {
+            provider: resolveProvider(flags, config.defaultProvider),
+            engine: parseEngine(flags.engine ?? config.engine),
+            agent: flags.agent ?? false,
+            headless: flags.headless ?? true, // monitors are unattended by default
+            maxSteps: parsePositiveInteger(flags.maxSteps ?? config.maxSteps, 'max-steps'),
+            timeoutSec: parsePositiveInteger(flags.timeout ?? config.timeoutSec, 'timeout'),
+            variables,
+            cdpEndpoint: flags.cdpEndpoint,
+            startUrl: flags.url,
+            model: flags.model,
+            record: false,
+            upload: flags.upload ?? false,
+            dashboard: false,
+            cache: cacheOptionsFrom(flags, config),
+            routing: { executionModel: (flags.modelExec as string | undefined) ?? config.routing.executionModel, escalateOnFailure: config.routing.escalateOnFailure },
+            auth: flags.auth,
+            viewport: parseViewport(flags.viewport),
+        };
+        const state = await runMonitor({
+            title: isTestFile ? path.basename(target) : target.slice(0, 60),
+            everyMs,
+            notifyUrl: flags.notify,
+            maxTicks: parseNonNegativeInteger(flags.ticks ?? '0', 'ticks'),
+            log: (msg) => process.stderr.write(msg + '\n'),
+            runOnce: async () => {
+                const result = isTestFile
+                    ? await runTestMd(target, { ...common, resultPath: undefined })
+                    : await executeRun({ ...common, objective: target });
+                return tickFromResult(result);
+            },
+        });
+        process.exit(state.lastStatus === 'passed' ? 0 : EXIT_CODES[state.lastStatus ?? 'error']);
+    } catch (err) {
+        process.stderr.write(`Error: ${(err as Error).message}\n`);
+        process.exit(2);
+    }
+});
 
 program
     .command('dashboard')
@@ -437,6 +528,47 @@ program
         process.stdout.write(`Removed ${flags.provider} credentials\n`);
     });
 
+const authCmd = program.command('auth').description('Saved login sessions — log in once, reuse across runs (--auth <name>)');
+authCmd
+    .command('save <name>')
+    .description('Open a browser, log in manually, press Enter to save the session')
+    .option('--url <url>', 'login page to open first')
+    .action(async (name: string, flags: { url?: string }) => {
+        const { captureAuthProfile } = await import('./auth-capture.js');
+        try {
+            const profile = await captureAuthProfile(name, flags.url);
+            process.stdout.write(
+                `Saved auth profile '${profile.name}' (${profile.origins.length} origin${profile.origins.length === 1 ? '' : 's'}: ` +
+                `${profile.origins.slice(0, 3).join(', ') || 'none recorded'}).\n` +
+                `Use it with: browserbash run "..." --auth ${profile.name}\n`,
+            );
+        } catch (err) {
+            process.stderr.write(`Error: ${(err as Error).message}\n`);
+            process.exit(2);
+        }
+    });
+authCmd
+    .command('list')
+    .description('List saved auth profiles')
+    .action(async () => {
+        const { listAuthProfiles } = await import('./auth-store.js');
+        const profiles = listAuthProfiles();
+        if (profiles.length === 0) {
+            process.stdout.write('No saved auth profiles. Create one with: browserbash auth save <name> --url <login-url>\n');
+            return;
+        }
+        for (const p of profiles) {
+            process.stdout.write(`${p.name} — saved ${p.savedAt}, origins: ${p.origins.join(', ') || 'none'}\n`);
+        }
+    });
+authCmd
+    .command('delete <name>')
+    .description('Delete a saved auth profile')
+    .action(async (name: string) => {
+        const { deleteAuthProfile } = await import('./auth-store.js');
+        process.stdout.write(deleteAuthProfile(name) ? `Deleted auth profile '${name}'.\n` : `No auth profile named '${name}'.\n`);
+    });
+
 program
     .command('whoami')
     .description('Show stored provider accounts')
@@ -509,6 +641,93 @@ configCmd
         }
         saveConfig(config);
         process.stdout.write(`Set ${key} = ${value}\n`);
+    });
+
+program
+    .command('record <url>')
+    .description('Open a browser, click through a flow once, get a plain-English *_test.md (Ctrl-C to finish)')
+    .option('--out <file>', 'output test file', '.browserbash/tests/recorded_test.md')
+    .option('--name <title>', 'test title')
+    .option('--seconds <n>', 'auto-stop after N seconds (default: wait for Ctrl-C)', '0')
+    .action(async (url: string, flags: { out: string; name?: string; seconds?: string }) => {
+        const { recordSession } = await import('./record/capture.js');
+        try {
+            const result = await recordSession({
+                url,
+                outFile: flags.out,
+                title: flags.name,
+                seconds: parseNonNegativeInteger(flags.seconds ?? '0', 'seconds'),
+                log: (msg) => process.stderr.write(msg + '\n'),
+            });
+            process.stdout.write(
+                `Recorded ${result.steps} steps -> ${result.file}\n` +
+                `Run it (records the replay journal too): browserbash testmd run ${result.file}\n`,
+            );
+            process.exit(0);
+        } catch (err) {
+            process.stderr.write(`Error: ${(err as Error).message}\n`);
+            process.exit(2);
+        }
+    });
+
+program
+    .command('import <paths...>')
+    .description('Convert Playwright specs (*.spec.ts, *.test.ts) into plain-English *_test.md files')
+    .option('--out-dir <dir>', 'where generated tests go', '.browserbash/imported')
+    .action(async (paths: string[], flags: { outDir: string }) => {
+        const { convertPlaywrightSpec, renderTestMd, renderImportReport, testFileName } = await import('./import/playwright.js');
+        const specFiles: string[] = [];
+        for (const p of paths) {
+            const abs = path.resolve(p);
+            if (!fs.existsSync(abs)) {
+                process.stderr.write(`Not found: ${p}\n`);
+                process.exit(2);
+            }
+            if (fs.statSync(abs).isDirectory()) {
+                const walk = (dir: string): void => {
+                    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                        if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+                        const full = path.join(dir, entry.name);
+                        if (entry.isDirectory()) walk(full);
+                        else if (/\.(spec|test)\.(ts|js|mjs)$/.test(entry.name)) specFiles.push(full);
+                    }
+                };
+                walk(abs);
+            } else {
+                specFiles.push(abs);
+            }
+        }
+        if (specFiles.length === 0) {
+            process.stderr.write('No *.spec.ts / *.test.ts files found.\n');
+            process.exit(2);
+        }
+
+        const outDir = path.resolve(flags.outDir);
+        fs.mkdirSync(outDir, { recursive: true });
+        const results = specFiles.map((f) => convertPlaywrightSpec(fs.readFileSync(f, 'utf-8'), path.relative(process.cwd(), f)));
+        let written = 0;
+        for (const r of results) {
+            for (const t of r.tests) {
+                fs.writeFileSync(path.join(outDir, testFileName(t.title)), renderTestMd(t, r.sourceFile));
+                written++;
+            }
+        }
+        const reportPath = path.join(outDir, 'IMPORT-REPORT.md');
+        fs.writeFileSync(reportPath, renderImportReport(results));
+        const attention = results.reduce((s, r) => s + r.skipped.length, 0);
+        process.stdout.write(
+            `Imported ${written} test${written === 1 ? '' : 's'} from ${specFiles.length} spec file${specFiles.length === 1 ? '' : 's'} into ${flags.outDir}.\n` +
+            `${attention} line${attention === 1 ? '' : 's'} need manual attention — see ${path.relative(process.cwd(), reportPath)}.\n` +
+            'Review the generated steps, then run one: browserbash testmd run <file>\n',
+        );
+    });
+
+program
+    .command('mcp')
+    .description('Serve BrowserBash as an MCP server on stdio (for Claude Code, Cursor, Codex, any MCP host)')
+    .action(async () => {
+        const { serveMcp } = await import('./mcp/server.js');
+        await serveMcp(CLI_ENTRY, packageVersion());
     });
 
 program

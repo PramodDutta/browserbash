@@ -14,7 +14,10 @@ export const localProvider: BrowserProvider = {
             channel: 'chrome',
             headless: options.headless,
         });
-        const context = await browser.newContext();
+        const context = await browser.newContext({
+            ...(options.context?.storageStatePath ? { storageState: options.context.storageStatePath } : {}),
+            ...(options.context?.viewport ? { viewport: options.context.viewport } : {}),
+        });
         const page = await context.newPage();
         return {
             browser,

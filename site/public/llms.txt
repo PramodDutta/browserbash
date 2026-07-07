@@ -3,11 +3,18 @@
 > BrowserBash is a free, open-source, vendor-independent CLI for natural language browser automation. A user types a plain-English objective (e.g. "Log in to example.com and store the invoice total as 'total'") and an AI agent drives a real browser step by step, exiting with a machine-readable verdict. Apache-2.0 with the full agent loop in the repository. The CLI needs no account to run; an optional free account adds a cloud dashboard with run history, video recordings and per-run replays.
 
 Key facts:
-- Free and open source (Apache-2.0). Install: `npm install -g browserbash-cli` (command: `browserbash`, version 1.3.1).
+- Free and open source (Apache-2.0). Install: `npm install -g browserbash-cli` (command: `browserbash`, version 1.5.0).
 - The default stack is 100% free: Stagehand engine (MIT) + local Chromium + Ollama. No API keys and no credit card required.
 - LLMs: Ollama-first (free, local). Also free OpenRouter models (e.g. `openai/gpt-oss-120b:free`) and Anthropic Claude (bring your own key — optional). Resolution order for `auto`: local Ollama → ANTHROPIC_API_KEY → OPENROUTER_API_KEY.
 - Providers (where the browser runs): local Chrome, any CDP endpoint, Browserbase, LambdaTest, BrowserStack. One flag switches: `--provider lambdatest`.
 - Engines: `stagehand` (default, MIT) or `builtin` (Anthropic tool-use loop for Playwright-protocol grids).
+- MCP server: `browserbash mcp` exposes run_objective / run_test_file / run_suite over the Model Context Protocol on stdio, so Claude Code (`claude mcp add browserbash -- browserbash mcp`), Cursor, Codex and any MCP host consume BrowserBash directly as a validation layer. Structured verdicts: status, summary, final_state, assertions, cost_usd.
+- Deterministic assertions (testmd v2, `version: 2` frontmatter): `Verify ...` steps compile to real Playwright checks with no model in the loop; failures carry expected-vs-actual evidence in `run_end.assertions`. API steps (GET/POST + `Expect status`, store JSON paths) seed data over plain HTTP.
+- Saved logins: `browserbash auth save <name>` captures a session once; `--auth <name>` reuses it in every run, suite and monitor.
+- Suites: `run-all` with memory-aware parallelism, `--shard i/n` across CI machines, `--matrix-viewport`, `--budget-usd` hard spend stop, JUnit + NDJSON + webhook notify.
+- Monitoring: `browserbash monitor <test> --every 10m --notify <webhook>` alerts only on pass/fail state changes (Slack formatting autodetected).
+- Authoring: `browserbash record <url>` (click through once, get a plain-English test; passwords never captured) and `browserbash import <playwright-specs>` (heuristic conversion + IMPORT-REPORT.md).
+- GitHub Action: `PramodDutta/browserbash@main` runs the suite in CI with a self-updating PR verdict comment.
 - Agent mode: `--agent` emits NDJSON events on stdout; exit codes 0 passed / 1 failed / 2 error / 3 timeout. Built for CI and AI coding agents — no prose parsing.
 - Markdown test files (`*_test.md`) with `@import` composition; `{{variable}}` substitution with secret masking (`*****` in all logs).
 - Recording: `--record` captures a screenshot and a session video (`.webm`, via ffmpeg) on any engine; the builtin engine also captures a Playwright trace. `--upload` pushes a run to the free cloud dashboard. Nothing leaves your machine unless you pass `--upload`.
@@ -30,7 +37,7 @@ Key facts:
 - [Case study — a real Playwright suite in plain English](https://browserbash.com/case-study): how The Testing Academy rewrote its production Playwright + TypeScript suite (AdvancePlaywrightFramework1x, testing the TTACart store: login → cart → checkout) as one plain-English BrowserBash markdown file, run with a single command on a free local model, recorded and replayable in the dashboard.
 - [Pricing](https://browserbash.com/pricing): free forever; optional paid cloud data retention only.
 - [FAQ](https://browserbash.com/faq): is it free, do I need an API key, which models, how it differs from Playwright/Selenium, CI, recordings.
-- [Changelog](https://browserbash.com/changelog): release history (v1.0.0 → v1.3.1).
+- [Changelog](https://browserbash.com/changelog): release history (v1.0.0 → v1.5.0).
 - [About](https://browserbash.com/about): why BrowserBash exists, built by The Testing Academy.
 - [Contact](https://browserbash.com/contact): support, bug reports, security, press.
 - [Brand & press kit](https://browserbash.com/brand): boilerplate, logos, colors, fast facts.

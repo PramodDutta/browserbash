@@ -1,4 +1,6 @@
 import { loadConfig } from './config.js';
+import { profileCoversOrigin, resolveAuthProfile, type AuthProfile } from './auth-store.js';
+import { estimateCostUsd } from './pricing.js';
 import { runAgent } from './engine/agent.js';
 import { replayJournal, ReplayMiss, ReplaySecurityError } from './engine/replay.js';
 import { startTrace, type TraceHandle } from './engine/trace.js';
@@ -45,11 +47,31 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
         );
     }
     const routing = options.routing ?? config.routing;
-    const resolved = { ...options, model, routing };
+
+    // Saved login session (--auth <name>): resolve up front so a typo fails
+    // fast, and warn when the profile's origins do not cover the target.
+    let authProfile: AuthProfile | undefined;
+    if (options.auth) {
+        authProfile = resolveAuthProfile(options.auth);
+        if (!profileCoversOrigin(authProfile, options.startUrl)) {
+            reporter.info(
+                `Warning: auth profile '${authProfile.name}' was saved for ${authProfile.origins.join(', ')} ` +
+                `— it may not apply to ${options.startUrl}`,
+            );
+        }
+        reporter.info(`Auth: using saved session '${authProfile.name}'`);
+    }
+
+    const resolved = { ...options, model, routing, authProfile };
 
     const result = engine === 'stagehand'
         ? await runWithStagehand(resolved, reporter, model)
         : await runWithBuiltin(resolved, reporter, model);
+
+    if (result.tokensIn !== undefined || result.tokensOut !== undefined) {
+        const cost = estimateCostUsd(model, result.tokensIn ?? 0, result.tokensOut ?? 0);
+        if (cost !== undefined) result.costUsd = cost;
+    }
 
     reporter.runEnd({
         type: 'run_end',
@@ -63,6 +85,8 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
         ...(result.cache ? { cache: result.cache } : {}),
         ...(result.tokensIn !== undefined ? { tokens_in: result.tokensIn } : {}),
         ...(result.tokensOut !== undefined ? { tokens_out: result.tokensOut } : {}),
+        ...(result.costUsd !== undefined ? { cost_usd: result.costUsd } : {}),
+        ...(result.assertions ? { assertions: result.assertions } : {}),
     });
 
     // Always keep a private local copy for `browserbash dashboard` (on-disk,
@@ -79,7 +103,9 @@ export async function executeRun(options: RunOptions): Promise<RunResult> {
     return result;
 }
 
-async function runWithStagehand(options: RunOptions, reporter: Reporter, defaultModel: string): Promise<RunResult> {
+type ResolvedRunOptions = RunOptions & { authProfile?: AuthProfile };
+
+async function runWithStagehand(options: ResolvedRunOptions, reporter: Reporter, defaultModel: string): Promise<RunResult> {
     return await runStagehandAgent({
         objective: options.objective,
         provider: options.provider,
@@ -95,10 +121,12 @@ async function runWithStagehand(options: RunOptions, reporter: Reporter, default
         name: options.name,
         cache: options.cache,
         ...(options.routing?.executionModel ? { executionModel: options.routing.executionModel } : {}),
+        ...(options.authProfile ? { authStatePath: options.authProfile.file } : {}),
+        ...(options.viewport ? { viewport: options.viewport } : {}),
     });
 }
 
-async function runWithBuiltin(options: RunOptions, reporter: Reporter, defaultModel: string): Promise<RunResult> {
+async function runWithBuiltin(options: ResolvedRunOptions, reporter: Reporter, defaultModel: string): Promise<RunResult> {
     const config = loadConfig();
     const provider = getProvider(options.provider);
     reporter.info(`Provider: ${provider.id} — ${provider.description}`);
@@ -108,6 +136,14 @@ async function runWithBuiltin(options: RunOptions, reporter: Reporter, defaultMo
         name: options.name ?? options.objective.slice(0, 80),
         cdpEndpoint: options.cdpEndpoint,
         config,
+        ...(options.authProfile || options.viewport
+            ? {
+                  context: {
+                      ...(options.authProfile ? { storageStatePath: options.authProfile.file } : {}),
+                      ...(options.viewport ? { viewport: options.viewport } : {}),
+                  },
+              }
+            : {}),
     });
 
     // Replay-first journal cache. Keyed on the TEMPLATED objective so secret
