@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.1
+
+Registry metadata only, no code change: adds `mcpName` to `package.json` so the server can be verified and listed in the official MCP Registry (`io.github.PramodDutta/browserbash`).
+
 ## 1.5.0
 
 The validation-layer release: BrowserBash becomes directly consumable by AI agents, and verdicts stop being model judgment.

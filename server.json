@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.PramodDutta/browserbash",
+  "description": "Plain-English browser tests for AI agents: real Chrome, deterministic verdicts. Free, no API keys.",
+  "repository": {
+    "url": "https://github.com/PramodDutta/browserbash",
+    "source": "github"
+  },
+  "version": "1.5.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "browserbash-cli",
+      "version": "1.5.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Anthropic API key. Optional: without it BrowserBash auto-resolves a free local Ollama model.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true,
+          "name": "ANTHROPIC_API_KEY"
+        }
+      ]
+    }
+  ]
+}
