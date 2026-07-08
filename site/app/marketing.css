@@ -145,6 +145,73 @@
 .doc-cta__in p { color: var(--terminal-dim); margin: 0 0 20px; }
 .doc-cta__in code { font-family: var(--font-mono); background: #000; color: var(--ok); padding: 10px 16px; border-radius: 8px; display: inline-block; margin-bottom: 16px; }
 
+/* ---- email capture (footer lead magnet) ---- */
+.footer__capture { padding-top: 0; padding-bottom: 28px; }
+.email-capture {
+    background: var(--terminal-bg);
+    color: var(--terminal-ink);
+    border-radius: 16px;
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.email-capture h4 { margin: 0; font-size: 1.1rem; color: var(--terminal-ink); }
+.email-capture p { margin: 0 0 12px; color: var(--terminal-dim); font-size: 0.9rem; }
+.email-capture__row { display: flex; gap: 10px; flex-wrap: wrap; }
+.email-capture__row input[type="email"] {
+    flex: 1 1 240px;
+    min-width: 0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--terminal-dim);
+    background: #0000;
+    color: var(--terminal-ink);
+    font-size: 0.95rem;
+}
+.email-capture__row input[type="email"]::placeholder { color: var(--terminal-dim); }
+.email-capture__row .pixel-btn { flex-shrink: 0; }
+.email-capture__honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.email-capture__error { margin: 8px 0 0; color: #ff8a65; font-size: 0.85rem; }
+.email-capture--done { background: var(--terminal-bg); color: var(--ok); border-radius: 16px; padding: 18px 28px; }
+.email-capture--done p { margin: 0; font-size: 0.98rem; }
+.email-capture--done a { color: var(--ok); text-decoration: underline; }
+
+@media (max-width: 640px) {
+    .email-capture__row { flex-direction: column; align-items: stretch; }
+}
+
+/* ---- playbook page ---- */
+.playbook { max-width: 780px; margin: 40px auto 0; padding: 0 20px; display: flex; flex-direction: column; gap: 18px; }
+.playbook__section { padding: 22px 26px; }
+.playbook__section h2 { display: flex; align-items: center; gap: 12px; font-size: 1.15rem; margin: 0 0 10px; }
+.playbook__n {
+    font-family: var(--font-pixel), monospace;
+    font-size: 0.8rem;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    flex-shrink: 0;
+}
+.playbook__section p { margin: 0 0 12px; color: var(--ink-soft); }
+.playbook__code {
+    background: var(--terminal-bg);
+    color: var(--terminal-ink);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+}
+
 /* ---- big footer ---- */
 .footer--big { padding: 56px 0 24px; }
 .footer__grid {

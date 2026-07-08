@@ -1,5 +1,6 @@
 import { Bo } from '@/components/Bo';
 import { PHBadge } from '@/components/PHBadge';
+import { EmailCapture } from '@/components/EmailCapture';
 
 /**
  * Site-wide footer with full Product / Resources / Company / Legal columns.
@@ -10,6 +11,9 @@ export function SiteFooter() {
     const year = 2026;
     return (
         <footer className="footer footer--big">
+            <div className="container footer__capture">
+                <EmailCapture source="footer" />
+            </div>
             <div className="container footer__grid">
                 <div className="footer__col footer__col--brand">
                     <div className="footer__brand">

@@ -69,7 +69,17 @@ await sql`
     )`;
 await sql`CREATE INDEX IF NOT EXISTS ab_events_variant ON ab_events (variant, event)`;
 
+// Email capture (footer "Get the AI-testing playbook" box). No sending yet —
+// this table IS the asset; Resend wiring lands separately once the key exists.
+await sql`
+    CREATE TABLE IF NOT EXISTS subscribers (
+        email      TEXT PRIMARY KEY,
+        source     TEXT NOT NULL DEFAULT 'footer',
+        created_at TIMESTAMPTZ DEFAULT now()
+    )`;
+
 const [{ ob }] = await sql`SELECT COUNT(*)::int AS ob FROM onboarding`;
 const [{ rn }] = await sql`SELECT COUNT(*)::int AS rn FROM runs`;
 const [{ pl }] = await sql`SELECT COUNT(*)::int AS pl FROM plans`;
-console.log(`onboarding ${ob} · runs ${rn} · plans ${pl} — all tables ready`);
+const [{ sb }] = await sql`SELECT COUNT(*)::int AS sb FROM subscribers`;
+console.log(`onboarding ${ob} · runs ${rn} · plans ${pl} · subscribers ${sb} — all tables ready`);
