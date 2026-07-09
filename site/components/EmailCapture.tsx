@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { sendGAEvent } from '@next/third-parties/google';
 
 /**
  * Site-wide lead magnet: "Get the AI-testing playbook". Renders in the
@@ -30,6 +31,12 @@ export function EmailCapture({ source = 'footer' }: { source?: string }) {
                 setError(data.error ?? 'Something went wrong');
                 setStatus('error');
                 return;
+            }
+            // GA4 conversion: a captured lead. Best-effort, never blocks the UX.
+            try {
+                sendGAEvent('event', 'generate_lead', { method: 'email_capture', source });
+            } catch {
+                // analytics must never affect the page
             }
             setStatus('done');
         } catch {
