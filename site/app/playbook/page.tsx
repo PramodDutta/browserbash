@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SiteNav } from '@/components/SiteNav';
 import { SiteFooter } from '@/components/SiteFooter';
 import { TUTORIAL } from '@/lib/learn-data';
+import { CourseCTA } from '@/components/CourseCTA';
 import '../landing.css';
 import '../marketing.css';
 
@@ -53,6 +54,8 @@ export default function PlaybookPage() {
                         </section>
                     ))}
                 </article>
+
+                <CourseCTA variant="band" source="playbook" />
 
                 <div className="doc-cta">
                     <div className="doc-cta__in">

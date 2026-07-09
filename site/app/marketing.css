@@ -336,3 +336,35 @@
     .cs-flow { grid-template-columns: 1fr 1fr; }
     .cs-list { grid-template-columns: 1fr; }
 }
+
+/* ---- AI Tester Blueprint course (playbook band + pricing card) ---- */
+.price-wrap { max-width: 1040px; }
+.course-card { border-color: var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+.course-card__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+    margin: 0 0 4px;
+}
+.course-card .price-amt { font-size: 1.6rem; color: var(--ink); }
+
+.course-band { max-width: 820px; margin: 56px auto 0; padding: 0 20px; }
+.course-band__in {
+    background: var(--bg-soft);
+    border: 2px solid var(--ink);
+    border-left: 8px solid var(--accent);
+    border-radius: 16px;
+    padding: 34px 36px;
+}
+.course-band__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+    margin: 0 0 6px;
+}
+.course-band__in h2 { font-size: 1.7rem; margin: 0 0 10px; letter-spacing: -0.01em; }
+.course-band__in p { color: var(--ink-soft); margin: 0 0 20px; max-width: 62ch; }

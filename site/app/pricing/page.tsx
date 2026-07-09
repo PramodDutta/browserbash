@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SiteNav } from '@/components/SiteNav';
 import { SiteFooter } from '@/components/SiteFooter';
 import { CopyButton } from '@/components/CopyButton';
+import { CourseCTA } from '@/components/CourseCTA';
 import '../landing.css';
 import '../marketing.css';
 
@@ -105,6 +106,8 @@ export default function Page() {
                             Start free &rarr;
                         </a>
                     </article>
+
+                    <CourseCTA variant="card" source="pricing" />
                 </div>
 
                 <div className="faq-list">
