@@ -1,0 +1,802 @@
+[
+{
+"slug": "test-deno-fresh-app-ai",
+"title": "Test a Deno Fresh App With Plain-English AI",
+"keyword": "test deno fresh app",
+"category": "guide",
+"angle": "Fresh islands architecture and server rendering tested by intent.",
+"date": "2026-08-12"
+},
+{
+"slug": "test-solidstart-app-ai",
+"title": "Test a SolidStart App in Plain English",
+"keyword": "test solidstart app",
+"category": "guide",
+"angle": "SolidStart routing and server functions verified by intent.",
+"date": "2026-08-13"
+},
+{
+"slug": "test-qwik-city-app-ai",
+"title": "Test a Qwik City App With AI Browser Automation",
+"keyword": "test qwik city app",
+"category": "guide",
+"angle": "Qwik City routing and resumable actions tested by intent.",
+"date": "2026-08-14"
+},
+{
+"slug": "test-analog-angular-app-ai",
+"title": "Test an Analog (Angular Meta-Framework) App With AI",
+"keyword": "test analog angular app",
+"category": "guide",
+"angle": "Analog file-based routes and Angular components verified by intent.",
+"date": "2026-08-15"
+},
+{
+"slug": "test-eleventy-site-ai",
+"title": "Test an Eleventy Static Site in Plain English",
+"keyword": "test eleventy site",
+"category": "guide",
+"angle": "11ty pre-rendered output and progressive enhancement tested by intent.",
+"date": "2026-08-16"
+},
+{
+"slug": "test-hugo-site-ai",
+"title": "Test a Hugo Static Site With Plain-English AI",
+"keyword": "test hugo site",
+"category": "guide",
+"angle": "Hugo-generated pages and search/nav widgets verified by intent.",
+"date": "2026-08-17"
+},
+{
+"slug": "test-jekyll-site-ai",
+"title": "Test a Jekyll Site With AI Browser Automation",
+"keyword": "test jekyll site",
+"category": "guide",
+"angle": "Jekyll pages and client-side sprinkles tested by intent.",
+"date": "2026-08-18"
+},
+{
+"slug": "test-docusaurus-site-ai",
+"title": "Test a Docusaurus Docs Site in Plain English",
+"keyword": "test docusaurus site",
+"category": "guide",
+"angle": "Docusaurus search, versioned docs, and nav verified by intent.",
+"date": "2026-08-19"
+},
+{
+"slug": "test-nextra-docs-ai",
+"title": "Test a Nextra Docs Site With Plain-English Tests",
+"keyword": "test nextra docs",
+"category": "guide",
+"angle": "Nextra MDX docs, search, and theme toggles tested by intent.",
+"date": "2026-08-20"
+},
+{
+"slug": "test-vitepress-site-ai",
+"title": "Test a VitePress Site With AI Browser Automation",
+"keyword": "test vitepress site",
+"category": "guide",
+"angle": "VitePress docs nav, search, and code groups verified by intent.",
+"date": "2026-08-21"
+},
+{
+"slug": "migrate-webdriverio-to-plain-english",
+"title": "Migrate WebdriverIO Tests to Plain English",
+"keyword": "migrate webdriverio tests",
+"category": "comparison",
+"angle": "Moving WDIO specs to intent-based tests, honest on what WDIO still does better.",
+"date": "2026-08-22"
+},
+{
+"slug": "migrate-nightwatch-to-ai",
+"title": "Migrate Nightwatch.js Tests to AI Browser Automation",
+"keyword": "migrate nightwatch tests",
+"category": "comparison",
+"angle": "Porting Nightwatch suites to plain English and where to keep them.",
+"date": "2026-08-23"
+},
+{
+"slug": "migrate-puppeteer-to-plain-english",
+"title": "Migrate Puppeteer Scripts to Plain-English Tests",
+"keyword": "migrate puppeteer scripts",
+"category": "comparison",
+"angle": "Turning Puppeteer automation into English objectives, honest on Puppeteer's low-level control.",
+"date": "2026-08-24"
+},
+{
+"slug": "migrate-protractor-legacy-to-ai",
+"title": "Migrate a Legacy Protractor Suite to AI Testing",
+"keyword": "migrate protractor tests",
+"category": "comparison",
+"angle": "Escaping deprecated Protractor into intent-based tests.",
+"date": "2026-08-25"
+},
+{
+"slug": "migrate-cucumber-js-to-plain-english",
+"title": "From Cucumber.js Gherkin to Plain-English Tests",
+"keyword": "migrate cucumber js tests",
+"category": "comparison",
+"angle": "Gherkin vs plain-English objectives, and a migration path.",
+"date": "2026-08-26"
+},
+{
+"slug": "migrate-specflow-to-ai",
+"title": "Migrate SpecFlow BDD Tests to AI Browser Automation",
+"keyword": "migrate specflow tests",
+"category": "comparison",
+"angle": "Porting .NET SpecFlow scenarios to English tests.",
+"date": "2026-08-27"
+},
+{
+"slug": "migrate-behave-python-to-ai",
+"title": "Migrate Behave (Python BDD) to Plain-English Tests",
+"keyword": "migrate behave python tests",
+"category": "comparison",
+"angle": "Behave step-defs vs intent objectives, migration honestly scoped.",
+"date": "2026-08-28"
+},
+{
+"slug": "migrate-codeceptjs-to-plain-english",
+"title": "Migrate CodeceptJS to Plain-English AI Tests",
+"keyword": "migrate codeceptjs tests",
+"category": "comparison",
+"angle": "CodeceptJS scenario-style to English objectives.",
+"date": "2026-08-29"
+},
+{
+"slug": "migrate-gauge-to-ai",
+"title": "Migrate Gauge Specs to AI Browser Automation",
+"keyword": "migrate gauge tests",
+"category": "comparison",
+"angle": "Gauge markdown specs to BrowserBash testmd, natural fit.",
+"date": "2026-08-30"
+},
+{
+"slug": "migrate-serenity-bdd-to-ai",
+"title": "Migrate Serenity BDD to Plain-English Testing",
+"keyword": "migrate serenity bdd tests",
+"category": "comparison",
+"angle": "Serenity/Java living docs vs English tests, honest tradeoffs.",
+"date": "2026-08-31"
+},
+{
+"slug": "seed-data-rest-api-then-verify-ui",
+"title": "Seed Data With a REST API, Verify It in the UI",
+"keyword": "seed data rest api verify ui",
+"category": "tutorial",
+"angle": "testmd v2 POST seed step + Verify step, the hybrid pattern end to end.",
+"date": "2026-09-01"
+},
+{
+"slug": "test-graphql-then-ui-hybrid",
+"title": "Seed via GraphQL, Assert in the Browser",
+"keyword": "graphql seed ui test",
+"category": "tutorial",
+"angle": "Using an API step to run a GraphQL mutation, then verifying the rendered result.",
+"date": "2026-09-02"
+},
+{
+"slug": "oauth-token-setup-api-step",
+"title": "Set Up an OAuth Token With an API Step, Then Test the UI",
+"keyword": "oauth token api step test",
+"category": "tutorial",
+"angle": "Fetching a token via API step, storing it, and driving an authed UI.",
+"date": "2026-09-03"
+},
+{
+"slug": "jwt-auth-hybrid-test",
+"title": "Test a JWT-Protected UI With an API-Seeded Session",
+"keyword": "jwt auth hybrid test",
+"category": "tutorial",
+"angle": "Minting a JWT through an API step and asserting gated UI.",
+"date": "2026-09-04"
+},
+{
+"slug": "test-pagination-api-and-ui",
+"title": "Test Pagination Across API and UI in One File",
+"keyword": "test pagination api ui",
+"category": "tutorial",
+"angle": "Seeding N records via API, then verifying page controls in the browser.",
+"date": "2026-09-05"
+},
+{
+"slug": "test-file-upload-api-plus-ui",
+"title": "Test a File-Upload Flow With API Setup and UI Checks",
+"keyword": "test file upload api ui",
+"category": "tutorial",
+"angle": "API-seeded state plus a UI upload assertion, honest on native file dialogs.",
+"date": "2026-09-06"
+},
+{
+"slug": "test-rate-limited-endpoint-ui",
+"title": "Test How the UI Handles a Rate-Limited API",
+"keyword": "test rate limited ui",
+"category": "tutorial",
+"angle": "Driving the UI into a 429 state and verifying the error surface.",
+"date": "2026-09-07"
+},
+{
+"slug": "contract-test-ui-with-api-steps",
+"title": "Lightweight Contract Testing Between UI and API",
+"keyword": "contract testing ui api",
+"category": "tutorial",
+"angle": "Using Expect status + stored values to pin the API the UI depends on.",
+"date": "2026-09-08"
+},
+{
+"slug": "webhook-triggered-ui-test",
+"title": "Verify a Webhook's Effect Shows Up in the UI",
+"keyword": "webhook ui verification",
+"category": "tutorial",
+"angle": "POSTing a webhook via API step and asserting the UI update.",
+"date": "2026-09-09"
+},
+{
+"slug": "test-search-index-api-then-ui",
+"title": "Seed a Search Index via API, Verify Results in the UI",
+"keyword": "test search index api ui",
+"category": "tutorial",
+"angle": "Populating search through the API, then asserting result rendering.",
+"date": "2026-09-10"
+},
+{
+"slug": "ai-browser-tests-argo-workflows",
+"title": "Run AI Browser Tests in Argo Workflows",
+"keyword": "ai browser tests argo",
+"category": "ci",
+"angle": "Argo Workflows step running browserbash --agent with artifacts.",
+"date": "2026-09-11"
+},
+{
+"slug": "ai-browser-tests-tekton",
+"title": "Run AI Browser Tests in Tekton Pipelines",
+"keyword": "ai browser tests tekton",
+"category": "ci",
+"angle": "Tekton Task/Pipeline running the suite with JUnit output.",
+"date": "2026-09-12"
+},
+{
+"slug": "ai-browser-tests-concourse",
+"title": "Run AI Browser Tests in Concourse CI",
+"keyword": "ai browser tests concourse",
+"category": "ci",
+"angle": "Concourse job wiring browserbash run-all with NDJSON.",
+"date": "2026-09-13"
+},
+{
+"slug": "ai-browser-tests-gocd",
+"title": "Run AI Browser Tests in GoCD",
+"keyword": "ai browser tests gocd",
+"category": "ci",
+"angle": "GoCD stage running the suite and gating on exit code.",
+"date": "2026-09-14"
+},
+{
+"slug": "ai-browser-tests-spinnaker",
+"title": "Gate Spinnaker Deploys With AI Browser Tests",
+"keyword": "ai browser tests spinnaker",
+"category": "ci",
+"angle": "Spinnaker pipeline stage running a smoke suite before promote.",
+"date": "2026-09-15"
+},
+{
+"slug": "ai-browser-tests-nx-cloud",
+"title": "Run AI Browser Tests With Nx and Nx Cloud",
+"keyword": "ai browser tests nx",
+"category": "ci",
+"angle": "Nx target + Nx Cloud caching around the test task.",
+"date": "2026-09-16"
+},
+{
+"slug": "ai-browser-tests-turborepo",
+"title": "Run AI Browser Tests in a Turborepo Monorepo",
+"keyword": "ai browser tests turborepo",
+"category": "ci",
+"angle": "Turborepo task pipeline running affected browser tests.",
+"date": "2026-09-17"
+},
+{
+"slug": "ai-browser-tests-earthly",
+"title": "Run AI Browser Tests With Earthly",
+"keyword": "ai browser tests earthly",
+"category": "ci",
+"angle": "Reproducible Earthfile target running the suite.",
+"date": "2026-09-18"
+},
+{
+"slug": "ai-browser-tests-dagger",
+"title": "Run AI Browser Tests in a Dagger Pipeline",
+"keyword": "ai browser tests dagger",
+"category": "ci",
+"angle": "Dagger function running browserbash in a container.",
+"date": "2026-09-19"
+},
+{
+"slug": "ai-browser-tests-self-hosted-runners",
+"title": "Run AI Browser Tests on Self-Hosted CI Runners",
+"keyword": "ai browser tests self hosted runners",
+"category": "ci",
+"angle": "Self-hosted runner setup, Chrome deps, and caching.",
+"date": "2026-09-20"
+},
+{
+"slug": "test-vercel-preview-deploys-ai",
+"title": "Test Vercel Preview Deploys on Every PR",
+"keyword": "test vercel preview deploys",
+"category": "use-case",
+"angle": "Pointing a suite at the per-PR preview URL and gating merge.",
+"date": "2026-09-21"
+},
+{
+"slug": "test-netlify-deploy-previews-ai",
+"title": "Test Netlify Deploy Previews With AI",
+"keyword": "test netlify deploy previews",
+"category": "use-case",
+"angle": "Running browser tests against Netlify preview URLs.",
+"date": "2026-09-22"
+},
+{
+"slug": "test-cloudflare-pages-ai",
+"title": "Test Cloudflare Pages Deployments in Plain English",
+"keyword": "test cloudflare pages",
+"category": "use-case",
+"angle": "Verifying Cloudflare Pages preview and production URLs.",
+"date": "2026-09-23"
+},
+{
+"slug": "test-aws-amplify-ai",
+"title": "Test an AWS Amplify App With AI Browser Automation",
+"keyword": "test aws amplify",
+"category": "use-case",
+"angle": "Amplify branch previews validated by intent.",
+"date": "2026-09-24"
+},
+{
+"slug": "test-render-deploys-ai",
+"title": "Test Render.com Deploys With Plain-English Tests",
+"keyword": "test render deploys",
+"category": "use-case",
+"angle": "Render preview environments checked by intent.",
+"date": "2026-09-25"
+},
+{
+"slug": "test-railway-deploys-ai",
+"title": "Test Railway Deploys With AI Browser Automation",
+"keyword": "test railway deploys",
+"category": "use-case",
+"angle": "Railway PR environments validated by intent.",
+"date": "2026-09-26"
+},
+{
+"slug": "test-fly-io-deploys-ai",
+"title": "Test Fly.io Deploys in Plain English",
+"keyword": "test fly io deploys",
+"category": "use-case",
+"angle": "Fly.io app URLs smoke-tested by intent.",
+"date": "2026-09-27"
+},
+{
+"slug": "test-azure-static-web-apps-ai",
+"title": "Test Azure Static Web Apps With AI",
+"keyword": "test azure static web apps",
+"category": "use-case",
+"angle": "Azure SWA staging environments verified by intent.",
+"date": "2026-09-28"
+},
+{
+"slug": "test-digitalocean-app-platform-ai",
+"title": "Test DigitalOcean App Platform Deploys With AI",
+"keyword": "test digitalocean app platform",
+"category": "use-case",
+"angle": "DO App Platform URLs validated by intent.",
+"date": "2026-09-29"
+},
+{
+"slug": "test-github-pages-ai",
+"title": "Test a GitHub Pages Site With Plain-English AI",
+"keyword": "test github pages",
+"category": "use-case",
+"angle": "GitHub Pages static output verified by intent in CI.",
+"date": "2026-09-30"
+},
+{
+"slug": "run-ai-tests-selenium-grid",
+"title": "Run AI Browser Tests Against Selenium Grid",
+"keyword": "ai tests selenium grid",
+"category": "guide",
+"angle": "Pointing the CDP/grid provider at a Selenium Grid endpoint.",
+"date": "2026-10-01"
+},
+{
+"slug": "run-ai-tests-docker-chrome",
+"title": "Run AI Browser Tests With Headless Chrome in Docker",
+"keyword": "ai tests docker chrome",
+"category": "guide",
+"angle": "Dockerized Chrome + CDP provider for reproducible runs.",
+"date": "2026-10-02"
+},
+{
+"slug": "run-ai-tests-chrome-for-testing",
+"title": "Use Chrome for Testing With AI Browser Automation",
+"keyword": "chrome for testing ai",
+"category": "guide",
+"angle": "Pinning Chrome for Testing builds for stable CI runs.",
+"date": "2026-10-03"
+},
+{
+"slug": "run-ai-tests-remote-cdp",
+"title": "Connect AI Browser Tests to a Remote CDP Endpoint",
+"keyword": "ai tests remote cdp",
+"category": "guide",
+"angle": "Using --provider cdp against any remote Chrome DevTools endpoint.",
+"date": "2026-10-04"
+},
+{
+"slug": "run-ai-tests-kubernetes",
+"title": "Run AI Browser Tests in Kubernetes Pods",
+"keyword": "ai tests kubernetes",
+"category": "guide",
+"angle": "Ephemeral browser pods and the CDP provider in a cluster.",
+"date": "2026-10-05"
+},
+{
+"slug": "run-ai-tests-testcontainers",
+"title": "Run AI Browser Tests With Testcontainers",
+"keyword": "ai tests testcontainers",
+"category": "guide",
+"angle": "Spinning a browser container per test run with Testcontainers.",
+"date": "2026-10-06"
+},
+{
+"slug": "run-ai-tests-xvfb-headed",
+"title": "Run Headed AI Browser Tests Under Xvfb in CI",
+"keyword": "ai tests xvfb headed",
+"category": "guide",
+"angle": "Xvfb for headed runs where headless behaves differently.",
+"date": "2026-10-07"
+},
+{
+"slug": "run-ai-tests-wsl",
+"title": "Run AI Browser Tests on Windows via WSL",
+"keyword": "ai tests wsl",
+"category": "guide",
+"angle": "WSL2 setup for Chrome and the CLI on Windows.",
+"date": "2026-10-08"
+},
+{
+"slug": "run-ai-tests-arm-runners",
+"title": "Run AI Browser Tests on ARM (M-series, Graviton) Runners",
+"keyword": "ai tests arm runners",
+"category": "guide",
+"angle": "ARM64 Chrome/runner notes and reproducibility.",
+"date": "2026-10-09"
+},
+{
+"slug": "run-ai-tests-github-hosted-vs-self-hosted",
+"title": "GitHub-Hosted vs Self-Hosted Runners for AI Browser Tests",
+"keyword": "github hosted vs self hosted runners",
+"category": "guide",
+"angle": "Cost, speed, and caching tradeoffs for browser test runners.",
+"date": "2026-10-10"
+},
+{
+"slug": "test-notion-workspace-ai",
+"title": "Test a Notion Workspace Flow With AI Browser Automation",
+"keyword": "test notion automation",
+"category": "use-case",
+"angle": "Notion's dynamic blocks tested by intent, honest on its heavy client DOM.",
+"date": "2026-10-11"
+},
+{
+"slug": "test-airtable-app-ai",
+"title": "Test an Airtable Base UI With Plain-English AI",
+"keyword": "test airtable automation",
+"category": "use-case",
+"angle": "Airtable grid and form views verified by intent.",
+"date": "2026-10-12"
+},
+{
+"slug": "test-linear-app-ai",
+"title": "Test a Linear Issue Flow With AI",
+"keyword": "test linear automation",
+"category": "use-case",
+"angle": "Linear's keyboard-driven UI tested by intent.",
+"date": "2026-10-13"
+},
+{
+"slug": "test-jira-ui-ai",
+"title": "Test a Jira Board and Issue UI With Plain-English Tests",
+"keyword": "test jira ui automation",
+"category": "use-case",
+"angle": "Jira board drag and issue edit verified by intent.",
+"date": "2026-10-14"
+},
+{
+"slug": "test-asana-app-ai",
+"title": "Test an Asana Project Flow With AI Browser Automation",
+"keyword": "test asana automation",
+"category": "use-case",
+"angle": "Asana task and list UIs tested by intent.",
+"date": "2026-10-15"
+},
+{
+"slug": "test-trello-board-ai",
+"title": "Test a Trello Board With Plain-English AI",
+"keyword": "test trello automation",
+"category": "use-case",
+"angle": "Trello card drag-drop verified by intent, honest on native DnD.",
+"date": "2026-10-16"
+},
+{
+"slug": "test-monday-com-ai",
+"title": "Test a Monday.com Board With AI Browser Automation",
+"keyword": "test monday com automation",
+"category": "use-case",
+"angle": "Monday boards and columns tested by intent.",
+"date": "2026-10-17"
+},
+{
+"slug": "test-clickup-app-ai",
+"title": "Test a ClickUp Workflow With Plain-English Tests",
+"keyword": "test clickup automation",
+"category": "use-case",
+"angle": "ClickUp views and tasks verified by intent.",
+"date": "2026-10-18"
+},
+{
+"slug": "test-zendesk-agent-ui-ai",
+"title": "Test a Zendesk Agent Workspace With AI",
+"keyword": "test zendesk automation",
+"category": "use-case",
+"angle": "Zendesk ticket flows tested by intent.",
+"date": "2026-10-19"
+},
+{
+"slug": "test-hubspot-crm-ai",
+"title": "Test a HubSpot CRM Flow With Plain-English AI",
+"keyword": "test hubspot automation",
+"category": "use-case",
+"angle": "HubSpot record and pipeline UIs verified by intent.",
+"date": "2026-10-20"
+},
+{
+"slug": "test-grafana-dashboards-ai",
+"title": "Test Grafana Dashboards With Plain-English AI",
+"keyword": "test grafana dashboards",
+"category": "guide",
+"angle": "Grafana panels, time-range, and variables verified by intent, honest on canvas charts.",
+"date": "2026-10-21"
+},
+{
+"slug": "test-metabase-dashboards-ai",
+"title": "Test Metabase Dashboards With AI Browser Automation",
+"keyword": "test metabase dashboards",
+"category": "guide",
+"angle": "Metabase questions and filters tested by intent.",
+"date": "2026-10-22"
+},
+{
+"slug": "test-apache-superset-ai",
+"title": "Test Apache Superset Charts With Plain-English Tests",
+"keyword": "test superset dashboards",
+"category": "guide",
+"angle": "Superset chart and dashboard interactions by intent.",
+"date": "2026-10-23"
+},
+{
+"slug": "test-looker-studio-ai",
+"title": "Test Looker Studio Reports With AI",
+"keyword": "test looker studio",
+"category": "guide",
+"angle": "Looker Studio filters and pages verified by intent.",
+"date": "2026-10-24"
+},
+{
+"slug": "test-powerbi-embedded-ai",
+"title": "Test a Power BI Embedded Report With AI",
+"keyword": "test powerbi embedded",
+"category": "guide",
+"angle": "Embedded Power BI slicers and visuals, honest on iframe/canvas.",
+"date": "2026-10-25"
+},
+{
+"slug": "test-observable-notebooks-ai",
+"title": "Test Observable Notebook UIs With Plain-English AI",
+"keyword": "test observable notebooks",
+"category": "guide",
+"angle": "Observable inputs and reactive cells verified by intent.",
+"date": "2026-10-26"
+},
+{
+"slug": "test-chartjs-d3-echarts-ai",
+"title": "Test Chart.js, D3, and ECharts UIs With AI",
+"keyword": "test chart ui automation",
+"category": "guide",
+"angle": "Asserting legends, tooltips, and controls around canvas/SVG charts.",
+"date": "2026-10-27"
+},
+{
+"slug": "test-data-tables-export-ai",
+"title": "Test Data Tables, Sorting, and CSV Export With AI",
+"keyword": "test data table export",
+"category": "guide",
+"angle": "Sort, filter, and export flows verified by intent, honest on file downloads.",
+"date": "2026-10-28"
+},
+{
+"slug": "test-kibana-dashboards-ai",
+"title": "Test Kibana Dashboards With Plain-English AI",
+"keyword": "test kibana dashboards",
+"category": "guide",
+"angle": "Kibana time filters and visualizations by intent.",
+"date": "2026-10-29"
+},
+{
+"slug": "test-realtime-dashboard-updates-ai",
+"title": "Test Real-Time Dashboard Updates With AI Browser Automation",
+"keyword": "test realtime dashboard",
+"category": "guide",
+"angle": "Asserting live-updating widgets and websockets-driven UI.",
+"date": "2026-10-30"
+},
+{
+"slug": "test-login-rate-limiting-ui",
+"title": "Test Login Rate-Limiting and Lockout in the UI",
+"keyword": "test login rate limiting",
+"category": "security",
+"angle": "Driving repeated failed logins and asserting the lockout surface.",
+"date": "2026-10-31"
+},
+{
+"slug": "test-session-timeout-ui",
+"title": "Test Session Timeout and Re-Auth Flows With AI",
+"keyword": "test session timeout",
+"category": "security",
+"angle": "Idle-timeout and re-auth prompts verified by intent.",
+"date": "2026-11-01"
+},
+{
+"slug": "test-csrf-protected-forms-ui",
+"title": "Test CSRF-Protected Forms Behave Correctly",
+"keyword": "test csrf form",
+"category": "security",
+"angle": "Asserting a form's happy path works and stale-token rejection surfaces.",
+"date": "2026-11-02"
+},
+{
+"slug": "test-rbac-visibility-ui",
+"title": "Test Role-Based UI Visibility With Plain-English AI",
+"keyword": "test rbac ui visibility",
+"category": "security",
+"angle": "Asserting different roles see different controls via saved auth profiles.",
+"date": "2026-11-03"
+},
+{
+"slug": "test-gdpr-consent-flows-ui",
+"title": "Test GDPR Consent and Cookie Preference Flows",
+"keyword": "test gdpr consent",
+"category": "security",
+"angle": "Consent banners, granular toggles, and the privacy-first default.",
+"date": "2026-11-04"
+},
+{
+"slug": "test-password-reset-flow-ai",
+"title": "Test a Password-Reset Flow End to End With AI",
+"keyword": "test password reset flow",
+"category": "security",
+"angle": "Request-to-reset UI plus honest email-link retrieval with IMAP variables.",
+"date": "2026-11-05"
+},
+{
+"slug": "test-2fa-totp-login-ai",
+"title": "Test a 2FA TOTP Login With Plain-English AI",
+"keyword": "test 2fa totp login",
+"category": "security",
+"angle": "TOTP entry UI tested by intent, honest on generating codes vs mocking.",
+"date": "2026-11-06"
+},
+{
+"slug": "test-account-lockout-recovery-ai",
+"title": "Test Account Lockout and Recovery Flows",
+"keyword": "test account lockout recovery",
+"category": "security",
+"angle": "Lockout, recovery, and support-path UIs verified by intent.",
+"date": "2026-11-07"
+},
+{
+"slug": "test-secure-headers-mixed-content-ai",
+"title": "Spot Mixed-Content and Insecure UI States With AI",
+"keyword": "test mixed content ui",
+"category": "security",
+"angle": "Asserting the UI does not surface insecure states, honest on scope.",
+"date": "2026-11-08"
+},
+{
+"slug": "test-privilege-escalation-ui-checks",
+"title": "UI Checks That Catch Broken Access Control",
+"keyword": "broken access control ui test",
+"category": "security",
+"angle": "Asserting a lower-privilege user cannot reach admin-only screens.",
+"date": "2026-11-09"
+},
+{
+"slug": "pr-gate-strategy-ai-browser-tests",
+"title": "A PR-Gate Strategy With AI Browser Tests",
+"keyword": "pr gate strategy ai tests",
+"category": "ci",
+"angle": "Which tests block merge, exit-code gating, and PR verdict comments.",
+"date": "2026-11-10"
+},
+{
+"slug": "naming-plain-english-tests-style-guide",
+"title": "A Style Guide for Naming Plain-English Tests",
+"keyword": "plain english test style guide",
+"category": "guide",
+"angle": "Conventions for clear, reviewable English objectives.",
+"date": "2026-11-11"
+},
+{
+"slug": "review-ai-written-tests",
+"title": "How to Review AI-Written Browser Tests",
+"keyword": "review ai written tests",
+"category": "agents",
+"angle": "What to check when an agent proposes a test before you trust it.",
+"date": "2026-11-12"
+},
+{
+"slug": "build-a-flakiness-dashboard-ai",
+"title": "Build a Flakiness Dashboard From BrowserBash Runs",
+"keyword": "flakiness dashboard",
+"category": "guide",
+"angle": "Using memory-store flaky flags and run history to see instability.",
+"date": "2026-11-13"
+},
+{
+"slug": "onboard-qa-team-to-ai-testing",
+"title": "Onboard a QA Team to AI Browser Testing in a Week",
+"keyword": "onboard qa ai testing",
+"category": "guide",
+"angle": "A practical rollout plan from first run to CI adoption.",
+"date": "2026-11-14"
+},
+{
+"slug": "shift-left-with-ai-browser-tests",
+"title": "Shift Testing Left With AI Browser Tests",
+"keyword": "shift left ai testing",
+"category": "guide",
+"angle": "Running English tests in pre-commit and preview, not just nightly.",
+"date": "2026-11-15"
+},
+{
+"slug": "from-manual-qa-to-ai-assisted",
+"title": "From Manual QA to AI-Assisted Testing",
+"keyword": "manual qa to ai testing",
+"category": "guide",
+"angle": "A path that keeps human judgment while automating the repetitive.",
+"date": "2026-11-16"
+},
+{
+"slug": "test-coverage-myths-ai-era",
+"title": "Test Coverage Myths in the AI Testing Era",
+"keyword": "test coverage myths",
+"category": "guide",
+"angle": "Why line coverage misleads and what user-flow coverage means.",
+"date": "2026-11-17"
+},
+{
+"slug": "cut-test-maintenance-with-ai",
+"title": "Cut Test Maintenance Cost With Intent-Based Tests",
+"keyword": "cut test maintenance",
+"category": "guide",
+"angle": "How intent over selectors reduces the churn, honestly scoped.",
+"date": "2026-11-18"
+},
+{
+"slug": "english-tests-as-living-documentation",
+"title": "Plain-English Tests as Living Documentation",
+"keyword": "english tests living documentation",
+"category": "guide",
+"angle": "Committed English tests that double as readable specs.",
+"date": "2026-11-19"
+}
+]
