@@ -1,0 +1,802 @@
+[
+{
+"slug": "test-solidjs-app-ai",
+"title": "Test a SolidJS App With Plain-English AI Tests",
+"keyword": "test solidjs app",
+"category": "guide",
+"angle": "SolidJS fine-grained reactivity and Signals-driven DOM updates verified by intent, honest on where Vitest unit tests still fit.",
+"date": "2026-05-04"
+},
+{
+"slug": "test-qwik-app-plain-english",
+"title": "Test a Qwik App in Plain English",
+"keyword": "test qwik app automation",
+"category": "guide",
+"angle": "Qwik resumability and lazy-loaded interactivity tested with English objectives and Verify steps, watching for hydration-on-interaction quirks.",
+"date": "2026-05-05"
+},
+{
+"slug": "test-emberjs-app-ai",
+"title": "Test an Ember.js App With AI Browser Automation",
+"keyword": "test emberjs app",
+"category": "guide",
+"angle": "Ember's convention-driven routes and computed properties covered by intent, honest on Ember's own QUnit test harness.",
+"date": "2026-05-06"
+},
+{
+"slug": "test-alpinejs-app-plain-english",
+"title": "Test an Alpine.js App in Plain English",
+"keyword": "test alpinejs app",
+"category": "guide",
+"angle": "Alpine's x-data/x-show sprinkles on server-rendered pages tested by intent without a build step.",
+"date": "2026-05-07"
+},
+{
+"slug": "test-lit-web-components-ai",
+"title": "Test Lit Web Components With Plain-English Tests",
+"keyword": "test lit web components",
+"category": "guide",
+"angle": "Lit elements and their shadow DOM verified by intent, with honest notes on shadow-root piercing.",
+"date": "2026-05-08"
+},
+{
+"slug": "test-preact-app-ai",
+"title": "Test a Preact App With AI Browser Automation",
+"keyword": "test preact app",
+"category": "guide",
+"angle": "Preact's tiny-React model and signals tested by intent, and how it differs from testing React.",
+"date": "2026-05-09"
+},
+{
+"slug": "test-gatsby-site-plain-english",
+"title": "Test a Gatsby Static Site in Plain English",
+"keyword": "test gatsby site",
+"category": "guide",
+"angle": "Gatsby's pre-rendered pages and client hydration verified, honest on what static output makes trivial vs hard.",
+"date": "2026-05-10"
+},
+{
+"slug": "test-redwoodjs-app-ai",
+"title": "Test a RedwoodJS App With Plain-English Tests",
+"keyword": "test redwoodjs app",
+"category": "guide",
+"angle": "Redwood cells, forms, and GraphQL-backed pages tested by intent across the full-stack framework.",
+"date": "2026-05-11"
+},
+{
+"slug": "test-marko-app-ai",
+"title": "Test a Marko App With AI Browser Automation",
+"keyword": "test marko app",
+"category": "guide",
+"angle": "Marko's streaming server render and partial hydration verified by intent.",
+"date": "2026-05-12"
+},
+{
+"slug": "test-angular-material-app-ai",
+"title": "Test an Angular Material App in Plain English",
+"keyword": "test angular material app",
+"category": "guide",
+"angle": "Angular Material overlays, mat-dialogs, and CDK components tested by intent, honest on overlay-container timing.",
+"date": "2026-05-13"
+},
+{
+"slug": "test-ionic-app-plain-english",
+"title": "Test an Ionic Web App in Plain English",
+"keyword": "test ionic app automation",
+"category": "guide",
+"angle": "Ionic web components and mobile-first UI tested by intent in a desktop browser, honest on native-only paths.",
+"date": "2026-05-14"
+},
+{
+"slug": "test-stenciljs-components-ai",
+"title": "Test Stencil.js Web Components With AI",
+"keyword": "test stenciljs components",
+"category": "guide",
+"angle": "Stencil-compiled custom elements and their shadow DOM verified by intent.",
+"date": "2026-05-15"
+},
+{
+"slug": "test-keycloak-login-ai",
+"title": "Test a Keycloak Login Flow With Plain-English AI",
+"keyword": "test keycloak login",
+"category": "security",
+"angle": "Keycloak-hosted login and redirect-back tested by intent, secrets via {{var}}, honest on realm/MFA config not being automatable.",
+"date": "2026-05-16"
+},
+{
+"slug": "test-passkey-webauthn-flows",
+"title": "Testing Passkey and WebAuthn Flows: What AI Automation Can and Cannot Do",
+"keyword": "test passkey webauthn automation",
+"category": "security",
+"angle": "Honest guide to passkey/WebAuthn: platform-authenticator prompts are OS-level and not scriptable, what you can still assert around them.",
+"date": "2026-05-17"
+},
+{
+"slug": "test-saml-sso-login-ai",
+"title": "Test a SAML SSO Login With AI Browser Automation",
+"keyword": "test saml sso login",
+"category": "security",
+"angle": "IdP-initiated and SP-initiated SAML redirects tested by intent, honest on corporate IdP MFA gates.",
+"date": "2026-05-18"
+},
+{
+"slug": "test-workos-auth-plain-english",
+"title": "Test WorkOS-Powered Auth in Plain English",
+"keyword": "test workos auth",
+"category": "security",
+"angle": "WorkOS AuthKit and SSO flows verified by intent with templated credentials.",
+"date": "2026-05-19"
+},
+{
+"slug": "test-fusionauth-login-ai",
+"title": "Test a FusionAuth Login Flow With Plain-English Tests",
+"keyword": "test fusionauth login",
+"category": "security",
+"angle": "FusionAuth hosted-login themes and redirects tested by intent.",
+"date": "2026-05-20"
+},
+{
+"slug": "test-supertokens-auth-ai",
+"title": "Test SuperTokens Auth With AI Browser Automation",
+"keyword": "test supertokens auth",
+"category": "security",
+"angle": "SuperTokens session flows and pre-built UI verified by intent.",
+"date": "2026-05-21"
+},
+{
+"slug": "test-ory-kratos-flows-ai",
+"title": "Test Ory Kratos Self-Service Flows in Plain English",
+"keyword": "test ory kratos flows",
+"category": "security",
+"angle": "Ory Kratos login/registration/recovery UI nodes tested by intent.",
+"date": "2026-05-22"
+},
+{
+"slug": "test-stytch-auth-plain-english",
+"title": "Test Stytch Passwordless Auth in Plain English",
+"keyword": "test stytch auth",
+"category": "security",
+"angle": "Stytch email/SMS passwordless UI tested by intent, honest on real OTP delivery needing IMAP variables.",
+"date": "2026-05-23"
+},
+{
+"slug": "test-descope-flows-ai",
+"title": "Test Descope Auth Flows With AI Browser Automation",
+"keyword": "test descope flows",
+"category": "security",
+"angle": "Descope no-code auth flows and widgets verified by intent.",
+"date": "2026-05-24"
+},
+{
+"slug": "test-magic-link-login-ai",
+"title": "Test a Magic-Link Login End to End With AI",
+"keyword": "test magic link login",
+"category": "security",
+"angle": "Magic-link request UI plus the honest email-retrieval story with {{mail.link}} IMAP variables.",
+"date": "2026-05-25"
+},
+{
+"slug": "test-magento-store-ai",
+"title": "Test a Magento Store Checkout With Plain-English AI",
+"keyword": "test magento store",
+"category": "use-case",
+"angle": "Magento 2 catalog, cart, and multi-step checkout tested by intent, honest on payment-sandbox setup.",
+"date": "2026-05-26"
+},
+{
+"slug": "test-bigcommerce-store-plain-english",
+"title": "Test a BigCommerce Store in Plain English",
+"keyword": "test bigcommerce store",
+"category": "use-case",
+"angle": "BigCommerce storefront browse-to-checkout verified by intent.",
+"date": "2026-05-27"
+},
+{
+"slug": "test-prestashop-store-ai",
+"title": "Test a PrestaShop Store With AI Browser Automation",
+"keyword": "test prestashop store",
+"category": "use-case",
+"angle": "PrestaShop cart and checkout flows tested by intent.",
+"date": "2026-05-28"
+},
+{
+"slug": "test-wix-store-plain-english",
+"title": "Test a Wix Online Store in Plain English",
+"keyword": "test wix store",
+"category": "use-case",
+"angle": "Wix Stores product-to-cart flows verified by intent, honest on Wix's dynamic DOM.",
+"date": "2026-05-29"
+},
+{
+"slug": "test-squarespace-commerce-ai",
+"title": "Test Squarespace Commerce Checkout With AI",
+"keyword": "test squarespace commerce",
+"category": "use-case",
+"angle": "Squarespace product pages and checkout tested by intent.",
+"date": "2026-05-30"
+},
+{
+"slug": "test-ecwid-store-ai",
+"title": "Test an Ecwid Storefront With Plain-English Tests",
+"keyword": "test ecwid store",
+"category": "use-case",
+"angle": "Ecwid embedded-store widgets and cart verified by intent, honest on iframe-embedded stores.",
+"date": "2026-05-31"
+},
+{
+"slug": "test-snipcart-checkout-ai",
+"title": "Test a Snipcart Checkout in Plain English",
+"keyword": "test snipcart checkout",
+"category": "use-case",
+"angle": "Snipcart's JS-injected cart overlay on any static site tested by intent.",
+"date": "2026-06-01"
+},
+{
+"slug": "test-medusajs-storefront-ai",
+"title": "Test a Medusa.js Storefront With AI Browser Automation",
+"keyword": "test medusajs storefront",
+"category": "use-case",
+"angle": "Headless Medusa storefront browse-and-buy verified by intent.",
+"date": "2026-06-02"
+},
+{
+"slug": "test-saleor-storefront-plain-english",
+"title": "Test a Saleor Storefront in Plain English",
+"keyword": "test saleor storefront",
+"category": "use-case",
+"angle": "Saleor GraphQL-backed storefront checkout tested by intent.",
+"date": "2026-06-03"
+},
+{
+"slug": "test-swell-store-ai",
+"title": "Test a Swell Headless Store With Plain-English Tests",
+"keyword": "test swell store",
+"category": "use-case",
+"angle": "Swell headless commerce cart and checkout verified by intent.",
+"date": "2026-06-04"
+},
+{
+"slug": "test-contentful-preview-ai",
+"title": "Test a Contentful-Powered Site With Plain-English AI",
+"keyword": "test contentful site",
+"category": "guide",
+"angle": "Contentful preview vs published content verified by intent on the front end.",
+"date": "2026-06-05"
+},
+{
+"slug": "test-sanity-studio-ai",
+"title": "Test a Sanity.io Front End With AI Browser Automation",
+"keyword": "test sanity site",
+"category": "guide",
+"angle": "Sanity-driven pages and portable-text rendering tested by intent.",
+"date": "2026-06-06"
+},
+{
+"slug": "test-strapi-frontend-plain-english",
+"title": "Test a Strapi-Backed Front End in Plain English",
+"keyword": "test strapi frontend",
+"category": "guide",
+"angle": "Strapi CMS content surfaced on the site verified by intent.",
+"date": "2026-06-07"
+},
+{
+"slug": "test-bubble-app-ai",
+"title": "Test a Bubble No-Code App With Plain-English Tests",
+"keyword": "test bubble app",
+"category": "guide",
+"angle": "Bubble's dynamic element IDs and workflows tested by intent, honest on Bubble's generated DOM.",
+"date": "2026-06-08"
+},
+{
+"slug": "test-retool-app-ai",
+"title": "Test a Retool Internal App With AI Browser Automation",
+"keyword": "test retool app",
+"category": "guide",
+"angle": "Retool internal tools and tables verified by intent, honest on iframe/component boundaries.",
+"date": "2026-06-09"
+},
+{
+"slug": "test-appsmith-app-plain-english",
+"title": "Test an Appsmith Internal Tool in Plain English",
+"keyword": "test appsmith app",
+"category": "guide",
+"angle": "Appsmith widgets and query-bound tables tested by intent.",
+"date": "2026-06-10"
+},
+{
+"slug": "test-budibase-app-ai",
+"title": "Test a Budibase App With Plain-English Tests",
+"keyword": "test budibase app",
+"category": "guide",
+"angle": "Budibase data-bound screens verified by intent.",
+"date": "2026-06-11"
+},
+{
+"slug": "test-directus-frontend-ai",
+"title": "Test a Directus-Backed Front End With AI",
+"keyword": "test directus frontend",
+"category": "guide",
+"angle": "Directus-managed content rendered on the site tested by intent.",
+"date": "2026-06-12"
+},
+{
+"slug": "test-payload-cms-frontend-ai",
+"title": "Test a Payload CMS Front End in Plain English",
+"keyword": "test payload cms frontend",
+"category": "guide",
+"angle": "Payload-driven pages and blocks verified by intent.",
+"date": "2026-06-13"
+},
+{
+"slug": "test-storyblok-site-ai",
+"title": "Test a Storyblok-Powered Site With AI Browser Automation",
+"keyword": "test storyblok site",
+"category": "guide",
+"angle": "Storyblok visual-editor content on the live site tested by intent.",
+"date": "2026-06-14"
+},
+{
+"slug": "browserbash-alerts-opsgenie",
+"title": "Route BrowserBash Monitor Alerts Into Opsgenie",
+"keyword": "browserbash opsgenie alerts",
+"category": "ci",
+"angle": "Wiring monitor --notify into an Opsgenie webhook and what the on-call payload looks like.",
+"date": "2026-06-15"
+},
+{
+"slug": "browserbash-alerts-rollbar",
+"title": "Send Broken-Flow Signals to Rollbar From BrowserBash",
+"keyword": "browserbash rollbar integration",
+"category": "ci",
+"angle": "Forwarding monitor failures to Rollbar as items via a webhook bridge.",
+"date": "2026-06-16"
+},
+{
+"slug": "browserbash-alerts-bugsnag",
+"title": "Pipe BrowserBash Failures Into Bugsnag",
+"keyword": "browserbash bugsnag integration",
+"category": "ci",
+"angle": "Turning a failed production flow into a Bugsnag event through a generic webhook.",
+"date": "2026-06-17"
+},
+{
+"slug": "browserbash-alerts-new-relic",
+"title": "Push BrowserBash Monitor Results to New Relic",
+"keyword": "browserbash new relic integration",
+"category": "ci",
+"angle": "Sending synthetic-check outcomes to New Relic via the Events API from a monitor hook.",
+"date": "2026-06-18"
+},
+{
+"slug": "browserbash-alerts-honeycomb",
+"title": "Send BrowserBash Verdicts to Honeycomb as Events",
+"keyword": "browserbash honeycomb integration",
+"category": "ci",
+"angle": "Emitting run_end verdicts to Honeycomb for observability correlation.",
+"date": "2026-06-19"
+},
+{
+"slug": "browserbash-alerts-better-stack",
+"title": "Wire BrowserBash Monitors Into Better Stack",
+"keyword": "browserbash better stack integration",
+"category": "ci",
+"angle": "Connecting monitor mode to Better Stack (Uptime) incidents via webhook.",
+"date": "2026-06-20"
+},
+{
+"slug": "browserbash-alerts-grafana-oncall",
+"title": "Alert Grafana OnCall When a Flow Breaks",
+"keyword": "browserbash grafana oncall integration",
+"category": "ci",
+"angle": "Routing monitor alerts into Grafana OnCall escalation chains.",
+"date": "2026-06-21"
+},
+{
+"slug": "browserbash-alerts-squadcast",
+"title": "Send BrowserBash Alerts to Squadcast On-Call",
+"keyword": "browserbash squadcast integration",
+"category": "ci",
+"angle": "Forwarding failed-flow alerts to Squadcast for incident response.",
+"date": "2026-06-22"
+},
+{
+"slug": "browserbash-zapier-bridge",
+"title": "Bridge BrowserBash Alerts to 1000 Apps With Zapier",
+"keyword": "browserbash zapier integration",
+"category": "ci",
+"angle": "Using a Zapier catch-hook to fan monitor alerts out to any app.",
+"date": "2026-06-23"
+},
+{
+"slug": "browserbash-n8n-workflow",
+"title": "Orchestrate BrowserBash Alerts With an n8n Workflow",
+"keyword": "browserbash n8n workflow",
+"category": "ci",
+"angle": "Self-hosted n8n receiving monitor webhooks and branching on pass/fail.",
+"date": "2026-06-24"
+},
+{
+"slug": "ai-testing-insurance-portals",
+"title": "AI Browser Testing for Insurance Quote and Claim Portals",
+"keyword": "ai testing insurance portals",
+"category": "use-case",
+"angle": "Multi-step quote and claims wizards validated by intent, honest on regulated data and PII masking.",
+"date": "2026-06-25"
+},
+{
+"slug": "ai-testing-banking-kyc-onboarding",
+"title": "AI Testing for Banking KYC and Onboarding Flows",
+"keyword": "ai testing banking kyc",
+"category": "use-case",
+"angle": "Identity-verification onboarding tested by intent, honest on document-upload and liveness limits.",
+"date": "2026-06-26"
+},
+{
+"slug": "ai-testing-crypto-exchange-ui",
+"title": "AI Browser Testing for a Crypto Exchange UI",
+"keyword": "ai testing crypto exchange",
+"category": "use-case",
+"angle": "Order-book, trade, and wallet UIs validated by intent without touching real funds, honest on 2FA.",
+"date": "2026-06-27"
+},
+{
+"slug": "ai-testing-web3-dapp-wallet-connect",
+"title": "Testing a Web3 dApp Wallet-Connect Flow With AI",
+"keyword": "ai testing web3 dapp",
+"category": "use-case",
+"angle": "Honest guide: wallet-extension popups (MetaMask) are out-of-page, what you can still assert around connect state.",
+"date": "2026-06-28"
+},
+{
+"slug": "ai-testing-gaming-leaderboards",
+"title": "AI Testing for Web Game Leaderboards and Accounts",
+"keyword": "ai testing gaming leaderboards",
+"category": "use-case",
+"angle": "Account, leaderboard, and store UIs verified by intent, honest on canvas game-canvas limits.",
+"date": "2026-06-29"
+},
+{
+"slug": "ai-testing-streaming-ott-player",
+"title": "AI Browser Testing for Streaming and OTT Players",
+"keyword": "ai testing streaming ott",
+"category": "use-case",
+"angle": "Catalog, playback controls, and paywall gates validated by intent, honest on DRM video pixels.",
+"date": "2026-06-30"
+},
+{
+"slug": "ai-testing-government-citizen-portals",
+"title": "AI Testing for Government and Citizen Service Portals",
+"keyword": "ai testing government portals",
+"category": "use-case",
+"angle": "Form-heavy public-service flows verified by intent, honest on accessibility and session timeouts.",
+"date": "2026-07-01"
+},
+{
+"slug": "ai-testing-nonprofit-donation-flows",
+"title": "AI Testing for Nonprofit Donation Flows",
+"keyword": "ai testing donation flows",
+"category": "use-case",
+"angle": "Donation forms and recurring-gift setup tested by intent with sandbox payments.",
+"date": "2026-07-02"
+},
+{
+"slug": "ai-testing-logistics-tracking-ui",
+"title": "AI Browser Testing for Logistics and Shipment Tracking",
+"keyword": "ai testing logistics tracking",
+"category": "use-case",
+"angle": "Tracking lookups, maps, and status timelines validated by intent, honest on live-map tiles.",
+"date": "2026-07-03"
+},
+{
+"slug": "ai-testing-telehealth-booking",
+"title": "AI Testing for Telehealth Booking and Intake",
+"keyword": "ai testing telehealth booking",
+"category": "use-case",
+"angle": "Appointment booking and intake forms tested by intent, honest on PHI and video-visit limits.",
+"date": "2026-07-04"
+},
+{
+"slug": "test-cookie-consent-walls-ai",
+"title": "Test Cookie Consent Walls Without Getting Blocked",
+"keyword": "test cookie consent automation",
+"category": "guide",
+"angle": "Handling CMP consent walls (accept/reject) by intent and the privacy-preserving default of declining non-essential.",
+"date": "2026-07-05"
+},
+{
+"slug": "test-paywall-metering-flows-ai",
+"title": "Test Paywalls and Metered Content With Plain-English AI",
+"keyword": "test paywall automation",
+"category": "guide",
+"angle": "Metered-article counters and subscribe gates verified by intent.",
+"date": "2026-07-06"
+},
+{
+"slug": "captcha-guarded-flows-ai-testing",
+"title": "Testing CAPTCHA-Guarded Flows: An Honest Guide",
+"keyword": "captcha automation testing",
+"category": "guide",
+"angle": "Honest limits: BrowserBash does not solve CAPTCHAs, use test keys/allowlists, and what to assert around them.",
+"date": "2026-07-07"
+},
+{
+"slug": "test-range-sliders-inputs-ai",
+"title": "Test Range Sliders and Custom Inputs With AI",
+"keyword": "test range slider automation",
+"category": "guide",
+"angle": "Driving native and custom range/slider inputs by intent, honest on pointer-drag precision.",
+"date": "2026-07-08"
+},
+{
+"slug": "test-rich-text-editors-ai",
+"title": "Test Rich-Text Editors (TipTap, Quill) With Plain-English Tests",
+"keyword": "test rich text editor automation",
+"category": "guide",
+"angle": "Typing, formatting, and asserting content in contenteditable editors by intent.",
+"date": "2026-07-09"
+},
+{
+"slug": "test-color-pickers-ai",
+"title": "Test Color Pickers and Swatch UIs With AI Automation",
+"keyword": "test color picker automation",
+"category": "guide",
+"angle": "Interacting with color-picker widgets by intent, honest on canvas gradient pixels.",
+"date": "2026-07-10"
+},
+{
+"slug": "test-embedded-maps-ai",
+"title": "Test Embedded Maps (Google, Mapbox) With Plain-English AI",
+"keyword": "test embedded maps automation",
+"category": "guide",
+"angle": "Asserting markers, search, and panels around a map, honest on tile-canvas interactions.",
+"date": "2026-07-11"
+},
+{
+"slug": "test-video-players-ai",
+"title": "Test Web Video Players With AI Browser Automation",
+"keyword": "test video player automation",
+"category": "guide",
+"angle": "Play/pause/seek controls and captions verified by intent, honest on decoded-frame pixels.",
+"date": "2026-07-12"
+},
+{
+"slug": "test-pdf-viewers-ai",
+"title": "Test In-Browser PDF Viewers With Plain-English Tests",
+"keyword": "test pdf viewer automation",
+"category": "guide",
+"angle": "Asserting rendered PDF text and toolbar controls, honest on canvas-rendered pages.",
+"date": "2026-07-13"
+},
+{
+"slug": "test-virtualized-tables-ai",
+"title": "Test Virtualized and Infinite Tables With AI",
+"keyword": "test virtualized table automation",
+"category": "guide",
+"angle": "Scrolling windowed grids (react-window/ag-grid) and asserting rows that render on demand.",
+"date": "2026-07-14"
+},
+{
+"slug": "test-pyramid-vs-trophy-ai-era",
+"title": "The Test Pyramid vs the Testing Trophy in the AI Era",
+"keyword": "test pyramid vs trophy",
+"category": "guide",
+"angle": "Where AI browser tests sit in the pyramid/trophy and how they change the E2E cost calculus.",
+"date": "2026-07-15"
+},
+{
+"slug": "wait-strategies-ai-browser-tests",
+"title": "Wait Strategies for AI Browser Tests, Explained",
+"keyword": "wait strategies browser tests",
+"category": "guide",
+"angle": "Why AI agents observe-then-act removes most manual waits, and where explicit waits still matter.",
+"date": "2026-07-16"
+},
+{
+"slug": "selector-strategy-vs-ai-intent",
+"title": "Selector Strategies vs AI Intent: Which Breaks Less",
+"keyword": "selector strategy vs ai",
+"category": "guide",
+"angle": "CSS/XPath brittleness vs intent-based location, honest on when a stable data-testid still wins.",
+"date": "2026-07-17"
+},
+{
+"slug": "visual-regression-testing-101-ai",
+"title": "Visual Regression Testing 101 in the AI Testing Era",
+"keyword": "visual regression testing 101",
+"category": "guide",
+"angle": "What visual regression catches that assertion-based AI tests do not, and how to combine them.",
+"date": "2026-07-18"
+},
+{
+"slug": "synthetic-monitoring-101-ai",
+"title": "Synthetic Monitoring 101 With AI Browser Tests",
+"keyword": "synthetic monitoring 101",
+"category": "guide",
+"angle": "Turning real user flows into 24/7 synthetic checks and the difference from uptime pings.",
+"date": "2026-07-19"
+},
+{
+"slug": "flaky-test-taxonomy-ai",
+"title": "A Taxonomy of Flaky Tests and How AI Testing Helps",
+"keyword": "flaky test taxonomy",
+"category": "guide",
+"angle": "Classifying flakiness (timing, order, data, environment) and which classes intent-based testing removes.",
+"date": "2026-07-20"
+},
+{
+"slug": "test-data-strategy-ai-suites",
+"title": "A Test-Data Strategy for AI Browser Suites",
+"keyword": "test data strategy",
+"category": "guide",
+"angle": "Unique/faker data, per-shard namespacing, and seeded repro for parallel AI test suites.",
+"date": "2026-07-21"
+},
+{
+"slug": "environment-parity-ai-testing",
+"title": "Environment Parity: Why Your AI Tests Pass Locally and Fail in CI",
+"keyword": "environment parity testing",
+"category": "guide",
+"angle": "Chasing local-vs-CI drift (fonts, timezones, headless) and how to make AI runs deterministic.",
+"date": "2026-07-22"
+},
+{
+"slug": "roi-cost-model-ai-testing",
+"title": "An Honest ROI and Cost Model for AI Browser Testing",
+"keyword": "roi ai testing cost model",
+"category": "guide",
+"angle": "Modeling token cost vs maintenance savings, with the cache-cold vs cache-warm math.",
+"date": "2026-07-23"
+},
+{
+"slug": "quarantine-strategy-flaky-tests",
+"title": "A Quarantine Strategy for Flaky Tests in CI",
+"keyword": "quarantine flaky tests",
+"category": "guide",
+"angle": "Isolating unstable tests without blocking releases, and using failed-first ordering to fix them fast.",
+"date": "2026-07-24"
+},
+{
+"slug": "non-deterministic-ui-testing-ai",
+"title": "Testing Non-Deterministic UIs With AI Browser Automation",
+"keyword": "non deterministic ui testing",
+"category": "guide",
+"angle": "Handling randomized content, A/B variants, and animations with intent-based assertions.",
+"date": "2026-07-25"
+},
+{
+"slug": "accessibility-first-testing-ai",
+"title": "Accessibility-First Testing With AI and axe-core",
+"keyword": "accessibility first testing",
+"category": "guide",
+"angle": "Combining role/name intent assertions with deterministic axe-core audits in one run.",
+"date": "2026-07-26"
+},
+{
+"slug": "test-ai-chatbot-ui",
+"title": "Test an AI Chatbot UI With Plain-English AI Tests",
+"keyword": "test ai chatbot ui",
+"category": "llm",
+"angle": "Sending prompts, waiting for streamed replies, and asserting non-deterministic chat output by intent.",
+"date": "2026-07-27"
+},
+{
+"slug": "test-rag-app-ui",
+"title": "Test a RAG App's Front End With AI Browser Automation",
+"keyword": "test rag app ui",
+"category": "llm",
+"angle": "Query, citation, and source-panel UIs verified by intent, honest on non-deterministic answers.",
+"date": "2026-07-28"
+},
+{
+"slug": "test-llm-streaming-ui",
+"title": "Test LLM Streaming and Token-by-Token UIs",
+"keyword": "test llm streaming ui",
+"category": "llm",
+"angle": "Asserting progressive streaming, stop, and regenerate controls by intent.",
+"date": "2026-07-29"
+},
+{
+"slug": "test-ai-agent-dashboard-ui",
+"title": "Test an AI Agent Dashboard and Run-Log UI",
+"keyword": "test ai agent dashboard",
+"category": "agents",
+"angle": "Run lists, step logs, and status pills verified by intent.",
+"date": "2026-07-30"
+},
+{
+"slug": "test-prompt-playground-ui",
+"title": "Test a Prompt-Playground UI With Plain-English Tests",
+"keyword": "test prompt playground ui",
+"category": "llm",
+"angle": "Parameter controls, model pickers, and output panes tested by intent.",
+"date": "2026-07-31"
+},
+{
+"slug": "test-ai-image-generation-ui",
+"title": "Test an AI Image-Generation UI With AI Automation",
+"keyword": "test ai image generation ui",
+"category": "llm",
+"angle": "Prompt-to-gallery flows verified by intent, honest on generated-image pixel assertions.",
+"date": "2026-08-01"
+},
+{
+"slug": "test-voice-assistant-web-ui",
+"title": "Testing Voice-Assistant Web UIs: What AI Automation Can Reach",
+"keyword": "test voice ui automation",
+"category": "llm",
+"angle": "Honest guide: mic capture is device-level, what transcript and control UI you can still assert.",
+"date": "2026-08-02"
+},
+{
+"slug": "test-in-app-ai-copilot",
+"title": "Test an In-App AI Copilot Panel With Plain-English AI",
+"keyword": "test in app ai copilot",
+"category": "agents",
+"angle": "Copilot side-panels, suggestion chips, and apply-actions verified by intent.",
+"date": "2026-08-03"
+},
+{
+"slug": "mobile-web-smoke-tests-ai",
+"title": "Run Mobile-Web Smoke Tests With AI and --viewport",
+"keyword": "mobile web smoke tests",
+"category": "guide",
+"angle": "Emulating a phone viewport and running intent-based smoke checks on the mobile layout.",
+"date": "2026-08-04"
+},
+{
+"slug": "responsive-breakpoint-testing-ai",
+"title": "Test Responsive Breakpoints With AI Browser Automation",
+"keyword": "responsive breakpoint testing",
+"category": "guide",
+"angle": "Asserting layout across breakpoints with the viewport matrix, honest on true-device rendering.",
+"date": "2026-08-05"
+},
+{
+"slug": "touch-swipe-gesture-testing-ai",
+"title": "Test Touch and Swipe Gestures With Plain-English AI",
+"keyword": "touch swipe gesture testing",
+"category": "guide",
+"angle": "Driving carousels and swipe UIs by intent, honest on native inertial scrolling.",
+"date": "2026-08-06"
+},
+{
+"slug": "pwa-install-prompt-testing-ai",
+"title": "Test a PWA Install Prompt and Offline Mode With AI",
+"keyword": "pwa install prompt testing",
+"category": "guide",
+"angle": "beforeinstallprompt and offline states verified by intent, honest on OS-level install dialogs.",
+"date": "2026-08-07"
+},
+{
+"slug": "mobile-nav-drawer-testing-ai",
+"title": "Test Mobile Nav Drawers and Hamburger Menus With AI",
+"keyword": "mobile nav drawer testing",
+"category": "guide",
+"angle": "Off-canvas drawers and menu toggles verified by intent on small viewports.",
+"date": "2026-08-08"
+},
+{
+"slug": "mobile-form-keyboard-testing-ai",
+"title": "Test Mobile Forms and Input Keyboards With Plain-English AI",
+"keyword": "mobile form testing",
+"category": "guide",
+"angle": "Mobile form fills and input-mode behavior tested by intent, honest on native keyboard overlays.",
+"date": "2026-08-09"
+},
+{
+"slug": "viewport-meta-testing-ai",
+"title": "Why the Viewport Meta Tag Breaks Tests, and How AI Handles It",
+"keyword": "viewport meta testing",
+"category": "guide",
+"angle": "How viewport/meta and zoom affect layout tests and asserting responsive behavior reliably.",
+"date": "2026-08-10"
+},
+{
+"slug": "mobile-safari-quirks-ai-testing",
+"title": "Testing Mobile Safari Quirks With AI Browser Automation",
+"keyword": "mobile safari testing",
+"category": "guide",
+"angle": "Honest guide to iOS Safari-only behaviors and what a Chromium engine can and cannot reproduce.",
+"date": "2026-08-11"
+}
+]
